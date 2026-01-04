@@ -1,3 +1,50 @@
+const STARTER_DECKS = {
+  "Flame Heart": {
+    "Flame Burst": 4,
+    "Inferno Strike": 4,
+    "Fireball": 4,
+    "Ember Focus": 3,
+    "Fire Field": 4,
+    "Flame Relic": 3,
+    "Cinder Drake": 2,
+    "Phoenix Avatar": 1
+    // (continue until 60 cards)
+  },
+
+  "Tidal Soul": {
+    "Water Jet": 4,
+    "Torrential Wave": 4,
+    "Frostbind": 4,
+    "Tide Focus": 3,
+    "Water Field": 4,
+    "Pearl Charm": 3,
+    "Leviathan": 2,
+    "Ocean Sovereign": 1
+  },
+
+  "Stone Body": {
+    "Stone Crush": 4,
+    "Earthen Slam": 4,
+    "Granite Guard": 4,
+    "Earth Focus": 3,
+    "Earth Field": 4,
+    "Obsidian Talisman": 3,
+    "Golem Titan": 2,
+    "World Colossus": 1
+  },
+
+  "Clouded Mind": {
+    "Wind Slice": 4,
+    "Gale Pierce": 4,
+    "Sky Rend": 4,
+    "Air Focus": 3,
+    "Air Field": 4,
+    "Zephyr Band": 3,
+    "Storm Djinn": 2,
+    "Tempest Incarnate": 1
+  }
+};
+
 /**********************
  * GLOBAL STATE
  **********************/
@@ -79,6 +126,12 @@ function populateDecks() {
 }
 
 function buildDeck(deckName) {
+  const deckDef = STARTER_DECKS[deckName];
+  if (!deckDef) {
+    console.error("No deck definition for", deckName);
+    return [];
+  }
+
   const allCards = [
     ...cardsDB.spells,
     ...cardsDB.items,
@@ -86,12 +139,22 @@ function buildDeck(deckName) {
     ...cardsDB.summons
   ];
 
-  const deck = allCards.filter(card =>
-    card.starterDecks && card.starterDecks.includes(deckName)
-  );
+  const deck = [];
 
-  console.log("Built deck:", deckName, deck.length);
-  return [...deck]; // clone
+  for (const [cardName, count] of Object.entries(deckDef)) {
+    const card = allCards.find(c => c.name === cardName);
+    if (!card) {
+      console.error("Missing card in JSON:", cardName);
+      continue;
+    }
+
+    for (let i = 0; i < count; i++) {
+      deck.push({ ...card });
+    }
+  }
+
+  console.log(`Built ${deckName} deck with ${deck.length} cards`);
+  return deck;
 }
 
 /**********************
