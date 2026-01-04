@@ -1,0 +1,29 @@
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 1em;
+  background: #0e0e0e;
+  color: #f0f0f0;
+}
+
+h1 {
+  color: #ffcc66;
+}
+
+button {
+  padding: 0.5em 1em;
+  margin-left: 0.5em;
+}
+
+select {
+  margin-left: 0.25em;
+}
+
+pre {
+  background: #1a1a1a;
+  padding: 1em;
+  margin-top: 1em;
+  height: 60vh;
+  overflow-y: auto;
+  border-radius: 6px;
+  white-space: pre-wrap;
+}
