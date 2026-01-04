@@ -1,3 +1,8 @@
+/*************************************************
+ * STARTER DECK DEFINITIONS (HARD-CODED)
+ * Card names MUST exactly match cards.json
+ *************************************************/
+
 const STARTER_DECKS = {
   "Flame Heart": {
     "Flame Burst": 4,
@@ -8,7 +13,6 @@ const STARTER_DECKS = {
     "Flame Relic": 3,
     "Cinder Drake": 2,
     "Phoenix Avatar": 1
-    // (continue until 60 cards)
   },
 
   "Tidal Soul": {
@@ -44,6 +48,49 @@ const STARTER_DECKS = {
     "Tempest Incarnate": 1
   }
 };
+
+/*************************************************
+ * BUILD DECK FUNCTION (FULL REPLACEMENT)
+ *************************************************/
+
+function buildDeck(deckName) {
+  console.log("Attempting to build deck:", deckName);
+
+  const deckDefinition = STARTER_DECKS[deckName];
+  if (!deckDefinition) {
+    console.error("Deck not found:", deckName);
+    return [];
+  }
+
+  // Combine all card pools into one lookup list
+  const allCards = [
+    ...(cardsDB.spells || []),
+    ...(cardsDB.items || []),
+    ...(cardsDB.fields || []),
+    ...(cardsDB.summons || [])
+  ];
+
+  console.log("Total cards available:", allCards.length);
+
+  const deck = [];
+
+  for (const cardName in deckDefinition) {
+    const quantity = deckDefinition[cardName];
+
+    const cardData = allCards.find(c => c.name === cardName);
+    if (!cardData) {
+      console.error("Missing card in cards.json:", cardName);
+      continue;
+    }
+
+    for (let i = 0; i < quantity; i++) {
+      deck.push({ ...cardData });
+    }
+  }
+
+  console.log(`Built deck "${deckName}" with ${deck.length} cards`);
+  return deck;
+}
 
 /**********************
  * GLOBAL STATE
