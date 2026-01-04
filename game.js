@@ -172,38 +172,6 @@ function populateDecks() {
   });
 }
 
-function buildDeck(deckName) {
-  const deckDef = STARTER_DECKS[deckName];
-  if (!deckDef) {
-    console.error("No deck definition for", deckName);
-    return [];
-  }
-
-  const allCards = [
-    ...cardsDB.spells,
-    ...cardsDB.items,
-    ...cardsDB.fields,
-    ...cardsDB.summons
-  ];
-
-  const deck = [];
-
-  for (const [cardName, count] of Object.entries(deckDef)) {
-    const card = allCards.find(c => c.name === cardName);
-    if (!card) {
-      console.error("Missing card in JSON:", cardName);
-      continue;
-    }
-
-    for (let i = 0; i < count; i++) {
-      deck.push({ ...card });
-    }
-  }
-
-  console.log(`Built ${deckName} deck with ${deck.length} cards`);
-  return deck;
-}
-
 /**********************
  * UI ACTIONS
  **********************/
