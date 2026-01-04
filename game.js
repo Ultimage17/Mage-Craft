@@ -1,102 +1,164 @@
-let cardsDB;
-const log = document.getElementById("log");
+/**********************
+ * GLOBAL STATE
+ **********************/
+let cardsDB = null;
+let selectedCardIndex = null;
 
+const game = {
+  player: {
+    deck: [],
+    hand: []
+  },
+  ai: {
+    deck: [],
+    hand: []
+  },
+  chainCount: 0,
+
+  startGame() {
+    this.chainCount = 0;
+    this.player.deck = buildDeck(playerDeck.value);
+    this.ai.deck = buildDeck(aiDeck.value);
+
+    shuffle(this.player.deck);
+    shuffle(this.ai.deck);
+
+    this.player.hand = drawCards(this.player.deck, 7);
+    this.ai.hand = drawCards(this.ai.deck, 7);
+
+    write("=== Mage Craft Match Started ===");
+    write(`Player Deck: ${playerDeck.value}`);
+    write(`AI Deck: ${aiDeck.value}`);
+    write("Awaiting first spell...");
+    updateStatus("Your turn – play the first spell");
+
+    renderHand();
+  },
+
+  playPlayerCard(card) {
+    this.chainCount++;
+    removeFromHand(this.player.hand, card);
+
+    return {
+      message: `Chain length is now ${this.chainCount}`,
+      chainEnded: false
+    };
+  },
+
+  aiTurn() {
+    if (this.ai.hand.length === 0) return;
+
+    const card = this.ai.hand.shift();
+    this.chainCount++;
+
+    write(`AI plays ${card.name}`);
+    write(`Chain length is now ${this.chainCount}`);
+  }
+};
+
+/**********************
+ * INITIAL LOAD
+ **********************/
 fetch("cards.json")
-  .then(response => response.json())
+  .then(r => r.json())
   .then(db => {
     cardsDB = db;
     populateDecks();
     write("Cards loaded successfully.");
-    write("Select decks and begin playtesting.");
+    write("Select decks and press Start Game.");
   });
 
+/**********************
+ * DECK SETUP
+ **********************/
 function populateDecks() {
-  const decks = [
-    "Flame Heart",
-    "Tidal Soul",
-    "Stone Body",
-    "Clouded Mind"
-  ];
-
-  const playerSelect = document.getElementById("playerDeck");
-  const aiSelect = document.getElementById("aiDeck");
-
-  decks.forEach(deck => {
-    playerSelect.add(new Option(deck, deck));
-    aiSelect.add(new Option(deck, deck));
+  ["Flame Heart", "Tidal Soul", "Stone Body", "Clouded Mind"].forEach(d => {
+    playerDeck.add(new Option(d, d));
+    aiDeck.add(new Option(d, d));
   });
 }
 
-function startGame() {
-  log.textContent = "";
-  write("=== Mage Craft Match Started ===");
-  write("Player Deck: " + playerDeck.value);
-  write("AI Deck: " + aiDeck.value);
-  write("Ruleset: Final Validated Rulebook");
-  write("Spell chains, summons, attunement, and scoring enabled.");
-  write("");
-  write("Awaiting first spell...");
+function buildDeck(deckName) {
+  return cardsDB.cards.filter(c => c.deck === deckName);
 }
-document.getElementById("startBtn").onclick = () => {
-  game.startGame();
-  document.getElementById("status").textContent = "Your turn – play the first spell";
-  document.getElementById("passBtn").disabled = false;
 
-  renderHand();
-  log("Game started. You draw 7 cards.");
+/**********************
+ * UI ACTIONS
+ **********************/
+startBtn.onclick = () => {
+  clearLog();
+  game.startGame();
+  passBtn.disabled = false;
 };
 
-function write(message) {
-  log.textContent += message + "\n";
-}
-let selectedCardIndex = null;
-function renderHand() {
-  const handEl = document.getElementById("hand");
-  handEl.innerHTML = "";
-
-  game.player.hand.forEach((card, index) => {
-    const li = document.createElement("li");
-    li.textContent = `${card.name} (${card.type}, ${card.element})`;
-    li.style.cursor = "pointer";
-
-    li.onclick = () => {
-      selectedCardIndex = index;
-      document.getElementById("selectedCard").textContent =
-        `${card.name} – ${card.type} – ${card.element}`;
-      document.getElementById("playCardBtn").disabled = false;
-    };
-
-    handEl.appendChild(li);
-  });
-}
-function log(message) {
-  const logEl = document.getElementById("log");
-  logEl.textContent += message + "\n";
-}document.getElementById("playCardBtn").onclick = () => {
+playCardBtn.onclick = () => {
   if (selectedCardIndex === null) return;
 
   const card = game.player.hand[selectedCardIndex];
-
   const result = game.playPlayerCard(card);
 
-  log(`You played ${card.name}`);
-  log(result.message);
+  write(`You played ${card.name}`);
+  write(result.message);
 
   selectedCardIndex = null;
-  document.getElementById("selectedCard").textContent = "None";
-  document.getElementById("playCardBtn").disabled = true;
+  selectedCard.textContent = "None";
+  playCardBtn.disabled = true;
 
+  game.aiTurn();
   renderHand();
+};
 
-  if (result.chainEnded) {
-    log("Chain ended. Scoring round.");
-  } else {
-    game.aiTurn(log);
-    renderHand();
+passBtn.onclick = () => {
+  write("You pass.");
+  game.aiTurn();
+  renderHand();
+};
+
+/**********************
+ * RENDERING
+ **********************/
+function renderHand() {
+  hand.innerHTML = "";
+
+  game.player.hand.forEach((card, i) => {
+    const li = document.createElement("li");
+    li.textContent = `${card.name} (${card.type}, ${card.element})`;
+    li.onclick = () => {
+      selectedCardIndex = i;
+      selectedCard.textContent = card.name;
+      playCardBtn.disabled = false;
+    };
+    hand.appendChild(li);
+  });
+}
+
+/**********************
+ * HELPERS
+ **********************/
+function drawCards(deck, n) {
+  return deck.splice(0, n);
+}
+
+function removeFromHand(hand, card) {
+  const i = hand.indexOf(card);
+  if (i >= 0) hand.splice(i, 1);
+}
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-};
-document.getElementById("passBtn").onclick = () => {
-  log("You pass.");
-  game.aiTurn(log);
-  renderHand();
-};
+}
+
+function write(msg) {
+  log.textContent += msg + "\n";
+}
+
+function clearLog() {
+  log.textContent = "";
+}
+
+function updateStatus(msg) {
+  status.textContent = msg;
+}
