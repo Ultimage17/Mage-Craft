@@ -29,14 +29,6 @@ function populateDecks() {
 
 function startGame() {
   log.textContent = "";
-  document.getElementById("startBtn").onclick = () => {
-  game.startGame();
-  document.getElementById("status").textContent = "Your turn – play the first spell";
-  document.getElementById("passBtn").disabled = false;
-
-  renderHand();
-  log("Game started. You draw 7 cards.");
-};
   write("=== Mage Craft Match Started ===");
   write("Player Deck: " + playerDeck.value);
   write("AI Deck: " + aiDeck.value);
@@ -45,6 +37,14 @@ function startGame() {
   write("");
   write("Awaiting first spell...");
 }
+document.getElementById("startBtn").onclick = () => {
+  game.startGame();
+  document.getElementById("status").textContent = "Your turn – play the first spell";
+  document.getElementById("passBtn").disabled = false;
+
+  renderHand();
+  log("Game started. You draw 7 cards.");
+};
 
 function write(message) {
   log.textContent += message + "\n";
