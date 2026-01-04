@@ -7,25 +7,36 @@
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-  <h1>Mage Craft – Playtest Prototype</h1>
 
-  <button id="startBtn">Start Game</button>
+<h1>Mage Craft – Playtest Prototype</h1>
 
-  <h2>Game Status</h2>
-  <div id="status">Waiting to start...</div>
+<!-- Deck Selection -->
+<label>Player Deck:</label>
+<select id="playerDeck"></select>
 
-  <h2>Your Hand</h2>
-  <ul id="hand"></ul>
+<label>AI Deck:</label>
+<select id="aiDeck"></select>
 
-  <h2>Selected Card</h2>
-  <div id="selectedCard">None</div>
+<br><br>
 
-  <button id="playCardBtn" disabled>Play Selected Card</button>
-  <button id="passBtn" disabled>Pass</button>
+<button id="startBtn">Start Game</button>
 
-  <h2>Game Log</h2>
-  <div id="log" style="white-space: pre-line;"></div>
+<h2>Game Status</h2>
+<div id="status">Waiting to start...</div>
 
-  <script src="game.js"></script>
+<h2>Your Hand</h2>
+<ul id="hand"></ul>
+
+<h2>Selected Card</h2>
+<div id="selectedCard">None</div>
+
+<button id="playCardBtn" disabled>Play Selected Card</button>
+<button id="passBtn" disabled>Pass</button>
+
+<h2>Game Log</h2>
+<pre id="log"></pre>
+
+<script src="game.js"></script>
+
 </body>
 </html>
