@@ -1,0 +1,662 @@
+{
+    "Spells": [
+        {
+            "name": "Fireball",
+            "element": "Fire",
+            "rarity": "Common",
+            "basetsv": 2,
+            "affinityfire": 2,
+            "affinitywater": -2,
+            "affinityair": 1,
+            "affinityearth": 0
+        },
+        {
+            "name": "Fire Wave",
+            "element": "Fire",
+            "rarity": "Common",
+            "basetsv": 3,
+            "affinityfire": 2,
+            "affinitywater": -2,
+            "affinityair": 1,
+            "affinityearth": 0
+        },
+        {
+            "name": "Flame Burst",
+            "element": "Fire",
+            "rarity": "Uncommon",
+            "basetsv": 4,
+            "affinityfire": 2,
+            "affinitywater": -2,
+            "affinityair": 1,
+            "affinityearth": 0
+        },
+        {
+            "name": "Magma Eruption",
+            "element": "Fire",
+            "rarity": "Uncommon",
+            "basetsv": 5,
+            "affinityfire": 3,
+            "affinitywater": -3,
+            "affinityair": 1,
+            "affinityearth": -1
+        },
+        {
+            "name": "Flare Lance",
+            "element": "Fire",
+            "rarity": "Rare",
+            "basetsv": 6,
+            "affinityfire": 3,
+            "affinitywater": -3,
+            "affinityair": 2,
+            "affinityearth": -1
+        },
+        {
+            "name": "Lava Ray",
+            "element": "Fire",
+            "rarity": "Rare",
+            "basetsv": 7,
+            "affinityfire": 4,
+            "affinitywater": -4,
+            "affinityair": 2,
+            "affinityearth": -1
+        },
+        {
+            "name": "Volcanic Blaze",
+            "element": "Fire",
+            "rarity": "Rare",
+            "basetsv": 8,
+            "affinityfire": 4,
+            "affinitywater": -4,
+            "affinityair": 3,
+            "affinityearth": -2
+        },
+        {
+            "name": "Solar Expulsion",
+            "element": "Fire",
+            "rarity": "Mythic",
+            "basetsv": 9,
+            "affinityfire": 5,
+            "affinitywater": -5,
+            "affinityair": 3,
+            "affinityearth": -2
+        },
+        {
+            "name": "Wind Slicer",
+            "element": "Air",
+            "rarity": "Common",
+            "basetsv": 2,
+            "affinityfire": 1,
+            "affinitywater": 0,
+            "affinityair": 2,
+            "affinityearth": -2
+        },
+        {
+            "name": "Gale Force",
+            "element": "Air",
+            "rarity": "Common",
+            "basetsv": 3,
+            "affinityfire": 1,
+            "affinitywater": 0,
+            "affinityair": 2,
+            "affinityearth": -2
+        },
+        {
+            "name": "Typhoon Cleaver",
+            "element": "Air",
+            "rarity": "Uncommon",
+            "basetsv": 4,
+            "affinityfire": 1,
+            "affinitywater": 0,
+            "affinityair": 2,
+            "affinityearth": -2
+        },
+        {
+            "name": "Cyclone Shredder",
+            "element": "Air",
+            "rarity": "Uncommon",
+            "basetsv": 5,
+            "affinityfire": 1,
+            "affinitywater": -1,
+            "affinityair": 3,
+            "affinityearth": -3
+        },
+        {
+            "name": "Tempest Strike",
+            "element": "Air",
+            "rarity": "Rare",
+            "basetsv": 6,
+            "affinityfire": 2,
+            "affinitywater": -1,
+            "affinityair": 3,
+            "affinityearth": -3
+        },
+        {
+            "name": "Thunder Slam",
+            "element": "Air",
+            "rarity": "Rare",
+            "basetsv": 7,
+            "affinityfire": 2,
+            "affinitywater": -1,
+            "affinityair": 4,
+            "affinityearth": -4
+        },
+        {
+            "name": "Lightning Chain",
+            "element": "Air",
+            "rarity": "Rare",
+            "basetsv": 8,
+            "affinityfire": 3,
+            "affinitywater": -2,
+            "affinityair": 4,
+            "affinityearth": -4
+        },
+        {
+            "name": "Storm Collapse",
+            "element": "Air",
+            "rarity": "Mythic",
+            "basetsv": 9,
+            "affinityfire": 3,
+            "affinitywater": -2,
+            "affinityair": 5,
+            "affinityearth": -5
+        },
+        {
+            "name": "Stone Throw",
+            "element": "Earth",
+            "rarity": "Common",
+            "basetsv": 2,
+            "affinityfire": 0,
+            "affinitywater": 1,
+            "affinityair": -2,
+            "affinityearth": 2
+        },
+        {
+            "name": "Boulder Slide",
+            "element": "Earth",
+            "rarity": "Common",
+            "basetsv": 3,
+            "affinityfire": 0,
+            "affinitywater": 1,
+            "affinityair": -2,
+            "affinityearth": 2
+        },
+        {
+            "name": "Ground Upheaval ",
+            "element": "Earth",
+            "rarity": "Uncommon",
+            "basetsv": 4,
+            "affinityfire": 0,
+            "affinitywater": 1,
+            "affinityair": -2,
+            "affinityearth": 2
+        },
+        {
+            "name": "Thorny Vine Wrap",
+            "element": "Earth",
+            "rarity": "Uncommon",
+            "basetsv": 5,
+            "affinityfire": -1,
+            "affinitywater": 1,
+            "affinityair": -3,
+            "affinityearth": 3
+        },
+        {
+            "name": "Quake Rush",
+            "element": "Earth",
+            "rarity": "Rare",
+            "basetsv": 6,
+            "affinityfire": -1,
+            "affinitywater": 2,
+            "affinityair": -3,
+            "affinityearth": 3
+        },
+        {
+            "name": "Spirit Siphon",
+            "element": "Earth",
+            "rarity": "Rare",
+            "basetsv": 7,
+            "affinityfire": -1,
+            "affinitywater": 2,
+            "affinityair": -4,
+            "affinityearth": 4
+        },
+        {
+            "name": "Forest Energy Spike",
+            "element": "Earth",
+            "rarity": "Rare",
+            "basetsv": 8,
+            "affinityfire": -2,
+            "affinitywater": 3,
+            "affinityair": -4,
+            "affinityearth": 4
+        },
+        {
+            "name": "Soul Erasure",
+            "element": "Earth",
+            "rarity": "Mythic",
+            "basetsv": 9,
+            "affinityfire": -2,
+            "affinitywater": 3,
+            "affinityair": -5,
+            "affinityearth": 5
+        },
+        {
+            "name": "Water Blast",
+            "element": "Water",
+            "rarity": "Common",
+            "basetsv": 2,
+            "affinityfire": -2,
+            "affinitywater": 2,
+            "affinityair": 0,
+            "affinityearth": 1
+        },
+        {
+            "name": "Water Whip",
+            "element": "Water",
+            "rarity": "Common",
+            "basetsv": 3,
+            "affinityfire": -2,
+            "affinitywater": 2,
+            "affinityair": 0,
+            "affinityearth": 1
+        },
+        {
+            "name": "Riptide Surge",
+            "element": "Water",
+            "rarity": "Uncommon",
+            "basetsv": 4,
+            "affinityfire": -2,
+            "affinitywater": 2,
+            "affinityair": 0,
+            "affinityearth": 1
+        },
+        {
+            "name": "Tidal Crash",
+            "element": "Water",
+            "rarity": "Uncommon",
+            "basetsv": 5,
+            "affinityfire": -3,
+            "affinitywater": 3,
+            "affinityair": -1,
+            "affinityearth": 1
+        },
+        {
+            "name": "Aquatic Beam",
+            "element": "Water",
+            "rarity": "Rare",
+            "basetsv": 6,
+            "affinityfire": -3,
+            "affinitywater": 3,
+            "affinityair": -1,
+            "affinityearth": 2
+        },
+        {
+            "name": "Glacial Spear",
+            "element": "Water",
+            "rarity": "Rare",
+            "basetsv": 7,
+            "affinityfire": -4,
+            "affinitywater": 4,
+            "affinityair": -1,
+            "affinityearth": 2
+        },
+        {
+            "name": "Hail Storm",
+            "element": "Water",
+            "rarity": "Rare",
+            "basetsv": 8,
+            "affinityfire": -4,
+            "affinitywater": 4,
+            "affinityair": -2,
+            "affinityearth": 3
+        },
+        {
+            "name": "Arctic Infinity",
+            "element": "Water",
+            "rarity": "Mythic",
+            "basetsv": 9,
+            "affinityfire": -5,
+            "affinitywater": 5,
+            "affinityair": -2,
+            "affinityearth": 3
+        }
+    ],
+    "Items": [
+        {
+            "name": "Flickering Amulet",
+            "element": "Fire",
+            "modifier": 1,
+            "rarity": "Common",
+            "specialeffect": "Add 1TSV when played with a fire spell"
+        },
+        {
+            "name": "Heat Charm",
+            "element": "Fire",
+            "modifier": 2,
+            "rarity": "Uncommon",
+            "specialeffect": "Add 1TSV when played with a fire spell"
+        },
+        {
+            "name": "Ember Orb",
+            "element": "Fire",
+            "modifier": 3,
+            "rarity": "Rare",
+            "specialeffect": "Add 1TSV when played with a fire spell"
+        },
+        {
+            "name": "Wispy Feather",
+            "element": "Air",
+            "modifier": 1,
+            "rarity": "Common",
+            "specialeffect": "Add 1TSV when played with an air spell"
+        },
+        {
+            "name": "Storm Token",
+            "element": "Air",
+            "modifier": 2,
+            "rarity": "Uncommon",
+            "specialeffect": "Add 1TSV when played with an air spell"
+        },
+        {
+            "name": "Essence Crystal",
+            "element": "Air",
+            "modifier": 3,
+            "rarity": "Rare",
+            "specialeffect": "Add 1TSV when played with an air spell"
+        },
+        {
+            "name": "Pulsating Shard",
+            "element": "Earth",
+            "modifier": 1,
+            "rarity": "Common",
+            "specialeffect": "Add 1TSV when played with an earth spell"
+        },
+        {
+            "name": "Aura Fragment",
+            "element": "Earth",
+            "modifier": 2,
+            "rarity": "Uncommon",
+            "specialeffect": "Add 1TSV when played with an earth spell"
+        },
+        {
+            "name": "Root Idol",
+            "element": "Earth",
+            "modifier": 3,
+            "rarity": "Rare",
+            "specialeffect": "Add 1TSV when played with an earth spell"
+        },
+        {
+            "name": "Wave Crest",
+            "element": "Water",
+            "modifier": 1,
+            "rarity": "Common",
+            "specialeffect": "Add 1TSV when played with a water spell"
+        },
+        {
+            "name": "Shell Bracelet",
+            "element": "Water",
+            "modifier": 2,
+            "rarity": "Uncommon",
+            "specialeffect": "Add 1TSV when played with a water spell"
+        },
+        {
+            "name": "Abyssal Pearl",
+            "element": "Water",
+            "modifier": 3,
+            "rarity": "Rare",
+            "specialeffect": "Add 1TSV when played with a water spell"
+        }
+    ],
+    "Fields": [
+        {
+            "name": "Scorched Plain",
+            "element": "Fire",
+            "effect": "Triggers fire affinity for spells",
+            "duration": "Until another field card is played"
+        },
+        {
+            "name": "Windy Mountain",
+            "element": "Air",
+            "effect": "Triggers air affinity for spells",
+            "duration": "Until another field card is played"
+        },
+        {
+            "name": "Endless Ocean",
+            "element": "Water",
+            "effect": "Triggers water affinity for spells",
+            "duration": "Until another field card is played"
+        },
+        {
+            "name": "Verdant Forest",
+            "element": "Earth",
+            "effect": "Triggers earth affinity for spells",
+            "duration": "Until another field card is played"
+        }
+    ],
+    "Summons": [
+        {
+            "name": "Hellhound",
+            "element": "Fire",
+            "rarity": "Common",
+            "threshold": 2,
+            "aura": "Add 1 TSV to fire spells",
+            "burstskill": "Add 3 TSV"
+        },
+        {
+            "name": "Fiery Demon",
+            "element": "Fire",
+            "rarity": "Common",
+            "threshold": 2,
+            "aura": "Increase attunement roll by 1",
+            "burstskill": "Change current field in play to Scorched Plain"
+        },
+        {
+            "name": "Fire Wyrm",
+            "element": "Fire",
+            "rarity": "Uncommon",
+            "threshold": 4,
+            "aura": "Add 2 TSV to fire spells",
+            "burstskill": "Add 4 TSV"
+        },
+        {
+            "name": "Flame Guardian",
+            "element": "Fire",
+            "rarity": "Uncommon",
+            "threshold": 4,
+            "aura": "Increase attunement roll by 2",
+            "burstskill": "Increase attunement roll by 4"
+        },
+        {
+            "name": "Red Dragon",
+            "element": "Fire",
+            "rarity": "Rare",
+            "threshold": 6,
+            "aura": "Add 3 TSV to fire spells",
+            "burstskill": "Add 5 TSV"
+        },
+        {
+            "name": "Underworld Queen",
+            "element": "Fire",
+            "rarity": "Rare",
+            "threshold": 6,
+            "aura": "Increase attunement roll by 3",
+            "burstskill": "Increase attunement roll by 5"
+        },
+        {
+            "name": "Goddess of the Sun",
+            "element": "Fire",
+            "rarity": "Mythic",
+            "threshold": 10,
+            "aura": "Add 5 TSV upon successful attunement",
+            "burstskill": "Add 10 TSV upon successful attunement"
+        },
+        {
+            "name": "Tea Spirit",
+            "element": "Water",
+            "rarity": "Common",
+            "threshold": 2,
+            "aura": "Add 1 TSV to water spells",
+            "burstskill": "Add 3 TSV"
+        },
+        {
+            "name": "Tidal Soldier",
+            "element": "Water",
+            "rarity": "Common",
+            "threshold": 2,
+            "aura": "Reduce opponent's TSV by 1",
+            "burstskill": "Change current field in play to Endless Ocean"
+        },
+        {
+            "name": "Lake Guardian",
+            "element": "Water",
+            "rarity": "Uncommon",
+            "threshold": 4,
+            "aura": "Add 2 TSV to water spells",
+            "burstskill": "Add 4 TSV"
+        },
+        {
+            "name": "Blue Dragon",
+            "element": "Water",
+            "rarity": "Uncommon",
+            "threshold": 4,
+            "aura": "Reduce opponent's TSV by 2",
+            "burstskill": "Reduce opponent's TSV by 4"
+        },
+        {
+            "name": "Siren",
+            "element": "Water",
+            "rarity": "Rare",
+            "threshold": 6,
+            "aura": "Add 3 TSV to water spells ",
+            "burstskill": "Add 5 TSV"
+        },
+        {
+            "name": "Fox of Spirits",
+            "element": "Water",
+            "rarity": "Rare",
+            "threshold": 6,
+            "aura": "Reduce opponent's TSV by 3",
+            "burstskill": "Reduce opponent's TSV by 5"
+        },
+        {
+            "name": "Grand Leviathan",
+            "element": "Water",
+            "rarity": "Mythic",
+            "threshold": 10,
+            "aura": "Reduce opponent's TSV by 5 when an affinity penalty is applied",
+            "burstskill": "Reduce opponent's TSV by 10 when an affinity penalty is applied"
+        },
+        {
+            "name": "Storm Imp",
+            "element": "Air",
+            "rarity": "Common",
+            "threshold": 2,
+            "aura": "Add 1 TSV to air spells",
+            "burstskill": "Add 3 TSV"
+        },
+        {
+            "name": "Wind Wyrm",
+            "element": "Air",
+            "rarity": "Common",
+            "threshold": 2,
+            "aura": "Add 1 TSV when playing an item",
+            "burstskill": "Change current field in play to Windy Mountain"
+        },
+        {
+            "name": "Malevalent Guardian",
+            "element": "Air",
+            "rarity": "Uncommon",
+            "threshold": 4,
+            "aura": "Add 2 TSV to air spells",
+            "burstskill": "Add 4 TSV"
+        },
+        {
+            "name": "Divine Harbinger",
+            "element": "Air",
+            "rarity": "Uncommon",
+            "threshold": 4,
+            "aura": "Add 2 TSV when playing an item",
+            "burstskill": "Add 4 TSV when playing an item"
+        },
+        {
+            "name": "Black Dragon",
+            "element": "Air",
+            "rarity": "Rare",
+            "threshold": 6,
+            "aura": "Add 3 TSV to air spells",
+            "burstskill": "Add 5 TSV"
+        },
+        {
+            "name": "Thunder Dragon",
+            "element": "Air",
+            "rarity": "Rare",
+            "threshold": 6,
+            "aura": "Add 3 TSV when playing an item",
+            "burstskill": "Add 5 TSV when playing an item"
+        },
+        {
+            "name": "Master of the Sky",
+            "element": "Air",
+            "rarity": "Mythic",
+            "threshold": 10,
+            "aura": "Add 5 TSV when playing an item and spell that have the same element",
+            "burstskill": "Add 10 TSV when playing an item and spell that have the same element"
+        },
+        {
+            "name": "Meadow Fox",
+            "element": "Earth",
+            "rarity": "Common",
+            "threshold": 2,
+            "aura": "Add 1 TSV to earth spells",
+            "burstskill": "Add 3 TSV"
+        },
+        {
+            "name": "Green Dragon",
+            "element": "Earth",
+            "rarity": "Common",
+            "threshold": 2,
+            "aura": "Increase affinity bonus by 1",
+            "burstskill": "Change current field in play to Verdent Forest"
+        },
+        {
+            "name": "Forest Wyrm",
+            "element": "Earth",
+            "rarity": "Uncommon",
+            "threshold": 4,
+            "aura": "Add 2 TSV to earth spells",
+            "burstskill": "Add 4 TSV"
+        },
+        {
+            "name": "Wildflower Kin",
+            "element": "Earth",
+            "rarity": "Uncommon",
+            "threshold": 4,
+            "aura": "Increase affinity bonus by 2",
+            "burstskill": "Increase affinity bonus by 4"
+        },
+        {
+            "name": "Great Wolf",
+            "element": "Earth",
+            "rarity": "Rare",
+            "threshold": 6,
+            "aura": "Add 3 TSV to earth spells",
+            "burstskill": "Add 5 TSV"
+        },
+        {
+            "name": "Soul Reaper",
+            "element": "Earth",
+            "rarity": "Rare",
+            "threshold": 6,
+            "aura": "Increase affinity bonus by 3",
+            "burstskill": "Increase affinity bonus by 5"
+        },
+        {
+            "name": "Lord of Sand and Stone",
+            "element": "Earth",
+            "rarity": "Mythic",
+            "threshold": 10,
+            "aura": "Add 5 TSV when playing a spell that matches the current field element",
+            "burstskill": "Add 10 TSV when playing a spell that matches the current field element"
+        }
+    ]
+}
