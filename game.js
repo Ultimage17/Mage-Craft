@@ -79,7 +79,19 @@ function populateDecks() {
 }
 
 function buildDeck(deckName) {
-  return cardsDB.cards.filter(c => c.deck === deckName);
+  const allCards = [
+    ...cardsDB.spells,
+    ...cardsDB.items,
+    ...cardsDB.fields,
+    ...cardsDB.summons
+  ];
+
+  const deck = allCards.filter(card =>
+    card.starterDecks && card.starterDecks.includes(deckName)
+  );
+
+  console.log("Built deck:", deckName, deck.length);
+  return [...deck]; // clone
 }
 
 /**********************
