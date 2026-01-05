@@ -27,18 +27,24 @@ fetch("cards.json")
     cardsDB = db;
     populateDeckSelectors();
     log("Cards loaded.");
+
+    // SAFE debug log
+    const allCards = [];
+    for (const key in cardsDB) {
+      if (Array.isArray(cardsDB[key])) {
+        allCards.push(...cardsDB[key]);
+      }
+    }
+
+    console.log(
+      "Loaded card names:",
+      allCards.map(c => `"${c.name}"`)
+    );
   })
   .catch(err => {
     console.error(err);
     log("ERROR loading cards.json");
   });
-
-console.log(
-  "Loaded card names:",
-  Object.values(cardsDB)
-    .flat()
-    .map(c => `"${c.name}"`)
-);
 
 // ---------- DECK SELECT ----------
 function populateDeckSelectors() {
