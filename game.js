@@ -1,94 +1,37 @@
-/*************************************************
- * STARTER DECK DEFINITIONS (HARD-CODED)
- * Card names MUST exactly match cards.json
- *************************************************/
-
-const STARTER_DECKS = {
-  "Flame Heart": {
-    "Flame Burst": 4,
-    "Inferno Strike": 4,
-    "Fireball": 4,
-    "Ember Focus": 3,
-    "Fire Field": 4,
-    "Flame Relic": 3,
-    "Cinder Drake": 2,
-    "Phoenix Avatar": 1
-  },
-
-  "Tidal Soul": {
-    "Water Jet": 4,
-    "Torrential Wave": 4,
-    "Frostbind": 4,
-    "Tide Focus": 3,
-    "Water Field": 4,
-    "Pearl Charm": 3,
-    "Leviathan": 2,
-    "Ocean Sovereign": 1
-  },
-
-  "Stone Body": {
-    "Stone Crush": 4,
-    "Earthen Slam": 4,
-    "Granite Guard": 4,
-    "Earth Focus": 3,
-    "Earth Field": 4,
-    "Obsidian Talisman": 3,
-    "Golem Titan": 2,
-    "World Colossus": 1
-  },
-
-  "Clouded Mind": {
-    "Wind Slice": 4,
-    "Gale Pierce": 4,
-    "Sky Rend": 4,
-    "Air Focus": 3,
-    "Air Field": 4,
-    "Zephyr Band": 3,
-    "Storm Djinn": 2,
-    "Tempest Incarnate": 1
-  }
-};
 
 /*************************************************
  * BUILD DECK FUNCTION (FULL REPLACEMENT)
  *************************************************/
 
 function buildDeck(deckName) {
-  console.log("Attempting to build deck:", deckName);
-
-  const deckDefinition = STARTER_DECKS[deckName];
-  if (!deckDefinition) {
+  const definition = STARTER_DECKS[deckName];
+  if (!definition) {
     console.error("Deck not found:", deckName);
     return [];
   }
 
-  // Combine all card pools into one lookup list
   const allCards = [
-    ...(cardsDB.spells || []),
-    ...(cardsDB.items || []),
-    ...(cardsDB.fields || []),
-    ...(cardsDB.summons || [])
+    ...cardsDB.spells,
+    ...cardsDB.items,
+    ...cardsDB.fields,
+    ...cardsDB.summons
   ];
-
-  console.log("Total cards available:", allCards.length);
 
   const deck = [];
 
-  for (const cardName in deckDefinition) {
-    const quantity = deckDefinition[cardName];
-
-    const cardData = allCards.find(c => c.name === cardName);
-    if (!cardData) {
+  for (const [cardName, qty] of definition) {
+    const card = allCards.find(c => c.name === cardName);
+    if (!card) {
       console.error("Missing card in cards.json:", cardName);
       continue;
     }
 
-    for (let i = 0; i < quantity; i++) {
-      deck.push({ ...cardData });
+    for (let i = 0; i < qty; i++) {
+      deck.push({ ...card });
     }
   }
 
-  console.log(`Built deck "${deckName}" with ${deck.length} cards`);
+  console.log(`Built ${deckName}: ${deck.length} cards`);
   return deck;
 }
 
