@@ -1,15 +1,49 @@
+let cardsDB = null;
 
-/*************************************************
- * BUILD DECK FUNCTION (FULL REPLACEMENT)
- *************************************************/
+const logEl = document.getElementById("log");
+const statusEl = document.getElementById("status");
+const handEl = document.getElementById("hand");
+const playerDeckSelect = document.getElementById("playerDeck");
+const aiDeckSelect = document.getElementById("aiDeck");
 
+const startBtn = document.getElementById("startBtn");
+
+// ---------- UTILITIES ----------
+function log(msg) {
+  logEl.textContent += msg + "\n";
+}
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+// ---------- LOAD CARDS ----------
+fetch("cards.json")
+  .then(res => res.json())
+  .then(db => {
+    cardsDB = db;
+    populateDeckSelectors();
+    log("Cards loaded.");
+  })
+  .catch(err => {
+    console.error(err);
+    log("ERROR loading cards.json");
+  });
+
+// ---------- DECK SELECT ----------
+function populateDeckSelectors() {
+  Object.keys(STARTER_DECKS).forEach(name => {
+    playerDeckSelect.add(new Option(name, name));
+    aiDeckSelect.add(new Option(name, name));
+  });
+}
+
+// ---------- DECK BUILDER ----------
 function buildDeck(deckName) {
   const definition = STARTER_DECKS[deckName];
-  if (!definition) {
-    console.error("Deck not found:", deckName);
-    return [];
-  }
-
   const allCards = [
     ...cardsDB.spells,
     ...cardsDB.items,
@@ -22,176 +56,56 @@ function buildDeck(deckName) {
   for (const [cardName, qty] of definition) {
     const card = allCards.find(c => c.name === cardName);
     if (!card) {
-      console.error("Missing card in cards.json:", cardName);
+      console.error("Missing card:", cardName);
       continue;
     }
-
     for (let i = 0; i < qty; i++) {
       deck.push({ ...card });
     }
   }
 
-  console.log(`Built ${deckName}: ${deck.length} cards`);
   return deck;
 }
 
-/**********************
- * GLOBAL STATE
- **********************/
-let cardsDB = null;
-let selectedCardIndex = null;
-
+// ---------- GAME STATE ----------
 const game = {
   player: {
     deck: [],
     hand: []
-  },
-  ai: {
-    deck: [],
-    hand: []
-  },
-  chainCount: 0,
-
-  startGame() {
-    this.chainCount = 0;
-    this.player.deck = buildDeck(playerDeck.value);
-    this.ai.deck = buildDeck(aiDeck.value);
-
-    shuffle(this.player.deck);
-    shuffle(this.ai.deck);
-
-    this.player.hand = drawCards(this.player.deck, 7);
-    this.ai.hand = drawCards(this.ai.deck, 7);
-
-    write("=== Mage Craft Match Started ===");
-    write(`Player Deck: ${playerDeck.value}`);
-    write(`AI Deck: ${aiDeck.value}`);
-    write("Awaiting first spell...");
-    updateStatus("Your turn – play the first spell");
-
-    renderHand();
-  },
-
-  playPlayerCard(card) {
-    this.chainCount++;
-    removeFromHand(this.player.hand, card);
-
-    return {
-      message: `Chain length is now ${this.chainCount}`,
-      chainEnded: false
-    };
-  },
-
-  aiTurn() {
-    if (this.ai.hand.length === 0) return;
-
-    const card = this.ai.hand.shift();
-    this.chainCount++;
-
-    write(`AI plays ${card.name}`);
-    write(`Chain length is now ${this.chainCount}`);
   }
 };
 
-/**********************
- * INITIAL LOAD
- **********************/
-fetch("cards.json")
-  .then(r => r.json())
-  .then(db => {
-    cardsDB = db;
-    populateDecks();
-    write("Cards loaded successfully.");
-    write("Select decks and press Start Game.");
-  });
-
-/**********************
- * DECK SETUP
- **********************/
-function populateDecks() {
-  ["Flame Heart", "Tidal Soul", "Stone Body", "Clouded Mind"].forEach(d => {
-    playerDeck.add(new Option(d, d));
-    aiDeck.add(new Option(d, d));
-  });
-}
-
-/**********************
- * UI ACTIONS
- **********************/
-startBtn.onclick = () => {
-  clearLog();
-  game.startGame();
-  passBtn.disabled = false;
-};
-
-playCardBtn.onclick = () => {
-  if (selectedCardIndex === null) return;
-
-  const card = game.player.hand[selectedCardIndex];
-  const result = game.playPlayerCard(card);
-
-  write(`You played ${card.name}`);
-  write(result.message);
-
-  selectedCardIndex = null;
-  selectedCard.textContent = "None";
-  playCardBtn.disabled = true;
-
-  game.aiTurn();
-  renderHand();
-};
-
-passBtn.onclick = () => {
-  write("You pass.");
-  game.aiTurn();
-  renderHand();
-};
-
-/**********************
- * RENDERING
- **********************/
+// ---------- RENDER ----------
 function renderHand() {
-  hand.innerHTML = "";
-
-  game.player.hand.forEach((card, i) => {
+  handEl.innerHTML = "";
+  game.player.hand.forEach(card => {
     const li = document.createElement("li");
-    li.textContent = `${card.name} (${card.type}, ${card.element})`;
-    li.onclick = () => {
-      selectedCardIndex = i;
-      selectedCard.textContent = card.name;
-      playCardBtn.disabled = false;
-    };
-    hand.appendChild(li);
+    li.textContent = `${card.name} (${card.type} – ${card.element})`;
+    handEl.appendChild(li);
   });
 }
 
-/**********************
- * HELPERS
- **********************/
-function drawCards(deck, n) {
-  return deck.splice(0, n);
-}
+// ---------- START GAME ----------
+startBtn.onclick = () => {
+  logEl.textContent = "";
+  handEl.innerHTML = "";
 
-function removeFromHand(hand, card) {
-  const i = hand.indexOf(card);
-  if (i >= 0) hand.splice(i, 1);
-}
-
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+  if (!cardsDB) {
+    log("Cards not loaded yet.");
+    return;
   }
-}
 
-function write(msg) {
-  log.textContent += msg + "\n";
-}
+  const deckName = playerDeckSelect.value;
+  log("Starting game with deck: " + deckName);
 
-function clearLog() {
-  log.textContent = "";
-}
+  game.player.deck = buildDeck(deckName);
+  shuffle(game.player.deck);
 
-function updateStatus(msg) {
-  status.textContent = msg;
-}
+  game.player.hand = game.player.deck.splice(0, 7);
+
+  log(`Deck built: ${game.player.deck.length + game.player.hand.length} cards`);
+  log("You draw 7 cards.");
+
+  statusEl.textContent = "Your turn – play a spell";
+  renderHand();
+};
