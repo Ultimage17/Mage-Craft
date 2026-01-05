@@ -104,7 +104,22 @@ function renderHand() {
 
   game.player.hand.forEach((card, index) => {
     const li = document.createElement("li");
-    li.textContent = `${card.name} (${card.type} – ${card.element})`;
+
+    // Normalize property names safely
+    const type =
+      card.type ||
+      card.Type ||
+      card["Card Type"] ||
+      "Unknown";
+
+    const element =
+      card.element ||
+      card.Element ||
+      card["Elemental Affinity"] ||
+      card["Element"] ||
+      "Neutral";
+
+    li.textContent = `${card.name} (${type} – ${element})`;
     handEl.appendChild(li);
   });
 }
