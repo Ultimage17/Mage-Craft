@@ -1,0 +1,71 @@
+const STARTER_DECKS = {
+  "Flame Heart": [
+    ["Fireball",3], ["Fire Wave",3], ["Flame Burst",3], ["Magma Eruption",3],
+    ["Flare Lance",2], ["Lava Ray",2], ["Volcanic Blaze",2], ["Solar Expulsion",1],
+
+    ["Wind Slicer",3], ["Typhoon Cleaver",3], ["Tempest Strike",2],
+    ["Stone Throw",2], ["Ground Upheaval",2],
+
+    ["Ember Orb",3], ["Heat Charm",3], ["Flickering Amulet",2],
+    ["Storm Token",2], ["Wispy Feather",1], ["Pulsating Shard",1],
+
+    ["Scorched Plain",5], ["Windy Mountain",3], ["Verdant Forest",2],
+
+    ["Hellhound",1], ["Fiery Demon",1], ["Fire Wyrm",1],
+    ["Flame Guardian",1], ["Red Dragon",1], ["Underworld Queen",1],
+    ["Goddess of the Sun",1]
+  ],
+
+  "Tidal Soul": [
+    ["Water Blast",3], ["Water Whip",3], ["Riptide Surge",3], ["Tidal Crash",3],
+    ["Aquatic Beam",2], ["Glacial Spear",2], ["Hail Storm",2], ["Arctic Infinity",1],
+
+    ["Stone Throw",3], ["Ground Upheaval",3], ["Quake Rush",2],
+    ["Wind Slicer",2], ["Typhoon Cleaver",2],
+
+    ["Abyssal Pearl",3], ["Shell Bracelet",3], ["Wave Crest",2],
+    ["Aura Fragment",2], ["Pulsating Shard",1], ["Wispy Feather",1],
+
+    ["Endless Ocean",5], ["Verdant Forest",3], ["Windy Mountain",2],
+
+    ["Tea Spirit",1], ["Tidal Soldier",1], ["Lake Guardian",1],
+    ["Blue Dragon",1], ["Siren",1], ["Fox of Spirits",1],
+    ["Grand Leviathan",1]
+  ],
+
+  "Stone Body": [
+    ["Stone Throw",3], ["Boulder Slide",3], ["Ground Upheaval",3],
+    ["Thorny Vine Whip",3], ["Quake Rush",2], ["Spirit Siphon",2],
+    ["Forest Energy Spike",2], ["Soul Erasure",1],
+
+    ["Water Blast",3], ["Riptide Surge",3], ["Aquatic Beam",2],
+    ["Fireball",2], ["Flame Burst",2],
+
+    ["Root Idol",3], ["Aura Fragment",3], ["Pulsating Shard",2],
+    ["Shell Bracelet",2], ["Wave Crest",1], ["Flickering Amulet",1],
+
+    ["Verdant Forest",5], ["Endless Ocean",3], ["Scorched Plain",2],
+
+    ["Meadow Fox",1], ["Green Dragon",1], ["Forest Wyrm",1],
+    ["Wildflower Kin",1], ["Great Wolf",1], ["Soul Reaper",1],
+    ["Lord of Sand and Stone",1]
+  ],
+
+  "Clouded Mind": [
+    ["Wind Slicer",3], ["Gale Force",3], ["Typhoon Cleaver",3],
+    ["Cyclone Shredder",3], ["Tempest Strike",2], ["Thunder Slam",2],
+    ["Lightning Chain",2], ["Storm Collapse",1],
+
+    ["Fireball",3], ["Flame Burst",3], ["Flare Lance",2],
+    ["Water Blast",2], ["Riptide Surge",2],
+
+    ["Essence Crystal",3], ["Storm Token",3], ["Wispy Feather",2],
+    ["Heat Charm",2], ["Flickering Amulet",1], ["Wave Crest",1],
+
+    ["Windy Mountain",5], ["Scorched Plain",3], ["Endless Ocean",2],
+
+    ["Storm Imp",1], ["Wind Wyrm",1], ["Malevalent Guardian",1],
+    ["Divine Harbinger",1], ["Black Dragon",1], ["Thunder Dragon",1],
+    ["Master of the Sky",1]
+  ]
+};
