@@ -43,27 +43,43 @@ function populateDeckSelectors() {
 
 // ---------- DECK BUILDER ----------
 function buildDeck(deckName) {
-  const definition = STARTER_DECKS[deckName];
-  const allCards = [
-    ...cardsDB.spells,
-    ...cardsDB.items,
-    ...cardsDB.fields,
-    ...cardsDB.summons
-  ];
+  const deckList = STARTER_DECKS[deckName];
+  if (!deckList) {
+    throw new Error("Deck not found: " + deckName);
+  }
+
+  // Normalize all cards into a single array
+  let allCards = [];
+
+  if (Array.isArray(cardsDB)) {
+    allCards = cardsDB;
+  } else if (cardsDB.cards) {
+    allCards = cardsDB.cards;
+  } else {
+    // Excel-style grouped export
+    Object.values(cardsDB).forEach(group => {
+      if (Array.isArray(group)) {
+        allCards.push(...group);
+      }
+    });
+  }
 
   const deck = [];
 
-  for (const [cardName, qty] of definition) {
+  deckList.forEach(([cardName, count]) => {
     const card = allCards.find(c => c.name === cardName);
+
     if (!card) {
       console.error("Missing card:", cardName);
-      continue;
+      throw new Error(`Card "${cardName}" not found in cards database`);
     }
-    for (let i = 0; i < qty; i++) {
-      deck.push({ ...card });
-    }
-  }
 
+    for (let i = 0; i < count; i++) {
+      deck.push(JSON.parse(JSON.stringify(card))); // deep copy
+    }
+  });
+
+  shuffle(deck);
   return deck;
 }
 
