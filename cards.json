@@ -181,7 +181,7 @@
             "affinityearth": 2
         },
         {
-            "name": "Ground Upheaval ",
+            "name": "Ground Upheaval",
             "element": "Earth",
             "rarity": "Uncommon",
             "basetsv": 4,
@@ -660,3 +660,4 @@
         }
     ]
 }
+
