@@ -33,6 +33,13 @@ fetch("cards.json")
     log("ERROR loading cards.json");
   });
 
+console.log(
+  "Loaded card names:",
+  Object.values(cardsDB)
+    .flat()
+    .map(c => `"${c.name}"`)
+);
+
 // ---------- DECK SELECT ----------
 function populateDeckSelectors() {
   Object.keys(STARTER_DECKS).forEach(name => {
