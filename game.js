@@ -56,20 +56,22 @@ function buildDeck(deckName) {
   }
 
   // Normalize all cards into a single array
-  let allCards = [];
+let allCards = [];
 
-  if (Array.isArray(cardsDB)) {
-    allCards = cardsDB;
-  } else if (cardsDB.cards) {
-    allCards = cardsDB.cards;
-  } else {
-    // Excel-style grouped export
-    Object.values(cardsDB).forEach(group => {
-      if (Array.isArray(group)) {
-        allCards.push(...group);
-      }
-    });
+if (Array.isArray(cardsDB)) {
+  allCards = cardsDB;
+} 
+else if (cardsDB.cards && Array.isArray(cardsDB.cards)) {
+  allCards = cardsDB.cards;
+} 
+else {
+  for (const key in cardsDB) {
+    if (Array.isArray(cardsDB[key])) {
+      allCards.push(...cardsDB[key]);
+    }
   }
+}
+
 
   const deck = [];
 
