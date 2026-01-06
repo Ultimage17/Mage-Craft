@@ -163,7 +163,7 @@ function renderCardDetails(card) {
 
     case "Field":
       text += "Field Effects:\n";
-      text += card.effect || "No special effect.\n`;
+      text += (card.effect || "No special effect.) + "\n\n";
       text += `Duration: ${card.duration || "Persistent"}\n`;
       break;
 
