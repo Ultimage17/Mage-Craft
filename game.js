@@ -148,10 +148,9 @@ function renderHand() {
   });
 }
 
-document.getElementById("playCardBtn").disabled = false;
-      renderHand();
-      renderCardDetails(card);
-    };
+playCardBtn.onclick = () => {
+  playSelectedCard();
+};
 
 function playSelectedCard() {
   if (!selectedCard) {
