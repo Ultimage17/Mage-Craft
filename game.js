@@ -54,10 +54,23 @@ function getAllCards() {
 
   if (!cardsDB) return all;
 
-  for (const key in cardsDB) {
-    if (Array.isArray(cardsDB[key])) {
-      all.push(...cardsDB[key]);
+  for (const groupName in cardsDB) {
+    const group = cardsDB[groupName];
+
+    if (!Array.isArray(group)) continue;
+
+    // Derive card type from the group name
+    let derivedType = groupName.toLowerCase();
+    if (derivedType.endsWith("s")) {
+      derivedType = derivedType.slice(0, -1); // Spells → spell
     }
+
+    group.forEach(card => {
+      all.push({
+        ...card,
+        type: derivedType.charAt(0).toUpperCase() + derivedType.slice(1)
+      });
+    });
   }
 
   return all;
