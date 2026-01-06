@@ -162,8 +162,9 @@ function renderCardDetails(card) {
 
     case "Field":
       text += "Field Effect:\n";
-      text += (card.effect || "None") + "\n";
-      text += `Duration: ${card.duration || "Until replaced"}`;
+      text += (card.effect || "No special effect.") + "\n\n";
+      text += "Duration:\n";
+      text += (card.duration || "Until another field card is played") + "\n";
       break;
 
     case "Summon":
