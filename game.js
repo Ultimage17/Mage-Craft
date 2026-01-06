@@ -158,7 +158,7 @@ function renderCardDetails(card) {
 
     case "Item":
       text += "Item Effects:\n";
-      text += card.effect || "No special effect.\n";
+      text += card.specialeffect || "No special effect.\n";
       break;
 
     case "Field":
@@ -172,7 +172,7 @@ function renderCardDetails(card) {
       text += "Aura:\n";
       text += (card.aura || "No aura.") + "\n\n";
       text += "Burst Skill:\n";
-      text += (card.burst || "No burst skill.");
+      text += (card.burstskill || "No burst skill.");
       break;
 
     default:
