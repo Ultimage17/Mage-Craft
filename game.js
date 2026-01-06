@@ -1,6 +1,6 @@
-/*************************************************
- * Mage Craft – Digital Playtest (Stable Build)
- *************************************************/
+/*************************
+ * Mage Craft – game.js
+ *************************/
 
 let cardsDB = null;
 
@@ -8,20 +8,23 @@ let cardsDB = null;
 const logEl = document.getElementById("log");
 const statusEl = document.getElementById("status");
 const handEl = document.getElementById("hand");
+const inPlayEl = document.getElementById("inPlay");
 const playerDeckSelect = document.getElementById("playerDeck");
 const aiDeckSelect = document.getElementById("aiDeck");
-const startBtn = document.getElementById("startBtn");
 
+const startBtn = document.getElementById("startBtn");
+const playCardBtn = document.getElementById("playCardBtn");
+const endTurnBtn = document.getElementById("endTurnBtn");
 
 // ---------- UTIL ----------
 function log(msg) {
   logEl.textContent += msg + "\n";
 }
 
-function shuffle(array) {
-  for (let i = array.length - 1; i > 0; i--) {
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
 }
 
@@ -49,52 +52,34 @@ function populateDeckSelectors() {
   });
 }
 
-// ---------- CARD NORMALIZATION ----------
-function getAllCards() {
-  const all = [];
+// ---------- DECK BUILDER ----------
+function getAllCardsArray() {
+  if (Array.isArray(cardsDB)) return cardsDB;
 
-  if (!cardsDB) return all;
-
-  for (const groupName in cardsDB) {
-    const group = cardsDB[groupName];
-
-    if (!Array.isArray(group)) continue;
-
-    // Derive card type from the group name
-    let derivedType = groupName.toLowerCase();
-    if (derivedType.endsWith("s")) {
-      derivedType = derivedType.slice(0, -1); // Spells → spell
-    }
-
-    group.forEach(card => {
-      all.push({
-        ...card,
-        type: derivedType.charAt(0).toUpperCase() + derivedType.slice(1)
+  let all = [];
+  for (const key in cardsDB) {
+    if (Array.isArray(cardsDB[key])) {
+      const type = key.slice(0, -1); // Spells → Spell
+      cardsDB[key].forEach(card => {
+        all.push({ ...card, type });
       });
-    });
+    }
   }
-
   return all;
 }
 
-// ---------- DECK BUILDER ----------
 function buildDeck(deckName) {
-  const deckDef = STARTER_DECKS[deckName];
-  if (!deckDef) {
-    throw new Error("Deck not found: " + deckName);
-  }
+  const deckList = STARTER_DECKS[deckName];
+  if (!deckList) throw new Error("Deck not found: " + deckName);
 
-  const allCards = getAllCards();
+  const allCards = getAllCardsArray();
   const deck = [];
 
-  deckDef.forEach(([cardName, count]) => {
-    const card = allCards.find(c => c.name.trim() === cardName.trim());
-
+  deckList.forEach(([cardName, count]) => {
+    const card = allCards.find(c => c.name === cardName);
     if (!card) {
-      console.error("Available cards:", allCards.map(c => c.name));
       throw new Error(`Card "${cardName}" not found in cards database`);
     }
-
     for (let i = 0; i < count; i++) {
       deck.push(JSON.parse(JSON.stringify(card)));
     }
@@ -113,10 +98,6 @@ const game = {
 };
 
 let selectedCard = null;
-
-const inPlayEl = document.getElementById("inPlay");
-const endTurnBtn = document.getElementById("endTurnBtn");
-const playCardBtn = document.getElementById("playCardBtn");
 
 const turnState = {
   spellPlayed: false,
@@ -148,99 +129,8 @@ function renderHand() {
   });
 }
 
-playCardBtn.onclick = () => {
-  playSelectedCard();
-};
-
-function playSelectedCard() {
-  if (!selectedCard) {
-    log("No card selected.");
-    return;
-  }
-
-  if (selectedCard.type === "Spell" && turnState.spellPlayed) {
-    log("You may only play one spell per turn.");
-    return;
-  }
-
-  if (selectedCard.type === "Spell") {
-    turnState.spellPlayed = true;
-  }
-
-  game.player.hand = game.player.hand.filter(c => c !== selectedCard);
-  turnState.cardsPlayed.push(selectedCard);
-
-  log(`Played ${selectedCard.name}.`);
-
-  selectedCard = null;
-  playCardBtn.disabled = true;
-
-  renderHand();
-  renderInPlay();
-  clearCardDetails();
-
-  endTurnBtn.disabled = false;
-}
-
-  // Enforce only one spell per turn
-  if (selectedCard.type === "Spell" && turnState.spellPlayed) {
-    log("You may only play one spell per turn.");
-    return;
-  }
-
-  // Mark spell played
-  if (selectedCard.type === "Spell") {
-    turnState.spellPlayed = true;
-  }
-
-  // Remove from hand
-  game.player.hand = game.player.hand.filter(c => c !== selectedCard);
-
-  // Add to in-play
-  turnState.cardsPlayed.push(selectedCard);
-
-  log(`Played ${selectedCard.name}.`);
-
-  selectedCard = null;
-  renderHand();
-  renderInPlay();
-
-  endTurnBtn.disabled = false;
-}
-
-endTurnBtn.onclick = () => {
-  log("Ending turn.");
-  log(`Cards played this turn: ${turnState.cardsPlayed.length}`);
-  log("Resolving effects (TSV, auras, summons) – coming next.");
-
-  turnState.spellPlayed = false;
-  turnState.cardsPlayed = [];
-  inPlayEl.innerHTML = "";
-
-  endTurnBtn.disabled = true;
-  playCardBtn.disabled = true;
-
-  clearCardDetails();
-  statusEl.textContent = "Opponent's turn (AI not implemented yet)";
-};
-
-  // Placeholder for effect resolution
-  log("Resolving effects (TSV, auras, summons) – coming next.");
-
-  // Reset turn state
-  turnState.spellPlayed = false;
-  turnState.cardsPlayed = [];
-  inPlayEl.innerHTML = "";
-
-  endTurnBtn.disabled = true;
-  document.getElementById("playCardBtn").disabled = true;
-
-  statusEl.textContent = "Opponent's turn (AI not implemented yet)";
-};
-
 function renderInPlay() {
   inPlayEl.innerHTML = "";
-
   turnState.cardsPlayed.forEach(card => {
     const li = document.createElement("li");
     li.textContent = `${card.name} (${card.type})`;
@@ -248,9 +138,9 @@ function renderInPlay() {
   });
 }
 
+// ---------- CARD DETAILS ----------
 function renderCardDetails(card) {
-  const detailsEl = document.getElementById("cardDetails");
-
+  const el = document.getElementById("cardDetails");
   let text = `Name: ${card.name}\n`;
   text += `Type: ${card.type}\n`;
   text += `Element: ${card.element}\n`;
@@ -259,44 +149,87 @@ function renderCardDetails(card) {
   switch (card.type) {
     case "Spell":
       text += "Affinities:\n";
-      text += `  Fire: ${card.affinityfire ?? 0}\n`;
-      text += `  Water: ${card.affinitywater ?? 0}\n`;
-      text += `  Air: ${card.affinityair ?? 0}\n`;
-      text += `  Earth: ${card.affinityearth ?? 0}\n`;
+      text += `Fire: ${card.affinityfire ?? 0}\n`;
+      text += `Water: ${card.affinitywater ?? 0}\n`;
+      text += `Air: ${card.affinityair ?? 0}\n`;
+      text += `Earth: ${card.affinityearth ?? 0}`;
       break;
 
     case "Item":
-      text += "Item Effects:\n";
-      text += card.specialeffect || "No special effect.";
+      text += "Item Effect:\n";
+      text += card.specialeffect || "None";
       break;
 
     case "Field":
-      text += "Field Effects:\n";
-      text += (card.effect || "No special effect.") + "\n";
-      text += `Duration: ${card.duration || "Until another field card is played"}`;
+      text += "Field Effect:\n";
+      text += (card.effect || "None") + "\n";
+      text += `Duration: ${card.duration || "Until replaced"}`;
       break;
 
     case "Summon":
       text += `Threshold: ${card.threshold}\n\n`;
       text += "Aura:\n";
-      text += (card.aura || "No aura.") + "\n\n";
-      text += "Burst Skill:\n";
-      text += (card.burstskill || "No burst skill.");
+      text += card.aura || "None";
+      text += "\n\nBurst Skill:\n";
+      text += card.burstskill || "None";
       break;
   }
 
-  detailsEl.textContent = text;
+  el.textContent = text;
 }
 
 function clearCardDetails() {
-  const detailsEl = document.getElementById("cardDetails");
-  detailsEl.textContent = "";
+  document.getElementById("cardDetails").textContent = "";
 }
+
+// ---------- PLAY CARD ----------
+playCardBtn.onclick = () => {
+  if (!selectedCard) return;
+
+  if (selectedCard.type === "Spell" && turnState.spellPlayed) {
+    log("Only one spell may be played per turn.");
+    return;
+  }
+
+  if (selectedCard.type === "Spell") {
+    turnState.spellPlayed = true;
+  }
+
+  game.player.hand = game.player.hand.filter(c => c !== selectedCard);
+  turnState.cardsPlayed.push(selectedCard);
+
+  log(`Played ${selectedCard.name}.`);
+
+  selectedCard = null;
+  playCardBtn.disabled = true;
+
+  renderHand();
+  renderInPlay();
+  clearCardDetails();
+
+  endTurnBtn.disabled = false;
+};
+
+// ---------- END TURN ----------
+endTurnBtn.onclick = () => {
+  log("Ending turn.");
+  log(`Cards played: ${turnState.cardsPlayed.length}`);
+
+  turnState.spellPlayed = false;
+  turnState.cardsPlayed = [];
+  inPlayEl.innerHTML = "";
+
+  endTurnBtn.disabled = true;
+  playCardBtn.disabled = true;
+
+  statusEl.textContent = "Opponent's turn (AI coming next)";
+};
 
 // ---------- START GAME ----------
 startBtn.onclick = () => {
   logEl.textContent = "";
   handEl.innerHTML = "";
+  inPlayEl.innerHTML = "";
 
   if (!cardsDB) {
     log("Cards not loaded yet.");
@@ -304,19 +237,13 @@ startBtn.onclick = () => {
   }
 
   const deckName = playerDeckSelect.value;
-  if (!deckName) {
-    log("Please select a deck.");
-    return;
-  }
-
   log("Starting game with deck: " + deckName);
 
   game.player.deck = buildDeck(deckName);
   game.player.hand = game.player.deck.splice(0, 7);
 
-  log(`Deck built: ${game.player.deck.length + game.player.hand.length} cards`);
   log("You draw 7 cards.");
+  statusEl.textContent = "Your turn – play cards";
 
-  statusEl.textContent = "Your turn – play the first spell";
   renderHand();
 };
