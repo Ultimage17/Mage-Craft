@@ -116,8 +116,7 @@ let selectedCard = null;
 
 const inPlayEl = document.getElementById("inPlay");
 const endTurnBtn = document.getElementById("endTurnBtn");
-
-let selectedCard = null;
+const playCardBtn = document.getElementById("playCardBtn");
 
 const turnState = {
   spellPlayed: false,
@@ -140,10 +139,7 @@ function renderHand() {
 
     li.onclick = () => {
       selectedCard = card;
-      document.getElementById("playCardBtn").onclick = () => {
-  playSelectedCard();
-};
-      document.getElementById("playCardBtn").disabled = false;
+      playCardBtn.disabled = false;
       renderHand();
       renderCardDetails(card);
     };
@@ -152,13 +148,40 @@ function renderHand() {
   });
 }
 
-
+document.getElementById("playCardBtn").disabled = false;
+      renderHand();
+      renderCardDetails(card);
+    };
 
 function playSelectedCard() {
   if (!selectedCard) {
     log("No card selected.");
     return;
   }
+
+  if (selectedCard.type === "Spell" && turnState.spellPlayed) {
+    log("You may only play one spell per turn.");
+    return;
+  }
+
+  if (selectedCard.type === "Spell") {
+    turnState.spellPlayed = true;
+  }
+
+  game.player.hand = game.player.hand.filter(c => c !== selectedCard);
+  turnState.cardsPlayed.push(selectedCard);
+
+  log(`Played ${selectedCard.name}.`);
+
+  selectedCard = null;
+  playCardBtn.disabled = true;
+
+  renderHand();
+  renderInPlay();
+  clearCardDetails();
+
+  endTurnBtn.disabled = false;
+}
 
   // Enforce only one spell per turn
   if (selectedCard.type === "Spell" && turnState.spellPlayed) {
@@ -189,6 +212,18 @@ function playSelectedCard() {
 endTurnBtn.onclick = () => {
   log("Ending turn.");
   log(`Cards played this turn: ${turnState.cardsPlayed.length}`);
+  log("Resolving effects (TSV, auras, summons) – coming next.");
+
+  turnState.spellPlayed = false;
+  turnState.cardsPlayed = [];
+  inPlayEl.innerHTML = "";
+
+  endTurnBtn.disabled = true;
+  playCardBtn.disabled = true;
+
+  clearCardDetails();
+  statusEl.textContent = "Opponent's turn (AI not implemented yet)";
+};
 
   // Placeholder for effect resolution
   log("Resolving effects (TSV, auras, summons) – coming next.");
@@ -233,14 +268,14 @@ function renderCardDetails(card) {
 
     case "Item":
       text += "Item Effects:\n";
-      text += card.specialeffect || "No special effect.\n";
+      text += card.specialeffect || "No special effect.";
       break;
 
     case "Field":
-  text += "Field Effects:\n";
-  text += (card.effect || "No special effect.") + "\n";
-  text += `Duration: ${card.duration || "Until another field card is played"}\n`;
-  break;
+      text += "Field Effects:\n";
+      text += (card.effect || "No special effect.") + "\n";
+      text += `Duration: ${card.duration || "Until another field card is played"}`;
+      break;
 
     case "Summon":
       text += `Threshold: ${card.threshold}\n\n`;
@@ -249,12 +284,14 @@ function renderCardDetails(card) {
       text += "Burst Skill:\n";
       text += (card.burstskill || "No burst skill.");
       break;
-
-    default:
-      text += "No additional information available.";
   }
 
   detailsEl.textContent = text;
+}
+
+function clearCardDetails() {
+  const detailsEl = document.getElementById("cardDetails");
+  detailsEl.textContent = "";
 }
 
 // ---------- START GAME ----------
