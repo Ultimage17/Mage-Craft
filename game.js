@@ -162,10 +162,10 @@ function renderCardDetails(card) {
       break;
 
     case "Field":
-      text += "Field Effects:\n";
-      text += (card.effect || "No special effect.) + "\n\n";
-      text += `Duration: ${card.duration || "Persistent"}\n`;
-      break;
+  text += "Field Effects:\n";
+  text += (card.effect || "No special effect.") + "\n";
+  text += `Duration: ${card.duration || "Until another field card is played"}\n`;
+  break;
 
     case "Summon":
       text += `Threshold: ${card.threshold}\n\n`;
