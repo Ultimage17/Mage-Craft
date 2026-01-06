@@ -111,6 +111,8 @@ const game = {
   }
 };
 
+let selectedCard = null;
+
 // ---------- RENDER ----------
 function renderHand() {
   handEl.innerHTML = "";
@@ -118,21 +120,21 @@ function renderHand() {
   game.player.hand.forEach((card, index) => {
     const li = document.createElement("li");
 
-    // Normalize property names safely
-    const type =
-      card.type ||
-      card.Type ||
-      card["Card Type"] ||
-      "Unknown";
+    li.textContent = `${card.name} (${card.type} – ${card.element})`;
+    li.style.cursor = "pointer";
 
-    const element =
-      card.element ||
-      card.Element ||
-      card["Elemental Affinity"] ||
-      card["Element"] ||
-      "Neutral";
+    // Highlight selected card
+    if (card === selectedCard) {
+      li.style.background = "#333";
+      li.style.color = "#fff";
+    }
 
-    li.textContent = `${card.name} (${type} – ${element})`;
+    li.onclick = () => {
+      selectedCard = card;
+      renderHand();
+      renderCardDetails(card);
+    };
+
     handEl.appendChild(li);
   });
 }
