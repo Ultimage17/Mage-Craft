@@ -12,6 +12,7 @@ const playerDeckSelect = document.getElementById("playerDeck");
 const aiDeckSelect = document.getElementById("aiDeck");
 const startBtn = document.getElementById("startBtn");
 
+
 // ---------- UTIL ----------
 function log(msg) {
   logEl.textContent += msg + "\n";
@@ -113,17 +114,25 @@ const game = {
 
 let selectedCard = null;
 
+const inPlayEl = document.getElementById("inPlay");
+const endTurnBtn = document.getElementById("endTurnBtn");
+
+let selectedCard = null;
+
+const turnState = {
+  spellPlayed: false,
+  cardsPlayed: []
+};
+
 // ---------- RENDER ----------
 function renderHand() {
   handEl.innerHTML = "";
 
-  game.player.hand.forEach((card, index) => {
+  game.player.hand.forEach(card => {
     const li = document.createElement("li");
-
     li.textContent = `${card.name} (${card.type} – ${card.element})`;
     li.style.cursor = "pointer";
 
-    // Highlight selected card
     if (card === selectedCard) {
       li.style.background = "#333";
       li.style.color = "#fff";
@@ -131,11 +140,77 @@ function renderHand() {
 
     li.onclick = () => {
       selectedCard = card;
+      document.getElementById("playCardBtn").onclick = () => {
+  playSelectedCard();
+};
+      document.getElementById("playCardBtn").disabled = false;
       renderHand();
       renderCardDetails(card);
     };
 
     handEl.appendChild(li);
+  });
+}
+
+
+
+function playSelectedCard() {
+  if (!selectedCard) {
+    log("No card selected.");
+    return;
+  }
+
+  // Enforce only one spell per turn
+  if (selectedCard.type === "Spell" && turnState.spellPlayed) {
+    log("You may only play one spell per turn.");
+    return;
+  }
+
+  // Mark spell played
+  if (selectedCard.type === "Spell") {
+    turnState.spellPlayed = true;
+  }
+
+  // Remove from hand
+  game.player.hand = game.player.hand.filter(c => c !== selectedCard);
+
+  // Add to in-play
+  turnState.cardsPlayed.push(selectedCard);
+
+  log(`Played ${selectedCard.name}.`);
+
+  selectedCard = null;
+  renderHand();
+  renderInPlay();
+
+  endTurnBtn.disabled = false;
+}
+
+endTurnBtn.onclick = () => {
+  log("Ending turn.");
+  log(`Cards played this turn: ${turnState.cardsPlayed.length}`);
+
+  // Placeholder for effect resolution
+  log("Resolving effects (TSV, auras, summons) – coming next.");
+
+  // Reset turn state
+  turnState.spellPlayed = false;
+  turnState.cardsPlayed = [];
+  inPlayEl.innerHTML = "";
+
+  endTurnBtn.disabled = true;
+  document.getElementById("playCardBtn").disabled = true;
+
+  statusEl.textContent = "Opponent's turn (AI not implemented yet)";
+};
+
+function renderInPlay() {
+  inPlayEl.innerHTML = "";
+
+  turnState.cardsPlayed.forEach(card => {
+    const li = document.createElement("li");
+    li.textContent = `${card.name} (${card.type})`;
+    inPlayEl.appendChild(li);
   });
 }
 
