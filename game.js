@@ -104,28 +104,77 @@ const turnState = {
   cardsPlayed: []
 };
 
-// ---------- RENDER ----------
-function renderHand() {
-  handEl.innerHTML = "";
+// ---------- TSV CALCULATION ----------
+function calculateTSVPreview() {
+  let tsv = 0;
+  let spell = null;
+  let field = null;
 
-  game.player.hand.forEach(card => {
+  turnState.cardsPlayed.forEach(card => {
+    if (card.type === "Spell") spell = card;
+    if (card.type === "Field") field = card;
+  });
+
+  if (!spell) return 0;
+
+  // Base TSV
+  tsv += spell.basetsv || 0;
+
+  // Field affinity
+  if (field) {
+    const affinityKey = "affinity" + field.element.toLowerCase();
+    tsv += spell[affinityKey] || 0;
+  }
+
+  // Items
+  turnState.cardsPlayed.forEach(card => {
+    if (card.type === "Item") {
+      tsv += card.bonus || 0;
+
+      // Elemental synergies
+      if (card.element === spell.element) tsv += 1;
+      if (field && card.element === field.element) tsv += 1;
+    }
+  });
+
+  return tsv;
+}
+
+function updateTSVPreview() {
+  const previewEl = document.getElementById("tsvPreview");
+  if (!previewEl) return;
+  previewEl.textContent = calculateTSVPreview();
+}
+
+// ---------- RENDER ----------
+function renderInPlay() {
+  inPlayEl.innerHTML = "";
+
+  turnState.cardsPlayed.forEach((card, index) => {
     const li = document.createElement("li");
-    li.textContent = `${card.name} (${card.type} – ${card.element})`;
+    li.textContent = `${card.name} (${card.type})`;
     li.style.cursor = "pointer";
 
-    if (card === selectedCard) {
-      li.style.background = "#333";
-      li.style.color = "#fff";
-    }
-
     li.onclick = () => {
-      selectedCard = card;
-      playCardBtn.disabled = false;
+      // Remove from staged
+      turnState.cardsPlayed.splice(index, 1);
+
+      // Return to hand
+      game.player.hand.push(card);
+
+      // Reset spell lock if needed
+      if (card.type === "Spell") {
+        turnState.spellPlayed = false;
+      }
+
+      log(`Removed ${card.name} from play.`);
+
       renderHand();
-      renderCardDetails(card);
+      renderInPlay();
+      updateTSVPreview();
     };
 
-    handEl.appendChild(li);
+    inPlayEl.appendChild(li);
   });
 }
 
@@ -206,6 +255,7 @@ playCardBtn.onclick = () => {
 
   renderHand();
   renderInPlay();
+  updateTSVPreview();
   clearCardDetails();
 
   endTurnBtn.disabled = false;
@@ -215,6 +265,9 @@ playCardBtn.onclick = () => {
 endTurnBtn.onclick = () => {
   log("Ending turn.");
   log(`Cards played: ${turnState.cardsPlayed.length}`);
+  
+  const finalTSV = calculateTSVPreview();
+  log(`Final TSV locked: ${finalTSV}`);
 
   turnState.spellPlayed = false;
   turnState.cardsPlayed = [];
