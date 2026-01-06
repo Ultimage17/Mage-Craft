@@ -139,6 +139,49 @@ function renderHand() {
   });
 }
 
+function renderCardDetails(card) {
+  const detailsEl = document.getElementById("cardDetails");
+
+  let text = `Name: ${card.name}\n`;
+  text += `Type: ${card.type}\n`;
+  text += `Element: ${card.element}\n`;
+  text += `Rarity: ${card.rarity || "—"}\n\n`;
+
+  switch (card.type) {
+    case "Spell":
+      text += "Affinities:\n";
+      text += `  Fire: ${card.affinityfire ?? 0}\n`;
+      text += `  Water: ${card.affinitywater ?? 0}\n`;
+      text += `  Air: ${card.affinityair ?? 0}\n`;
+      text += `  Earth: ${card.affinityearth ?? 0}\n`;
+      break;
+
+    case "Item":
+      text += "Item Effects:\n";
+      text += card.effect || "No special effect.\n";
+      break;
+
+    case "Field":
+      text += "Field Effects:\n";
+      text += card.effect || "No special effect.\n";
+      text += `Duration: ${card.duration || "Persistent"}\n`;
+      break;
+
+    case "Summon":
+      text += `Threshold: ${card.threshold}\n\n`;
+      text += "Aura:\n";
+      text += (card.aura || "No aura.") + "\n\n";
+      text += "Burst Skill:\n";
+      text += (card.burst || "No burst skill.");
+      break;
+
+    default:
+      text += "No additional information available.";
+  }
+
+  detailsEl.textContent = text;
+}
+
 // ---------- START GAME ----------
 startBtn.onclick = () => {
   logEl.textContent = "";
