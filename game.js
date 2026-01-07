@@ -146,6 +146,25 @@ function updateTSVPreview() {
 }
 
 // ---------- RENDER ----------
+function renderHand() {
+  handEl.innerHTML = "";
+
+  game.player.hand.forEach(card => {
+    const li = document.createElement("li");
+    li.textContent = `${card.name} (${card.type} – ${card.element})`;
+    li.style.cursor = "pointer";
+
+    li.onclick = () => {
+      selectedCard = card;
+      document.getElementById("playCardBtn").disabled = false;
+      renderCardDetails(card);
+      renderHand();
+    };
+
+    handEl.appendChild(li);
+  });
+}
+
 function renderInPlay() {
   inPlayEl.innerHTML = "";
 
