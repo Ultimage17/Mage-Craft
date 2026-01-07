@@ -215,12 +215,13 @@ function renderCardDetails(card) {
 
   switch (card.type) {
     case "Spell":
+      text += `Base TSV: ${card.basetsv ?? 0}\n\n`;
       text += "Affinities:\n";
-      text += `Fire: ${card.affinityfire ?? 0}\n`;
-      text += `Water: ${card.affinitywater ?? 0}\n`;
-      text += `Air: ${card.affinityair ?? 0}\n`;
-      text += `Earth: ${card.affinityearth ?? 0}`;
-      break;
+      text += `  Fire: ${card.affinityfire ?? 0}\n`;
+      text += `  Water: ${card.affinitywater ?? 0}\n`;
+      text += `  Air: ${card.affinityair ?? 0}\n`;
+      text += `  Earth: ${card.affinityearth ?? 0}\n`;
+  break;
 
     case "Item":
       text += "Item Effects:\n";
