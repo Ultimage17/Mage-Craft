@@ -127,14 +127,23 @@ function calculateTSVPreview() {
 
   // Items
   turnState.cardsPlayed.forEach(card => {
-    if (card.type === "Item") {
-      tsv += card.bonus || 0;
+  if (card.type === "Item") {
 
-      // Elemental synergies
-      if (card.element === spell.element) tsv += 1;
-      if (field && card.element === field.element) tsv += 1;
+    // Base item modifier
+    if (card.modifier !== undefined) {
+      tsv += card.modifier;
     }
-  });
+
+    // Elemental synergy bonuses
+    if (card.element === spell.element) {
+      tsv += 1;
+    }
+
+    if (field && card.element === field.element) {
+      tsv += 1;
+    }
+  }
+});
 
   return tsv;
 }
@@ -214,9 +223,21 @@ function renderCardDetails(card) {
       break;
 
     case "Item":
-      text += "Item Effect:\n";
-      text += card.specialeffect || "None";
-      break;
+      text += "Item Effects:\n";
+
+      if (card.modifier !== undefined) {
+      text += `Modifier: +${card.modifier}\n`;
+  }
+
+      if (card.specialeffect) {
+      text += `Special Effect:\n${card.specialeffect}\n`;
+  }
+
+      if (card.modifier === undefined && !card.specialeffect) {
+      text += "No special effects.\n";
+  }
+
+  break;
 
     case "Field":
       text += "Field Effect:\n";
