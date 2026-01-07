@@ -11,7 +11,6 @@ const handEl = document.getElementById("hand");
 const inPlayEl = document.getElementById("inPlay");
 const playerDeckSelect = document.getElementById("playerDeck");
 const aiDeckSelect = document.getElementById("aiDeck");
-
 const startBtn = document.getElementById("startBtn");
 const playCardBtn = document.getElementById("playCardBtn");
 const endTurnBtn = document.getElementById("endTurnBtn");
@@ -174,15 +173,6 @@ function renderInPlay() {
       updateTSVPreview();
     };
 
-    inPlayEl.appendChild(li);
-  });
-}
-
-function renderInPlay() {
-  inPlayEl.innerHTML = "";
-  turnState.cardsPlayed.forEach(card => {
-    const li = document.createElement("li");
-    li.textContent = `${card.name} (${card.type})`;
     inPlayEl.appendChild(li);
   });
 }
