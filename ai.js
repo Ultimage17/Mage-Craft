@@ -1,92 +1,113 @@
 /*************************
  * Mage Craft – ai.js
- * Basic Competitive AI
  *************************/
 
-function aiTurn() {
-  log("— AI Turn Begins —");
+const AI = {
+  deck: [],
+  hand: [],
+  activeSummons: [],
+  victoryPoints: 0,
 
-  // Draw up to 7 cards
-  while (game.ai.hand.length < 7 && game.ai.deck.length > 0) {
-    game.ai.hand.push(game.ai.deck.shift());
-  }
-
-  let bestPlay = null;
-  let bestTSV = game.currentTSV;
-
-  // Identify legal spell
-  const spells = game.ai.hand.filter(c => c.type === "Spell");
-  const fields = game.ai.hand.filter(c => c.type === "Field");
-  const items = game.ai.hand.filter(c => c.type === "Item");
-
-  spells.forEach(spell => {
-    fields.forEach(field => {
-      const affinityKey = "affinity" + field.element.toLowerCase();
-      let tsv =
-        game.currentTSV +
-        (spell.basetsv || 0) +
-        (spell[affinityKey] || 0);
-
-      let usedItems = [];
-      let itemTSV = 0;
-
-      items.slice(0, 2).forEach(item => {
-        let value = item.modifier || 0;
-        if (item.element === spell.element) value += 1;
-        if (item.element === field.element) value += 1;
-        itemTSV += value;
-        usedItems.push(item);
-      });
-
-      tsv += itemTSV;
-
-      game.activeSummons.forEach(s => {
-        if (s.auraValue) tsv += s.auraValue;
-      });
-
-      if (tsv > bestTSV) {
-        bestTSV = tsv;
-        bestPlay = { spell, field, items: usedItems, tsv };
+  draw(count = 1) {
+    for (let i = 0; i < count; i++) {
+      if (this.deck.length > 0) {
+        this.hand.push(this.deck.shift());
       }
+    }
+  },
+
+  /**
+   * MAIN ENTRY POINT
+   * Called from game.js after player locks TSV
+   */
+  takeTurn(playerTSV) {
+    log("=== AI TURN ===");
+
+    let bestPlay = null;
+    let bestTSV = -Infinity;
+
+    const spells = this.hand.filter(c => c.type === "Spell");
+    const items = this.hand.filter(c => c.type === "Item");
+
+    // Try every spell
+    spells.forEach(spell => {
+      const itemCombos = this.getItemCombos(items);
+
+      itemCombos.forEach(combo => {
+        const simulated = this.simulateTSV(spell, combo);
+        if (simulated > bestTSV) {
+          bestTSV = simulated;
+          bestPlay = { spell, items: combo };
+        }
+      });
     });
-  });
 
-  // Summon play if threshold allows
-  const summons = game.ai.hand.filter(
-    c => c.type === "Summon" && game.threshold >= c.threshold
-  );
+    if (!bestPlay) {
+      log("AI cannot play a spell.");
+      return { tsv: 0, cardsPlayed: [] };
+    }
 
-  if (summons.length) {
-    const summon = summons[0];
-    game.activeSummons.push({ ...summon, burstUsed: false });
-    game.ai.hand = game.ai.hand.filter(c => c !== summon);
-    log(`AI summons ${summon.name}`);
+    // Commit play
+    const played = [];
+    played.push(bestPlay.spell);
+    bestPlay.items.forEach(i => played.push(i));
+
+    // Remove cards from hand
+    this.hand = this.hand.filter(
+      c => !played.includes(c)
+    );
+
+    this.draw(played.length);
+
+    log(`AI plays ${bestPlay.spell.name}`);
+    log(`AI TSV: ${bestTSV}`);
+
+    return {
+      tsv: bestTSV,
+      cardsPlayed: played
+    };
+  },
+
+  /**
+   * Generate all legal item combos (0–2)
+   */
+  getItemCombos(items) {
+    const combos = [[]];
+
+    for (let i = 0; i < items.length; i++) {
+      combos.push([items[i]]);
+      for (let j = i + 1; j < items.length; j++) {
+        combos.push([items[i], items[j]]);
+      }
+    }
+
+    return combos;
+  },
+
+  /**
+   * TSV simulation using same rules as player
+   */
+  simulateTSV(spell, items) {
+    let tsv = spell.basetsv || 0;
+
+    // Field
+    if (game.activeField) {
+      const key =
+        "affinity" + game.activeField.element.toLowerCase();
+      tsv += spell[key] || 0;
+    }
+
+    // Items
+    items.forEach(item => {
+      if (item.modifier) tsv += item.modifier;
+      if (item.element === spell.element) tsv += 1;
+    });
+
+    // Summon auras
+    game.activeSummons.forEach(s => {
+      if (s.aura?.tsvBonus) tsv += s.aura.tsvBonus;
+    });
+
+    return tsv;
   }
-
-  // If AI cannot beat TSV → chain ends
-  if (!bestPlay) {
-    log("AI cannot beat the TSV.");
-    resolveSpellChain("player");
-    game.currentTSV = 0;
-    game.threshold = 0;
-    game.round++;
-    statusEl.textContent = "Your turn";
-    return;
-  }
-
-  // Execute AI play
-  log(`AI plays ${bestPlay.spell.name}`);
-  game.currentTSV = bestPlay.tsv;
-  game.spellChain++;
-  game.threshold++;
-
-  // Remove cards from AI hand
-  game.ai.hand = game.ai.hand.filter(
-    c =>
-      c !== bestPlay.spell &&
-      c !== bestPlay.field &&
-      !bestPlay.items.includes(c)
-  );
-
-  statusEl.textContent = "Your turn";
-}
+};
