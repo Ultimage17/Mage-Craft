@@ -1,6 +1,5 @@
 /*************************
  * Mage Craft – game.js
- * Fully Integrated Core Engine
  *************************/
 
 let cardsDB = null;
@@ -16,15 +15,16 @@ const activeSummonsEl = document.getElementById("activeSummons");
 const playerDeckSelect = document.getElementById("playerDeck");
 const aiDeckSelect = document.getElementById("aiDeck");
 const startBtn = document.getElementById("startBtn");
+const resetBtn = document.getElementById("resetBtn");
 const playCardBtn = document.getElementById("playCardBtn");
 const endTurnBtn = document.getElementById("endTurnBtn");
-const resetBtn = document.getElementById("resetBtn");
 const tsvPreviewEl = document.getElementById("tsvPreview");
 const playerVPEl = document.getElementById("playerVP");
 const aiVPEl = document.getElementById("aiVP");
+const roundEl = document.getElementById("round");
 
 /* ======================
-   UTILITIES
+   UTIL
 ====================== */
 function log(msg) {
   logEl.textContent += msg + "\n";
@@ -38,14 +38,18 @@ function shuffle(arr) {
 }
 
 /* ======================
-   LOAD CARD DATABASE
+   LOAD CARDS + INIT
 ====================== */
 fetch("cards.json")
   .then(res => res.json())
   .then(db => {
     cardsDB = db;
     populateDeckSelectors();
-    log("Cards loaded successfully.");
+    log("Cards loaded. Decks ready.");
+  })
+  .catch(err => {
+    console.error(err);
+    log("ERROR loading cards.json");
   });
 
 function populateDeckSelectors() {
@@ -75,11 +79,11 @@ function getAllCardsArray() {
 }
 
 function buildDeck(deckName) {
-  const deckList = STARTER_DECKS[deckName];
+  const list = STARTER_DECKS[deckName];
   const allCards = getAllCardsArray();
   const deck = [];
 
-  deckList.forEach(([name, count]) => {
+  list.forEach(([name, count]) => {
     const card = allCards.find(c => c.name === name);
     if (!card) throw new Error(`Missing card: ${name}`);
     for (let i = 0; i < count; i++) {
@@ -103,15 +107,8 @@ const game = {
   playerVP: 0,
   aiVP: 0,
 
-  player: {
-    deck: [],
-    hand: []
-    
-    ai: {
-  deck: [],
-  hand: []
-}
-  },
+  player: { deck: [], hand: [] },
+  ai: { deck: [], hand: [] },
 
   activeSummons: []
 };
@@ -139,6 +136,8 @@ function resetGame() {
 
   game.player.deck = [];
   game.player.hand = [];
+  game.ai.deck = [];
+  game.ai.hand = [];
 
   selectedCard = null;
   Object.assign(turnState, {
@@ -156,16 +155,20 @@ function resetGame() {
   playerVPEl.textContent = "0";
   aiVPEl.textContent = "0";
   tsvPreviewEl.textContent = "0";
+  roundEl.textContent = "Round 1";
 
   statusEl.textContent = "Waiting to start...";
   playCardBtn.disabled = true;
   endTurnBtn.disabled = true;
 
+  document.getElementById("cardDetails").textContent =
+    "Select a card to view details.";
+
   log("Game reset.");
 }
 
 /* ======================
-   TSV CALCULATION
+   TSV
 ====================== */
 function calculateTSVPreview() {
   let tsv = game.currentTSV;
@@ -237,144 +240,22 @@ function renderActiveSummons() {
   game.activeSummons.forEach((s, i) => {
     const li = document.createElement("li");
     li.textContent = `${s.name} (Aura +${s.auraValue || 0})`;
-
-    const btn = document.createElement("button");
-    btn.textContent = "Burst";
-    btn.onclick = () => activateBurst(i);
-
-    li.appendChild(btn);
     activeSummonsEl.appendChild(li);
   });
 }
-
-/* ======================
-   CARD DETAILS
-====================== */
-function renderCardDetails(card) {
-  const el = document.getElementById("cardDetails");
-  let t = `Name: ${card.name}\nType: ${card.type}\nElement: ${card.element}\nRarity: ${card.rarity}\n\n`;
-
-  if (card.type === "Spell") {
-    t += `Base TSV: ${card.basetsv}\n\nAffinities:\n`;
-    ["fire", "water", "air", "earth"].forEach(e => {
-      t += `  ${e}: ${card["affinity" + e] || 0}\n`;
-    });
-  }
-
-  if (card.type === "Item") {
-    t += `Modifier: +${card.modifier || 0}\n${card.specialeffect || ""}`;
-  }
-
-  if (card.type === "Field") {
-    t += `Effect:\n${card.effect}\n\nDuration:\n${card.duration}`;
-  }
-
-  if (card.type === "Summon") {
-    t += `Threshold: ${card.threshold}\nAura: ${card.aura}\n\nBurst:\n${card.burstskill}`;
-  }
-
-  el.textContent = t;
-}
-
-/* ======================
-   PLAY / UNDO
-====================== */
-function undoCard(index) {
-  const card = turnState.cardsPlayed.splice(index, 1)[0];
-  game.player.hand.push(card);
-
-  if (card.type === "Spell") turnState.spellPlayed = false;
-  if (card.type === "Field") turnState.fieldPlayed = false;
-  if (card.type === "Item") turnState.itemsPlayed--;
-
-  renderHand();
-  renderInPlay();
-  updateTSVPreview();
-}
-
-playCardBtn.onclick = () => {
-  if (!selectedCard) return;
-
-  if (selectedCard.type === "Spell" && turnState.spellPlayed) return;
-  if (selectedCard.type === "Field" && turnState.fieldPlayed) return;
-  if (selectedCard.type === "Item" && turnState.itemsPlayed >= 2) return;
-  if (selectedCard.type === "Summon" && game.threshold < selectedCard.threshold) return;
-
-  if (selectedCard.type === "Spell") turnState.spellPlayed = true;
-  if (selectedCard.type === "Field") turnState.fieldPlayed = true;
-  if (selectedCard.type === "Item") turnState.itemsPlayed++;
-
-  if (selectedCard.type === "Summon") {
-    game.activeSummons.push({ ...selectedCard, burstUsed: false });
-  } else {
-    turnState.cardsPlayed.push(selectedCard);
-  }
-
-  game.player.hand = game.player.hand.filter(c => c !== selectedCard);
-  selectedCard = null;
-  playCardBtn.disabled = true;
-
-  renderHand();
-  renderInPlay();
-  renderActiveSummons();
-  updateTSVPreview();
-};
-
-/* ======================
-   BURST SKILLS
-====================== */
-function activateBurst(index) {
-  const s = game.activeSummons[index];
-  if (s.burstUsed) return;
-
-  log(`Burst activated: ${s.name}`);
-  log(s.burstskill);
-
-  s.burstUsed = true;
-  game.activeSummons.splice(index, 1);
-  renderActiveSummons();
-}
-
-/* ======================
-   END TURN
-====================== */
-endTurnBtn.onclick = () => {
-  const finalTSV = calculateTSVPreview();
-  log(`Final TSV locked: ${finalTSV}`);
-
-  game.currentTSV = finalTSV;
-  game.spellChain++;
-  game.threshold++;
-
-  const cardsPlayedCount = turnState.cardsPlayed.length;
-  for (let i = 0; i < cardsPlayedCount; i++) {
-    if (game.player.deck.length) {
-      game.player.hand.push(game.player.deck.shift());
-    }
-  }
-
-  Object.assign(turnState, {
-    spellPlayed: false,
-    fieldPlayed: false,
-    itemsPlayed: 0,
-    cardsPlayed: []
-  });
-
-  inPlayEl.innerHTML = "";
-  updateTSVPreview();
-  renderHand();
-
-  statusEl.textContent = "AI thinking...";
-  setTimeout(aiTurn, 800);
-};
 
 /* ======================
    START GAME
 ====================== */
 startBtn.onclick = () => {
   resetGame();
+
   game.player.deck = buildDeck(playerDeckSelect.value);
+  game.ai.deck = buildDeck(aiDeckSelect.value);
+
   game.player.hand = game.player.deck.splice(0, 7);
+  game.ai.hand = game.ai.deck.splice(0, 7);
+
   statusEl.textContent = "Your turn";
   renderHand();
 };
