@@ -14,6 +14,7 @@ const aiDeckSelect = document.getElementById("aiDeck");
 const startBtn = document.getElementById("startBtn");
 const playCardBtn = document.getElementById("playCardBtn");
 const endTurnBtn = document.getElementById("endTurnBtn");
+const resetBtn = document.getElementById("resetBtn");
 
 // ---------- UTIL ----------
 function log(msg) {
@@ -102,6 +103,35 @@ const turnState = {
   spellPlayed: false,
   cardsPlayed: []
 };
+
+function resetGame() {
+  // Clear game state
+  game.player.deck = [];
+  game.player.hand = [];
+
+  selectedCard = null;
+
+  turnState.spellPlayed = false;
+  turnState.cardsPlayed = [];
+
+  // Clear UI
+  handEl.innerHTML = "";
+  inPlayEl.innerHTML = "";
+  logEl.textContent = "";
+  document.getElementById("cardDetails").textContent =
+    "Select a card to view details.";
+
+  const tsvPreview = document.getElementById("tsvPreview");
+  if (tsvPreview) tsvPreview.textContent = "0";
+
+  statusEl.textContent = "Waiting to start...";
+
+  // Disable buttons
+  document.getElementById("playCardBtn").disabled = true;
+  endTurnBtn.disabled = true;
+
+  log("Game reset. Select a deck and press Start Game.");
+}
 
 // ---------- TSV CALCULATION ----------
 function calculateTSVPreview() {
@@ -310,7 +340,14 @@ endTurnBtn.onclick = () => {
   statusEl.textContent = "Opponent's turn (AI coming next)";
 };
 
+resetBtn.onclick = () => {
+  resetGame();
+};
+
 // ---------- START GAME ----------
+startBtn.onclick = () => {
+  resetGame();
+
 startBtn.onclick = () => {
   logEl.textContent = "";
   handEl.innerHTML = "";
