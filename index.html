@@ -20,45 +20,62 @@
 <br><br>
 
 <button id="startBtn">Start Game</button>
-<button id="resetBtn">Reset Game</button>
+<button id="resetBtn">Reset</button>
 
-<h2>Game Status</h2>
-<div id="status">Waiting to start...</div>
+<hr>
 
-<h2>Your Hand</h2>
-<ul id="hand"></ul>
+<!-- ROUND -->
+<h2>Round</h2>
+<div id="round">Round 1</div>
 
-<button id="playCardBtn" disabled>Play Selected Card</button>
+<!-- ACTIVE SUMMONS -->
+<h2>Active Summons</h2>
+<ul id="activeSummons"></ul>
 
-<h2>Cards Played This Turn</h2>
-<ul id="inPlay"></ul>
-<h3>TSV Preview</h3>
-<div id="tsvPreview">0</div>
-
-<button id="endTurnBtn" disabled>End Turn</button>
-
-<h2>Card Details</h2>
-<pre id="cardDetails">Select a card to view details.</pre>
-
+<!-- VICTORY POINTS -->
 <h2>Victory Points</h2>
 <div>
   Player: <span id="playerVP">0</span> |
   Opponent: <span id="aiVP">0</span>
 </div>
 
-<h2>Active Summons</h2>
-<ul id="activeSummons"></ul>
+<hr>
 
+<!-- GAME STATUS -->
+<h2>Game Status</h2>
+<div id="status">Waiting to start...</div>
+
+<!-- TSV -->
 <h2>TSV Preview</h2>
 <div id="tsvPreview">0</div>
 
-<h2>Round</h2>
-<div id="round">Round 1</div>
+<hr>
 
+<!-- HAND -->
+<h2>Your Hand</h2>
+<ul id="hand"></ul>
+<button id="playCardBtn" disabled>Play Selected Card</button>
+
+<!-- IN PLAY -->
+<h2>Cards Played This Turn</h2>
+<ul id="inPlay"></ul>
+<button id="endTurnBtn" disabled>End Turn</button>
+
+<hr>
+
+<!-- CARD DETAILS -->
+<h2>Card Details</h2>
+<pre id="cardDetails">Select a card to view details.</pre>
+
+<hr>
+
+<!-- LOG -->
 <h2>Game Log</h2>
 <pre id="log"></pre>
 
+<!-- SCRIPT ORDER IS CRITICAL -->
 <script src="starter_decks.js"></script>
+<script src="ai.js"></script>
 <script src="game.js"></script>
 
 </body>
