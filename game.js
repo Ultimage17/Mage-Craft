@@ -106,6 +106,11 @@ const game = {
   player: {
     deck: [],
     hand: []
+    
+    ai: {
+  deck: [],
+  hand: []
+}
   },
 
   activeSummons: []
@@ -359,7 +364,8 @@ endTurnBtn.onclick = () => {
   updateTSVPreview();
   renderHand();
 
-  statusEl.textContent = "Opponent's turn (AI coming next)";
+  statusEl.textContent = "AI thinking...";
+  setTimeout(aiTurn, 800);
 };
 
 /* ======================
