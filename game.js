@@ -12,6 +12,7 @@ const statusEl = document.getElementById("status");
 const handEl = document.getElementById("hand");
 const inPlayEl = document.getElementById("inPlay");
 const cardDetailsEl = document.getElementById("cardDetails");
+const tsvPreviewEl = document.getElementById("tsvPreview");
 
 const playerDeckSelect = document.getElementById("playerDeck");
 const aiDeckSelect = document.getElementById("aiDeck");
@@ -68,10 +69,8 @@ function populateDeckSelectors() {
 ===================== */
 function getAllCards() {
   const all = [];
-
   for (const key in cardsDB) {
     if (!Array.isArray(cardsDB[key])) continue;
-
     const type = key.slice(0, -1); // Spells → Spell
     cardsDB[key].forEach(card => {
       all.push({ ...card, type });
@@ -93,7 +92,6 @@ function buildDeck(deckName) {
   def.forEach(([name, count]) => {
     const card = allCards.find(c => c.name === name);
     if (!card) throw new Error(`Missing card: ${name}`);
-
     for (let i = 0; i < count; i++) {
       deck.push(JSON.parse(JSON.stringify(card)));
     }
@@ -123,32 +121,7 @@ const turnState = {
 };
 
 /* =====================
-   RESET
-===================== */
-function resetGame() {
-  game.player.deck = [];
-  game.player.hand = [];
-
-  selectedCardIndex = null;
-
-  turnState.spell = false;
-  turnState.field = false;
-  turnState.items = 0;
-  turnState.staged = [];
-
-  handEl.innerHTML = "";
-  inPlayEl.innerHTML = "";
-  cardDetailsEl.textContent = "Select a card to view details.";
-  logEl.textContent = "";
-
-  playCardBtn.disabled = true;
-  endTurnBtn.disabled = true;
-
-  statusEl.textContent = "Waiting to start...";
-}
-
-/* =====================
-   TSV PREVIEW
+   TSV CALCULATION
 ===================== */
 function calculateTSV() {
   let spell = null;
@@ -178,6 +151,38 @@ function calculateTSV() {
   });
 
   return tsv;
+}
+
+function updateTSVPreview() {
+  if (!tsvPreviewEl) return;
+  tsvPreviewEl.textContent = calculateTSV();
+}
+
+/* =====================
+   RESET
+===================== */
+function resetGame() {
+  game.player.deck = [];
+  game.player.hand = [];
+
+  selectedCardIndex = null;
+
+  turnState.spell = false;
+  turnState.field = false;
+  turnState.items = 0;
+  turnState.staged = [];
+
+  handEl.innerHTML = "";
+  inPlayEl.innerHTML = "";
+  cardDetailsEl.textContent = "Select a card to view details.";
+  logEl.textContent = "";
+
+  playCardBtn.disabled = true;
+  endTurnBtn.disabled = true;
+
+  if (tsvPreviewEl) tsvPreviewEl.textContent = "0";
+
+  statusEl.textContent = "Waiting to start...";
 }
 
 /* =====================
@@ -228,6 +233,7 @@ function renderInPlay() {
 
       renderHand();
       renderInPlay();
+      updateTSVPreview();
     };
 
     inPlayEl.appendChild(li);
@@ -291,6 +297,7 @@ playCardBtn.onclick = () => {
 
   renderHand();
   renderInPlay();
+  updateTSVPreview();
 };
 
 /* =====================
@@ -306,6 +313,7 @@ endTurnBtn.onclick = () => {
   turnState.items = 0;
 
   inPlayEl.innerHTML = "";
+  updateTSVPreview();
 };
 
 /* =====================
