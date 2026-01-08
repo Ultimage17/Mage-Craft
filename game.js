@@ -13,10 +13,8 @@ const handEl = document.getElementById("hand");
 const inPlayEl = document.getElementById("inPlay");
 const cardDetailsEl = document.getElementById("cardDetails");
 const tsvPreviewEl = document.getElementById("tsvPreview");
-
 const playerDeckSelect = document.getElementById("playerDeck");
 const aiDeckSelect = document.getElementById("aiDeck");
-
 const startBtn = document.getElementById("startBtn");
 const playCardBtn = document.getElementById("playCardBtn");
 const endTurnBtn = document.getElementById("endTurnBtn");
@@ -34,6 +32,10 @@ function shuffle(arr) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
+}
+
+function rollD8() {
+  return Math.floor(Math.random() * 8) + 1;
 }
 
 /* =====================
@@ -118,6 +120,10 @@ const turnState = {
   field: false,
   items: 0,
   staged: []
+  attunement: {
+    attempted: false,
+    success: false,
+    bonus: 0
 };
 
 /* =====================
@@ -148,6 +154,9 @@ function calculateTSV() {
       if (c.element === spell.element) tsv += 1;
     }
   });
+  if (turnState.attunement.success) {
+    tsv += turnState.attunement.bonus;
+}
 
   return tsv;
 }
@@ -155,6 +164,49 @@ function calculateTSV() {
 function updateTSVPreview() {
   if (!tsvPreviewEl) return;
   tsvPreviewEl.textContent = calculateTSV();
+}
+
+/* ---------- ATTUNEMENT ---------- */
+function attemptAttunement() {
+  if (turnState.attunement.attempted) {
+    log("Attunement already attempted this turn.");
+    return;
+  }
+
+  const spell = turnState.cardsPlayed.find(c => c.type === "Spell");
+  if (!spell) {
+    log("No spell to attune.");
+    return;
+  }
+
+  const difficultyByRarity = {
+    Common: 3,
+    Uncommon: 5,
+    Rare: 6,
+    Mythic: 7
+  };
+
+  const bonusByRarity = {
+    Common: 1,
+    Uncommon: 2,
+    Rare: 3,
+    Mythic: 5
+  };
+
+  const roll = rollD8();
+  const difficulty = difficultyByRarity[spell.rarity] || 4;
+
+  turnState.attunement.attempted = true;
+
+  if (roll >= difficulty) {
+    turnState.attunement.success = true;
+    turnState.attunement.bonus = bonusByRarity[spell.rarity] || 1;
+    log(`Attunement SUCCESS! Rolled ${roll} (+${turnState.attunement.bonus} TSV)`);
+  } else {
+    log(`Attunement failed. Rolled ${roll}.`);
+  }
+
+  updateTSVPreview();
 }
 
 /* =====================
@@ -170,6 +222,7 @@ function resetGame() {
   turnState.field = false;
   turnState.items = 0;
   turnState.staged = [];
+  turnState.attunement = { attempted: false, success: false, bonus: 0 };
 
   handEl.innerHTML = "";
   inPlayEl.innerHTML = "";
@@ -310,8 +363,9 @@ endTurnBtn.onclick = () => {
   turnState.spell = false;
   turnState.field = false;
   turnState.items = 0;
-
-  inPlayEl.innerHTML = "";
+  turnState.cardsPlayed = [];
+  turnState.attunement = { attempted: false, success: false, bonus: 0 };
+  renderInPlay();
   updateTSVPreview();
 };
 
