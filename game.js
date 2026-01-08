@@ -146,7 +146,6 @@ function calculateTSV() {
     if (c.type === "Item") {
       if (c.modifier) tsv += c.modifier;
       if (c.element === spell.element) tsv += 1;
-      if (field && c.element === field.element) tsv += 1;
     }
   });
 
