@@ -89,7 +89,7 @@ const game = {
     hand: []
   },
   activeSummons: [],
-  activeField: null   // 🔥 FIELD IS NOW GLOBAL
+  activeField: null   // FIELD IS NOW GLOBAL
 };
 
 let selectedCard = null;
@@ -157,7 +157,7 @@ function calculateTSV() {
 
   tsv += spell.basetsv || 0;
 
-  // 🌍 GLOBAL FIELD
+  // GLOBAL FIELD
   if (game.activeField) {
     const key = "affinity" + game.activeField.element.toLowerCase();
     tsv += spell[key] || 0;
@@ -191,21 +191,21 @@ function updateTSVPreview() {
 playCardBtn.onclick = () => {
   if (!selectedCard) return;
 
-  // 🔒 Play limits
+  // Play limits
   if (selectedCard.type === "Spell" && turnState.spellPlayed) return;
   if (selectedCard.type === "Item" && turnState.itemsPlayed >= 2) return;
 
-  // 🌍 FIELD PLAY
+  // FIELD PLAY
   if (selectedCard.type === "Field") {
     game.activeField = selectedCard;
     log(`Field changed to ${selectedCard.name}`);
   }
-  // 🧙 SUMMON
+  // SUMMON
   else if (selectedCard.type === "Summon") {
     game.activeSummons.push(selectedCard);
     log(`Summoned ${selectedCard.name}`);
   }
-  // 🎴 NORMAL CARD
+  // NORMAL CARD
   else {
     if (selectedCard.type === "Spell") turnState.spellPlayed = true;
     if (selectedCard.type === "Item") turnState.itemsPlayed++;
@@ -231,6 +231,20 @@ endTurnBtn.onclick = () => {
 
   updateTSVPreview();
 };
+
+// === AI TURN ===
+const aiResult = AI.takeTurn(finalTSV);
+
+log(`AI final TSV: ${aiResult.tsv}`);
+
+// Compare TSVs and award victory points
+if (aiResult.tsv > finalTSV) {
+  log("AI wins the round.");
+  game.aiVictoryPoints = (game.aiVictoryPoints || 0) + 1;
+} else {
+  log("Player wins the round.");
+  game.playerVictoryPoints = (game.playerVictoryPoints || 0) + 1;
+}
 
 /* ---------- START ---------- */
 startBtn.onclick = () => {
