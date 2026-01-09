@@ -1,82 +1,126 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Mage Craft – Digital Playtest</title>
-  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
 
 <h1>Mage Craft – Playtest Prototype</h1>
 
-<!-- Deck Selection -->
-<label>Player Deck:</label>
-<select id="playerDeck"></select>
+<!-- =========================
+     SETUP
+========================= -->
+<section>
+  <label>Player Deck:</label>
+  <select id="playerDeck"></select>
 
-<label>AI Deck:</label>
-<select id="aiDeck"></select>
+  <label>AI Deck:</label>
+  <select id="aiDeck"></select>
 
-<br><br>
-
-<button id="startBtn">Start Game</button>
-<button id="resetBtn">Reset</button>
-
-<hr>
-
-<!-- ROUND -->
-<h2>Round</h2>
-<div id="round">Round 1</div>
-
-<!-- ACTIVE SUMMONS -->
-<h2>Active Summons</h2>
-<ul id="activeSummons"></ul>
-
-<!-- VICTORY POINTS -->
-<h2>Victory Points</h2>
-<div>
-  Player: <span id="playerVP">0</span> |
-  Opponent: <span id="aiVP">0</span>
-</div>
+  <button id="startBtn">Start Game</button>
+  <button id="resetBtn">Reset</button>
+</section>
 
 <hr>
 
-<!-- GAME STATUS -->
-<h2>Game Status</h2>
-<div id="status">Waiting to start...</div>
+<!-- =========================
+     GAME STATUS
+========================= -->
+<section>
+  <h2>Game Status</h2>
+  <div id="status">Waiting to start...</div>
 
-<!-- TSV -->
-<h2>TSV Preview</h2>
-<div id="tsvPreview">0</div>
-
-<hr>
-
-<!-- HAND -->
-<h2>Your Hand</h2>
-<ul id="hand"></ul>
-<button id="playCardBtn" disabled>Play Selected Card</button>
-
-<!-- IN PLAY -->
-<h2>Cards Played This Turn</h2>
-<ul id="inPlay"></ul>
-<button id="endTurnBtn" disabled>End Turn</button>
+  <div><strong>Round:</strong> <span id="roundCounter">0</span></div>
+</section>
 
 <hr>
 
-<!-- CARD DETAILS -->
-<h2>Card Details</h2>
-<pre id="cardDetails">Select a card to view details.</pre>
+<!-- =========================
+     SCORING
+========================= -->
+<section>
+  <h2>Victory Points</h2>
+  <div>Player: <span id="playerVP">0</span></div>
+  <div>AI: <span id="aiVP">0</span></div>
+</section>
 
 <hr>
 
-<!-- LOG -->
-<h2>Game Log</h2>
-<pre id="log"></pre>
+<!-- =========================
+     ACTIVE STATE
+========================= -->
+<section>
+  <h2>Active Field</h2>
+  <div id="activeField">None</div>
 
-<!-- SCRIPT ORDER IS CRITICAL -->
+  <h2>Active Summons</h2>
+  <ul id="activeSummons"></ul>
+</section>
+
+<hr>
+
+<!-- =========================
+     TSV
+========================= -->
+<section>
+  <h2>TSV</h2>
+  <div>Current TSV to Beat: <strong><span id="currentTSV">0</span></strong></div>
+  <div>Your TSV Preview: <strong><span id="tsvPreview">0</span></strong></div>
+</section>
+
+<hr>
+
+<!-- =========================
+     PLAYER HAND
+========================= -->
+<section>
+  <h2>Your Hand</h2>
+  <ul id="hand"></ul>
+
+  <button id="playCardBtn" disabled>Play Selected Card</button>
+  <button id="endTurnBtn" disabled>End Turn</button>
+</section>
+
+<hr>
+
+<!-- =========================
+     CARDS PLAYED THIS TURN
+========================= -->
+<section>
+  <h2>Cards Played This Turn</h2>
+  <ul id="inPlay"></ul>
+</section>
+
+<hr>
+
+<!-- =========================
+     CARD DETAILS
+========================= -->
+<section>
+  <h2>Card Details</h2>
+  <pre id="cardDetails">Select a card to view details.</pre>
+</section>
+
+<hr>
+
+<!-- =========================
+     GAME LOG
+========================= -->
+<section>
+  <h2>Game Log</h2>
+  <pre id="log"></pre>
+</section>
+
+<!-- =========================
+     SCRIPTS (ORDER MATTERS)
+========================= -->
 <script src="starter_decks.js"></script>
-<script src="ai.js"></script>
 <script src="game.js"></script>
+<script src="ai.js"></script>
 
 </body>
 </html>
