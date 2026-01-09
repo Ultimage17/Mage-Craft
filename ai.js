@@ -7,107 +7,190 @@ const AI = {
   hand: [],
   activeSummons: [],
   victoryPoints: 0,
+  threshold: 0
+};
 
-  draw(count = 1) {
-    for (let i = 0; i < count; i++) {
-      if (this.deck.length > 0) {
-        this.hand.push(this.deck.shift());
-      }
-    }
-  },
+/* -------------------------
+   AI TURN ENTRY POINT
+------------------------- */
+function aiTakeTurn(playerTSV) {
+  log("AI turn begins.");
 
-  /**
-   * MAIN ENTRY POINT
-   * Called from game.js after player locks TSV
-   */
-  takeTurn(playerTSV) {
-    log("=== AI TURN ===");
+  drawUpToSeven(AI);
 
-    let bestPlay = null;
-    let bestTSV = -Infinity;
+  let bestPlay = evaluateBestPlay(playerTSV);
 
-    const spells = this.hand.filter(c => c.type === "Spell");
-    const items = this.hand.filter(c => c.type === "Item");
+  if (!bestPlay) {
+    log("AI passes. No valid play.");
+    return finalizeAITurn(0);
+  }
 
-    // Try every spell
-    spells.forEach(spell => {
-      const itemCombos = this.getItemCombos(items);
+  executeAIPlay(bestPlay);
+
+  const finalTSV = calculateAITSV(bestPlay);
+  log(`AI final TSV: ${finalTSV}`);
+
+  finalizeAITurn(finalTSV);
+}
+
+/* -------------------------
+   DRAW
+------------------------- */
+function drawUpToSeven(actor) {
+  while (actor.hand.length < 7 && actor.deck.length > 0) {
+    actor.hand.push(actor.deck.shift());
+  }
+}
+
+/* -------------------------
+   PLAY EVALUATION
+------------------------- */
+function evaluateBestPlay(playerTSV) {
+  let best = null;
+  let bestTSV = -Infinity;
+
+  const spells = AI.hand.filter(c => c.type === "Spell");
+  const items = AI.hand.filter(c => c.type === "Item");
+  const fields = AI.hand.filter(c => c.type === "Field");
+  const summons = AI.hand.filter(c => c.type === "Summon");
+
+  spells.forEach(spell => {
+    fields.forEach(field => {
+      const itemCombos = getItemCombos(items);
 
       itemCombos.forEach(combo => {
-        const simulated = this.simulateTSV(spell, combo);
-        if (simulated > bestTSV) {
-          bestTSV = simulated;
-          bestPlay = { spell, items: combo };
+        const staged = [spell, field, ...combo];
+        const tsv = calculateAITSV(staged);
+
+        if (tsv > bestTSV && tsv >= playerTSV) {
+          bestTSV = tsv;
+          best = staged;
         }
       });
     });
+  });
 
-    if (!bestPlay) {
-      log("AI cannot play a spell.");
-      return { tsv: 0, cardsPlayed: [] };
+  // Summon-only or summon + spell lines
+  summons.forEach(summon => {
+    if (AI.threshold >= summon.threshold) {
+      best = [summon];
     }
+  });
 
-    // Commit play
-    const played = [];
-    played.push(bestPlay.spell);
-    bestPlay.items.forEach(i => played.push(i));
+  return best;
+}
 
-    // Remove cards from hand
-    this.hand = this.hand.filter(
-      c => !played.includes(c)
-    );
+/* -------------------------
+   ITEM COMBINATIONS (0–2)
+------------------------- */
+function getItemCombos(items) {
+  const combos = [[]];
 
-    this.draw(played.length);
+  for (let i = 0; i < items.length; i++) {
+    combos.push([items[i]]);
+    for (let j = i + 1; j < items.length; j++) {
+      combos.push([items[i], items[j]]);
+    }
+  }
 
-    log(`AI plays ${bestPlay.spell.name}`);
-    log(`AI TSV: ${bestTSV}`);
+  return combos;
+}
 
-    return {
-      tsv: bestTSV,
-      cardsPlayed: played
-    };
-  },
+/* -------------------------
+   TSV CALCULATION
+------------------------- */
+function calculateAITSV(cards) {
+  let tsv = 0;
+  let spell = cards.find(c => c.type === "Spell");
+  let field = cards.find(c => c.type === "Field");
 
-  /**
-   * Generate all legal item combos (0–2)
-   */
-  getItemCombos(items) {
-    const combos = [[]];
+  if (!spell) return 0;
 
-    for (let i = 0; i < items.length; i++) {
-      combos.push([items[i]]);
-      for (let j = i + 1; j < items.length; j++) {
-        combos.push([items[i], items[j]]);
+  tsv += spell.basetsv || 0;
+
+  // Field affinity
+  if (field) {
+    const key = "affinity" + field.element.toLowerCase();
+    tsv += spell[key] || 0;
+  }
+
+  // Items
+  cards.forEach(card => {
+    if (card.type === "Item") {
+      if (card.modifier) tsv += card.modifier;
+
+      if (card.specialeffect?.includes("fire") &&
+          spell.element === "Fire") {
+        tsv += 1;
       }
     }
+  });
 
-    return combos;
-  },
-
-  /**
-   * TSV simulation using same rules as player
-   */
-  simulateTSV(spell, items) {
-    let tsv = spell.basetsv || 0;
-
-    // Field
-    if (game.activeField) {
-      const key =
-        "affinity" + game.activeField.element.toLowerCase();
-      tsv += spell[key] || 0;
+  // Summon Auras
+  AI.activeSummons.forEach(summon => {
+    if (!summon.auraActive) return;
+    if (summon.aura?.element === spell.element) {
+      tsv += summon.aura.bonus || 0;
     }
+    if (summon.aura?.flatTSV) {
+      tsv += summon.aura.flatTSV;
+    }
+  });
 
-    // Items
-    items.forEach(item => {
-      if (item.modifier) tsv += item.modifier;
-      if (item.element === spell.element) tsv += 1;
-    });
+  // Attunement
+  tsv += resolveAttunement(spell);
 
-    // Summon auras
-    game.activeSummons.forEach(s => {
-      if (s.aura?.tsvBonus) tsv += s.aura.tsvBonus;
-    });
+  return tsv;
+}
 
-    return tsv;
+/* -------------------------
+   ATTUNEMENT
+------------------------- */
+function resolveAttunement(spell) {
+  const roll = Math.ceil(Math.random() * 7);
+  log(`AI attunement roll: ${roll}`);
+
+  switch (spell.rarity) {
+    case "Common": return roll >= 3 ? 1 : 0;
+    case "Uncommon": return roll >= 5 ? 2 : 0;
+    case "Rare": return roll >= 6 ? 3 : 0;
+    case "Mythic": return roll >= 7 ? 5 : 0;
+    default: return 0;
   }
-};
+}
+
+/* -------------------------
+   EXECUTE PLAY
+------------------------- */
+function executeAIPlay(cards) {
+  cards.forEach(card => {
+    AI.hand = AI.hand.filter(c => c !== card);
+
+    if (card.type === "Summon") {
+      AI.activeSummons.push({
+        ...card,
+        auraActive: true,
+        burstUsed: false
+      });
+      log(`AI summons ${card.name}`);
+    } else {
+      log(`AI plays ${card.name}`);
+    }
+  });
+}
+
+/* -------------------------
+   TURN FINALIZATION
+------------------------- */
+function finalizeAITurn(tsv) {
+  AI.threshold += 1;
+
+  if (tsv > game.currentTSV) {
+    AI.victoryPoints += 1;
+    log("AI wins the round.");
+  } else {
+    log("AI fails to beat TSV.");
+  }
+
+  log(`AI VP: ${AI.victoryPoints}`);
+}
