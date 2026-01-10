@@ -189,6 +189,16 @@ function renderHand() {
   });
 }
 
+function renderInPlay() {
+  inPlayEl.innerHTML = "";
+
+  turnState.cardsPlayed.forEach(card => {
+    const li = document.createElement("li");
+    li.textContent = `${card.name} (${card.type})`;
+    inPlayEl.appendChild(li);
+  });
+}
+
 /* =======================
    RENDER DETAILS
 ======================= */
