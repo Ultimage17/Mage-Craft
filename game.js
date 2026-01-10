@@ -209,22 +209,34 @@ function renderCardDetails(card) {
 playCardBtn.onclick = () => {
   if (!selectedCard) return;
 
+  // --- RULE ENFORCEMENT ---
+  const itemsPlayed = turnState.cardsPlayed.filter(c => c.type === "Item").length;
+  const fieldsPlayed = turnState.cardsPlayed.filter(c => c.type === "Field").length;
+  const summonsPlayed = turnState.cardsPlayed.filter(c => c.type === "Summon").length;
+
   if (selectedCard.type === "Spell" && turnState.spellPlayed) {
-    log("Only one spell per turn.");
+    log("Only one spell may be played per turn.");
     return;
   }
 
-  if (selectedCard.type === "Field") {
-    game.activeField = selectedCard;
-    log(`Field changed to ${selectedCard.name}`);
+  if (selectedCard.type === "Item" && itemsPlayed >= 2) {
+    log("You may only play up to 2 items per turn.");
+    return;
+  }
 
-    // Dynamic recalculation happens automatically
-    if (game.lastResolvedSpell) {
-      const newTSV = calculateResolvedTSV(game.lastResolvedSpell);
-      log(`Opponent TSV is now ${newTSV}`);
+  if (selectedCard.type === "Field" && fieldsPlayed >= 1) {
+    log("Only one field may be played per turn.");
+    return;
+  }
+
+  if (selectedCard.type === "Summon") {
+    if (game.round < selectedCard.threshold) {
+      log(`Summon requires threshold ${selectedCard.threshold}.`);
+      return;
     }
   }
 
+  // --- APPLY PLAY ---
   if (selectedCard.type === "Spell") {
     turnState.spellPlayed = true;
   }
@@ -232,11 +244,17 @@ playCardBtn.onclick = () => {
   game.player.hand = game.player.hand.filter(c => c !== selectedCard);
   turnState.cardsPlayed.push(selectedCard);
 
+  log(`Played ${selectedCard.name}.`);
+
   selectedCard = null;
   playCardBtn.disabled = true;
 
   renderHand();
-  updateTSVPreview();
+  renderInPlay();          // 
+  updateTSVPreview();      // 
+  clearCardDetails();
+
+  endTurnBtn.disabled = false;
 };
 
 /* =======================
