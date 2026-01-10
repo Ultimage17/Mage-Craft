@@ -276,7 +276,29 @@ resetBtn.onclick = () => location.reload();
    START GAME
 ======================= */
 startBtn.onclick = () => {
-  game.player.deck = buildDeck(playerDeckSelect.value);
+  resetGame();
+
+  if (!cardsDB) {
+    log("Cards not loaded yet.");
+    return;
+  }
+
+  game.round = 1;
+  game.playerVP = 0;
+  game.aiVP = 0;
+
+  document.getElementById("roundCounter").textContent = game.round;
+  document.getElementById("playerVP").textContent = game.playerVP;
+  document.getElementById("aiVP").textContent = game.aiVP;
+
+  const deckName = playerDeckSelect.value;
+  log("Starting game with deck: " + deckName);
+
+  game.player.deck = buildDeck(deckName);
   game.player.hand = game.player.deck.splice(0, 7);
+
+  log("You draw 7 cards.");
+  statusEl.textContent = "Your turn – play cards";
+
   renderHand();
 };
