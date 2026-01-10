@@ -192,9 +192,30 @@ function renderHand() {
 function renderInPlay() {
   inPlayEl.innerHTML = "";
 
-  turnState.cardsPlayed.forEach(card => {
+  turnState.cardsPlayed.forEach((card, index) => {
     const li = document.createElement("li");
     li.textContent = `${card.name} (${card.type})`;
+    li.style.cursor = "pointer";
+
+    li.onclick = () => {
+      // Remove card from staged play
+      turnState.cardsPlayed.splice(index, 1);
+
+      // Return card to hand
+      game.player.hand.push(card);
+
+      // Unlock spell if a spell was removed
+      if (card.type === "Spell") {
+        turnState.spellPlayed = false;
+      }
+
+      log(`Removed ${card.name} from played cards.`);
+
+      renderHand();
+      renderInPlay();
+      updateTSVPreview();
+    };
+
     inPlayEl.appendChild(li);
   });
 }
