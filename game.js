@@ -106,7 +106,7 @@ const game = {
   vpAI: 0
 };
 
-let selectedCard = null;
+let selectedCardIndex = null;
 
 const turnState = {
   spellPlayed: false,
@@ -167,14 +167,24 @@ function updateTSVPreview() {
 ======================= */
 function renderHand() {
   handEl.innerHTML = "";
-  game.player.hand.forEach(card => {
+
+  game.player.hand.forEach((card, index) => {
     const li = document.createElement("li");
     li.textContent = `${card.name} (${card.type} – ${card.element})`;
+    li.style.cursor = "pointer";
+
+    if (index === selectedCardIndex) {
+      li.style.background = "#333";
+      li.style.color = "#fff";
+    }
+
     li.onclick = () => {
-      selectedCard = card;
+      selectedCardIndex = index;
       playCardBtn.disabled = false;
       renderCardDetails(card);
+      renderHand();
     };
+
     handEl.appendChild(li);
   });
 }
@@ -207,36 +217,41 @@ function renderCardDetails(card) {
    PLAY CARD
 ======================= */
 playCardBtn.onclick = () => {
-  if (!selectedCard) return;
-
-  if (selectedCard.type === "Spell" && turnState.spellPlayed) {
-    log("Only one spell per turn.");
+  if (selectedCardIndex === null) {
+    log("No card selected.");
     return;
   }
 
-  if (selectedCard.type === "Field") {
-    game.activeField = selectedCard;
-    log(`Field changed to ${selectedCard.name}`);
+  const card = game.player.hand[selectedCardIndex];
 
-    // Dynamic recalculation happens automatically
-    if (game.lastResolvedSpell) {
-      const newTSV = calculateResolvedTSV(game.lastResolvedSpell);
-      log(`Opponent TSV is now ${newTSV}`);
-    }
+  // Enforce one spell per turn
+  if (card.type === "Spell" && turnState.spellPlayed) {
+    log("Only one spell may be played per turn.");
+    return;
   }
 
-  if (selectedCard.type === "Spell") {
+  if (card.type === "Spell") {
     turnState.spellPlayed = true;
   }
 
-  game.player.hand = game.player.hand.filter(c => c !== selectedCard);
-  turnState.cardsPlayed.push(selectedCard);
+  // Remove from hand
+  game.player.hand.splice(selectedCardIndex, 1);
 
-  selectedCard = null;
+  // Add to in-play
+  turnState.cardsPlayed.push(card);
+
+  log(`Played ${card.name}.`);
+
+  selectedCardIndex = null;
   playCardBtn.disabled = true;
 
   renderHand();
+  renderInPlay();
   updateTSVPreview();
+  clearCardDetails();
+
+  endTurnBtn.disabled = true;
+  endTurnBtn.disabled = false;
 };
 
 /* =======================
