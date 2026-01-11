@@ -110,6 +110,7 @@ let selectedCardIndex = null;
 
 const turnState = {
   spellPlayed: false,
+  itemsPlayed: 0,
   cardsPlayed: []
 };
 
@@ -198,23 +199,23 @@ function renderInPlay() {
     li.style.cursor = "pointer";
 
     li.onclick = () => {
-      // Remove card from staged play
-      turnState.cardsPlayed.splice(index, 1);
+  turnState.cardsPlayed.splice(index, 1);
+  game.player.hand.push(card);
 
-      // Return card to hand
-      game.player.hand.push(card);
+  if (card.type === "Spell") {
+    turnState.spellPlayed = false;
+  }
 
-      // Unlock spell if a spell was removed
-      if (card.type === "Spell") {
-        turnState.spellPlayed = false;
-      }
+  if (card.type === "Item") {
+    turnState.itemsPlayed -= 1;
+  }
 
-      log(`Removed ${card.name} from played cards.`);
+  log(`Removed ${card.name} from played cards.`);
 
-      renderHand();
-      renderInPlay();
-      updateTSVPreview();
-    };
+  renderHand();
+  renderInPlay();
+  updateTSVPreview();
+};
 
     inPlayEl.appendChild(li);
   });
@@ -248,32 +249,37 @@ function renderCardDetails(card) {
    PLAY CARD
 ======================= */
 playCardBtn.onclick = () => {
-  if (selectedCardIndex === null) {
-    log("No card selected.");
-    return;
-  }
+  if (!selectedCard) return;
 
-  const card = game.player.hand[selectedCardIndex];
-
-  // Enforce one spell per turn
-  if (card.type === "Spell" && turnState.spellPlayed) {
+  // Enforce spell limit
+  if (selectedCard.type === "Spell" && turnState.spellPlayed) {
     log("Only one spell may be played per turn.");
     return;
   }
 
-  if (card.type === "Spell") {
+  // Enforce item limit
+  if (selectedCard.type === "Item" && turnState.itemsPlayed >= 2) {
+    log("You may only play up to 2 items per turn.");
+    return;
+  }
+
+  // Mark spell played
+  if (selectedCard.type === "Spell") {
     turnState.spellPlayed = true;
   }
 
-  // Remove from hand
-  game.player.hand.splice(selectedCardIndex, 1);
+  // Track item count
+  if (selectedCard.type === "Item") {
+    turnState.itemsPlayed += 1;
+  }
 
-  // Add to in-play
-  turnState.cardsPlayed.push(card);
+  // Remove from hand and stage
+  game.player.hand = game.player.hand.filter(c => c !== selectedCard);
+  turnState.cardsPlayed.push(selectedCard);
 
-  log(`Played ${card.name}.`);
+  log(`Played ${selectedCard.name}.`);
 
-  selectedCardIndex = null;
+  selectedCard = null;
   playCardBtn.disabled = true;
 
   renderHand();
@@ -281,8 +287,10 @@ playCardBtn.onclick = () => {
   updateTSVPreview();
   clearCardDetails();
 
-  endTurnBtn.disabled = true;
-  endTurnBtn.disabled = false;
+  endTurnBtn.disabled = true; // enabled once a spell exists
+  if (turnState.spellPlayed) {
+    endTurnBtn.disabled = false;
+  }
 };
 
 /* =======================
@@ -304,6 +312,7 @@ endTurnBtn.onclick = () => {
 
   turnState.cardsPlayed = [];
   turnState.spellPlayed = false;
+  turnState.itemsPlayed = 0;
 
   while (game.player.hand.length < 7 && game.player.deck.length > 0) {
     game.player.hand.push(game.player.deck.shift());
