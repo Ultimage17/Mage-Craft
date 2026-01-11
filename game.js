@@ -64,14 +64,27 @@ function populateDeckSelectors() {
 /* =======================
    CARD NORMALIZATION
 ======================= */
-function getAllCards() {
+function getAllCardsArray() {
   let all = [];
+
   for (const key in cardsDB) {
-    if (Array.isArray(cardsDB[key])) {
-      const type = key.slice(0, -1);
-      cardsDB[key].forEach(c => all.push({ ...c, type }));
+    if (!Array.isArray(cardsDB[key])) continue;
+
+    let type = key.slice(0, -1); // Spells → Spell
+
+    // Normalize Summons explicitly
+    if (key.toLowerCase() === "summons") {
+      type = "Summon";
     }
+
+    cardsDB[key].forEach(card => {
+      all.push({
+        ...card,
+        type
+      });
+    });
   }
+
   return all;
 }
 
@@ -240,6 +253,15 @@ function renderCardDetails(card) {
 
   if (card.type === "Field") {
     txt += `${card.effect}\n\nDuration:\n${card.duration}`;
+  }
+  
+  if (card.type === "Summon") {
+    txt += `Threshold: ${card.threshold ?? "—"}\n\n`;
+    txt += "Aura:\n";
+    txt += (card.aura ?? "No aura effect.") + "\n\n";
+    txt += "Burst Skill:\n";
+    txt += (card.burstskill ?? "No burst skill.");
+  break;
   }
 
   cardDetailsEl.textContent = txt;
