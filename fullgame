@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Mage Craft</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --fire: #e8541a; --fire-dark: #8b2500; --fire-glow: #ff6b2b;
+  --water: #1a78e8; --water-dark: #00308b; --water-glow: #4da6ff;
+  --air: #c8e81a; --air-dark: #5a7000; --air-glow: #e4ff4d;
+  --earth: #3ae81a; --earth-dark: #006b00; --earth-glow: #5aff3a;
+  --void: #9b1ae8; --void-dark: #3d0070; --void-glow: #c44dff;
+  --gold: #c9a84c; --gold-light: #f0d080;
+  --bg: #0a0610; --bg2: #110d1c; --bg3: #1a1428;
+  --surface: #1e1830; --surface2: #261f3e;
+  --border: #2e2550; --border2: #3d3268;
+  --text: #e8e0f8; --text2: #a090c8; --text3: #6858a0;
+  --radius: 12px; --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Crimson Pro', serif; }
+
+/* ===== SCREENS ===== */
+.screen { display: none; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+.screen.active { display: flex; }
+
+/* ===== BACKGROUND ===== */
+.arcane-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 20% 20%, #1a0830 0%, transparent 50%),
+              radial-gradient(ellipse at 80% 80%, #0a1830 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 50%, #0d0820 0%, var(--bg) 70%);
+}
+.arcane-bg::after {
+  content: ''; position: absolute; inset: 0;
+  background-image: radial-gradient(circle, #ffffff08 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ===== TITLE SCREEN ===== */
+#title-screen { align-items: center; justify-content: center; gap: 32px; position: relative; z-index: 1; }
+.title-emblem { font-size: 80px; filter: drop-shadow(0 0 20px var(--void-glow)); animation: pulse 3s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.05);opacity:0.85} }
+.title-main { font-family: 'Cinzel Decorative', serif; font-size: clamp(28px,8vw,48px); font-weight: 900; color: var(--gold-light); text-align: center; text-shadow: 0 0 30px var(--gold), 0 0 60px var(--void-glow); letter-spacing: 4px; }
+.title-sub { font-family: 'Cinzel', serif; font-size: 14px; letter-spacing: 6px; color: var(--text2); text-transform: uppercase; }
+.btn-primary { background: linear-gradient(135deg, #3d2870, #1e1440); border: 1px solid var(--gold); color: var(--gold-light); font-family: 'Cinzel', serif; font-size: 16px; letter-spacing: 2px; padding: 16px 40px; border-radius: 4px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 20px #00000080, inset 0 1px 0 #ffffff20; width: 100%; max-width: 280px; }
+.btn-primary:active { transform: scale(0.97); box-shadow: 0 0 10px var(--gold) }
+.btn-secondary { background: transparent; border: 1px solid var(--border2); color: var(--text2); font-family: 'Cinzel', serif; font-size: 14px; letter-spacing: 1px; padding: 12px 32px; border-radius: 4px; cursor: pointer; transition: all 0.2s; width: 100%; max-width: 280px; }
+.btn-secondary:active { background: var(--surface); }
+
+/* ===== MAGE SELECT ===== */
+#mage-screen { overflow-y: auto; position: relative; z-index: 1; }
+.screen-header { padding: 20px 20px 12px; text-align: center; flex-shrink: 0; }
+.screen-title { font-family: 'Cinzel', serif; font-size: 18px; color: var(--gold-light); letter-spacing: 3px; }
+.screen-subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.mage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px 16px 24px; }
+.mage-card { background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); padding: 16px 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; overflow: hidden; }
+.mage-card.selected { border-color: var(--gold); box-shadow: 0 0 20px #c9a84c40; }
+.mage-card.disabled { opacity: 0.4; pointer-events: none; }
+.mage-card::before { content:''; position:absolute; inset:0; opacity:0; transition:opacity 0.2s; }
+.mage-card[data-element=fire]::before { background: radial-gradient(circle at 50% 0%, #e8541a20, transparent 70%); }
+.mage-card[data-element=water]::before { background: radial-gradient(circle at 50% 0%, #1a78e820, transparent 70%); }
+.mage-card[data-element=air]::before { background: radial-gradient(circle at 50% 0%, #c8e81a20, transparent 70%); }
+.mage-card[data-element=earth]::before { background: radial-gradient(circle at 50% 0%, #3ae81a20, transparent 70%); }
+.mage-card.selected::before { opacity: 1; }
+.mage-icon { font-size: 36px; }
+.mage-name { font-family: 'Cinzel', serif; font-size: 13px; color: var(--text); text-align: center; }
+.mage-titan { font-size: 11px; color: var(--text2); text-align: center; }
+.mage-ability { font-size: 11px; color: var(--text3); text-align: center; line-height: 1.4; margin-top: 4px; }
+.ability-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; margin-top: 4px; }
+.confirm-row { padding: 12px 16px 32px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+
+/* ===== GAME SCREEN ===== */
+#game-screen { position: relative; z-index: 1; }
+.game-layout { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+
+/* Score bar */
+.score-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px 8px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; gap: 8px; }
+.player-score { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 80px; }
+.player-label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 1px; color: var(--text2); }
+.player-name-display { font-size: 11px; color: var(--text3); }
+.score-num { font-family: 'Cinzel Decorative', serif; font-size: 26px; color: var(--gold-light); line-height: 1; }
+.score-target { font-size: 10px; color: var(--text3); }
+.score-divider { font-family: 'Cinzel Decorative', serif; font-size: 18px; color: var(--border2); }
+.titan-badge { display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; border: 1px solid var(--border2); font-size: 10px; color: var(--text2); margin-top: 2px; }
+.titan-badge.awakened { border-color: var(--gold); color: var(--gold); }
+.titan-badge.enhanced { border-color: var(--fire-glow); color: var(--fire-glow); }
+
+/* Status bar */
+.status-bar { padding: 6px 14px; background: var(--bg3); border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.turn-indicator { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 1px; color: var(--text2); }
+.turn-indicator span { color: var(--gold-light); }
+.phase-indicator { font-size: 11px; color: var(--text3); }
+.item-tokens { display: flex; gap: 4px; }
+.token-chip { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 12px; background: var(--surface); cursor: pointer; }
+.token-chip:active { transform: scale(0.9); }
+
+/* Spell Slots */
+.slots-area { padding: 10px 12px; background: var(--bg); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.slots-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; color: var(--text3); text-align: center; margin-bottom: 8px; text-transform: uppercase; }
+.slots-row { display: flex; gap: 6px; justify-content: center; }
+.spell-slot { flex: 1; max-width: 64px; min-height: 88px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; padding: 4px; gap: 2px; }
+.spell-slot.targetable { border-color: var(--gold); box-shadow: 0 0 12px #c9a84c60; animation: targetPulse 1s ease-in-out infinite; }
+.spell-slot.selected-slot { border-color: var(--void-glow); box-shadow: 0 0 16px #c44dff60; }
+.spell-slot.locked { border-color: #888; opacity: 0.7; }
+.spell-slot.nulled { border-color: #555; opacity: 0.5; }
+@keyframes targetPulse { 0%,100%{box-shadow:0 0 8px #c9a84c40} 50%{box-shadow:0 0 20px #c9a84c80} }
+.slot-number-display { font-family: 'Cinzel Decorative', serif; font-size: 20px; line-height: 1; }
+.slot-element-display { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
+.slot-stack-count { font-size: 9px; color: var(--text3); }
+.slot-empty-label { font-size: 10px; color: var(--text3); }
+.slot-lock-icon { position: absolute; top: 2px; right: 2px; font-size: 10px; }
+
+.el-fire { color: var(--fire-glow); } .el-water { color: var(--water-glow); }
+.el-air { color: var(--air-glow); } .el-earth { color: var(--earth-glow); }
+.el-void { color: var(--void-glow); } .el-none { color: var(--text3); }
+
+/* AI zone */
+.ai-zone { padding: 6px 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
+.ai-hand-display { display: flex; gap: 4px; }
+.ai-card-back { width: 28px; height: 40px; background: linear-gradient(135deg, #1e1440, #2e1860); border: 1px solid var(--border2); border-radius: 4px; }
+.ai-label { font-size: 10px; color: var(--text3); font-family: 'Cinzel', serif; letter-spacing: 1px; }
+
+/* Message area */
+.message-area { padding: 6px 14px; flex-shrink: 0; min-height: 32px; }
+.game-message { font-size: 12px; color: var(--gold-light); text-align: center; font-style: italic; }
+.game-message.error { color: #ff6060; }
+.game-message.success { color: var(--earth-glow); }
+
+/* Player hand */
+.hand-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.hand-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; color: var(--text3); text-align: center; padding: 4px 0; flex-shrink: 0; }
+.hand-scroll { overflow-x: auto; overflow-y: hidden; flex: 1; display: flex; align-items: center; padding: 4px 12px 8px; gap: 8px; scrollbar-width: none; }
+.hand-scroll::-webkit-scrollbar { display: none; }
+.card { width: 56px; min-width: 56px; height: 80px; border-radius: var(--radius-sm); border: 1.5px solid var(--border2); background: var(--surface2); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; position: relative; gap: 2px; flex-shrink: 0; }
+.card:active { transform: scale(0.94); }
+.card.selected { border-color: var(--gold); box-shadow: 0 0 16px #c9a84c60; transform: translateY(-8px); }
+.card.played { opacity: 0.3; pointer-events: none; }
+.card-number { font-family: 'Cinzel Decorative', serif; font-size: 22px; line-height: 1; }
+.card-element { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+.card-icon { font-size: 18px; }
+.card-type-label { font-size: 8px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+.card-corner { position: absolute; top: 3px; left: 5px; font-size: 9px; opacity: 0.7; }
+.card.fire-card { background: linear-gradient(160deg, #1e0a00, var(--surface2)); border-color: var(--fire-dark); }
+.card.fire-card.selected { border-color: var(--fire-glow); box-shadow: 0 0 16px #e8541a60; }
+.card.water-card { background: linear-gradient(160deg, #00061e, var(--surface2)); border-color: var(--water-dark); }
+.card.water-card.selected { border-color: var(--water-glow); box-shadow: 0 0 16px #1a78e860; }
+.card.air-card { background: linear-gradient(160deg, #0e1400, var(--surface2)); border-color: var(--air-dark); }
+.card.air-card.selected { border-color: var(--air-glow); box-shadow: 0 0 16px #c8e81a60; }
+.card.earth-card { background: linear-gradient(160deg, #001400, var(--surface2)); border-color: var(--earth-dark); }
+.card.earth-card.selected { border-color: var(--earth-glow); box-shadow: 0 0 16px #3ae81a60; }
+.card.void-card { background: linear-gradient(160deg, #0d0020, var(--surface2)); border-color: var(--void-dark); }
+.card.void-card.selected { border-color: var(--void-glow); box-shadow: 0 0 16px #9b1ae860; }
+.card.wild-card { border-style: dashed; }
+
+/* Action bar */
+.action-bar { display: flex; gap: 6px; padding: 8px 12px 16px; flex-shrink: 0; background: var(--bg2); border-top: 1px solid var(--border); }
+.btn-action { flex: 1; padding: 10px 4px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text2); font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 1px; cursor: pointer; transition: all 0.15s; }
+.btn-action:active { transform: scale(0.96); background: var(--surface2); }
+.btn-action.primary { background: linear-gradient(135deg, #3d2870, #1e1440); border-color: var(--gold); color: var(--gold-light); }
+.btn-action.danger { border-color: var(--fire-dark); color: var(--fire-glow); }
+.btn-action:disabled { opacity: 0.35; pointer-events: none; }
+
+/* ===== MODALS ===== */
+.modal-overlay { position: fixed; inset: 0; background: #00000090; z-index: 100; display: none; align-items: flex-end; }
+.modal-overlay.active { display: flex; }
+.modal-sheet { background: var(--bg2); border-radius: 20px 20px 0 0; border-top: 1px solid var(--border2); width: 100%; max-height: 80vh; overflow-y: auto; padding: 20px 20px 40px; }
+.modal-handle { width: 40px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 16px; }
+.modal-title { font-family: 'Cinzel', serif; font-size: 16px; color: var(--gold-light); margin-bottom: 4px; text-align: center; }
+.modal-subtitle { font-size: 13px; color: var(--text2); text-align: center; margin-bottom: 16px; }
+.modal-options { display: flex; flex-direction: column; gap: 8px; }
+.modal-option { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 12px 16px; cursor: pointer; transition: all 0.15s; }
+.modal-option:active { background: var(--surface2); border-color: var(--gold); }
+.modal-option-title { font-family: 'Cinzel', serif; font-size: 14px; color: var(--text); }
+.modal-option-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.modal-btn-row { display: flex; gap: 8px; margin-top: 16px; }
+.modal-btn { flex: 1; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text2); font-family: 'Cinzel', serif; font-size: 13px; cursor: pointer; }
+.modal-btn.confirm { border-color: var(--gold); color: var(--gold-light); background: linear-gradient(135deg, #3d2870, #1e1440); }
+.modal-btn:active { transform: scale(0.97); }
+
+/* Wild declare */
+.declare-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 12px 0; }
+.declare-btn { padding: 8px 4px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'Cinzel', serif; font-size: 13px; cursor: pointer; text-align: center; }
+.declare-btn:active { background: var(--surface2); border-color: var(--gold); }
+.declare-elements { display: flex; gap: 8px; margin: 8px 0; }
+.declare-el { flex: 1; padding: 10px 4px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); font-size: 11px; text-align: center; cursor: pointer; }
+.declare-el:active { transform: scale(0.95); }
+
+/* Attunement tracker */
+.attunement-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.streak-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--border2); color: var(--text2); }
+.streak-badge.active { border-color: var(--gold); color: var(--gold); }
+.streak-badge.ready { border-color: var(--earth-glow); color: var(--earth-glow); animation: pulse 1s ease-in-out infinite; }
+
+/* Combo flash */
+.combo-flash { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 200; pointer-events: none; text-align: center; animation: comboAnim 1.5s ease-out forwards; }
+.combo-flash-title { font-family: 'Cinzel Decorative', serif; font-size: 28px; color: var(--gold-light); text-shadow: 0 0 20px var(--gold), 0 0 40px var(--void-glow); }
+.combo-flash-pts { font-family: 'Cinzel', serif; font-size: 18px; color: var(--earth-glow); }
+@keyframes comboAnim { 0%{opacity:0;transform:translate(-50%,-60%) scale(0.8)} 20%{opacity:1;transform:translate(-50%,-50%) scale(1.05)} 70%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-40%) scale(0.95)} }
+
+/* Win screen */
+#win-screen { align-items: center; justify-content: center; gap: 24px; position: relative; z-index: 1; }
+.win-emblem { font-size: 80px; animation: pulse 2s ease-in-out infinite; }
+.win-title { font-family: 'Cinzel Decorative', serif; font-size: 32px; color: var(--gold-light); text-shadow: 0 0 30px var(--gold); text-align: center; }
+.win-subtitle { font-family: 'Cinzel', serif; font-size: 16px; color: var(--text2); letter-spacing: 2px; text-align: center; }
+.win-scores { display: flex; gap: 32px; }
+.win-score-block { text-align: center; }
+.win-score-label { font-size: 12px; color: var(--text3); letter-spacing: 2px; }
+.win-score-num { font-family: 'Cinzel Decorative', serif; font-size: 40px; color: var(--gold-light); }
+
+/* Attunement panel */
+.attunement-panel { padding: 8px 14px; background: var(--bg3); border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.attunement-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; color: var(--text3); flex-shrink: 0; }
+
+/* Void Mage indicator */
+.void-mage-btn { font-size: 10px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--void-glow); color: var(--void-glow); background: transparent; cursor: pointer; font-family: 'Cinzel', serif; animation: voidPulse 1.5s ease-in-out infinite; }
+@keyframes voidPulse { 0%,100%{box-shadow:0 0 8px #c44dff40} 50%{box-shadow:0 0 20px #c44dff80} }
+
+/* Rules modal */
+.rules-section { margin-bottom: 16px; }
+.rules-section-title { font-family: 'Cinzel', serif; font-size: 14px; color: var(--gold-light); margin-bottom: 6px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+.rules-text { font-size: 12px; color: var(--text2); line-height: 1.6; }
+.rules-text li { margin: 4px 0 4px 16px; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="arcane-bg"></div>
+
+<!-- TITLE SCREEN -->
+<div id="title-screen" class="screen active">
+  <div class="title-emblem">⚗️</div>
+  <div class="title-main">MAGE CRAFT</div>
+  <div class="title-sub">The Elemental Duel</div>
+  <button class="btn-primary" onclick="showScreen('mage-screen')">Begin</button>
+  <button class="btn-secondary" onclick="showRules()">Rules</button>
+</div>
+
+<!-- MAGE SELECT SCREEN -->
+<div id="mage-screen" class="screen">
+  <div class="screen-header">
+    <div class="screen-title">Choose Your Mage</div>
+    <div class="screen-subtitle">Select your elemental affinity and Titan</div>
+  </div>
+  <div class="mage-grid" id="mage-grid"></div>
+  <div class="confirm-row">
+    <button class="btn-primary" id="start-game-btn" onclick="startGame()" disabled>Summon the Arena</button>
+    <button class="btn-secondary" onclick="showScreen('title-screen')">Back</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game-screen" class="screen">
+  <div class="game-layout">
+    <!-- Score Bar -->
+    <div class="score-bar">
+      <div class="player-score">
+        <div class="player-label">YOU</div>
+        <div class="score-num" id="player-score">0</div>
+        <div class="score-target">/ 50</div>
+        <div class="titan-badge" id="player-titan-badge">🔒 Locked</div>
+      </div>
+      <div class="score-divider">⚔</div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div class="turn-indicator">Turn <span id="turn-num">1</span></div>
+        <div id="void-mage-btn-container"></div>
+      </div>
+      <div class="score-divider">⚔</div>
+      <div class="player-score">
+        <div class="player-label">AI</div>
+        <div class="score-num" id="ai-score">0</div>
+        <div class="score-target">/ 50</div>
+        <div class="titan-badge" id="ai-titan-badge">🔒 Locked</div>
+      </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <div class="turn-indicator"><span id="current-turn-label">Your Turn</span></div>
+      <div class="phase-indicator" id="phase-label">Draw Phase</div>
+      <div class="item-tokens" id="player-tokens"></div>
+    </div>
+
+    <!-- Attunement -->
+    <div class="attunement-panel">
+      <div class="attunement-label">ATTUNEMENT</div>
+      <div class="attunement-row" id="attunement-display"></div>
+    </div>
+
+    <!-- AI Zone -->
+    <div class="ai-zone">
+      <div class="ai-label">AI HAND</div>
+      <div class="ai-hand-display" id="ai-hand-display"></div>
+      <div style="font-size:10px;color:var(--text3)" id="ai-streak-display"></div>
+    </div>
+
+    <!-- Spell Slots -->
+    <div class="slots-area">
+      <div class="slots-label">Spell Slots</div>
+      <div class="slots-row" id="slots-row"></div>
+    </div>
+
+    <!-- Message -->
+    <div class="message-area">
+      <div class="game-message" id="game-message">Draw your cards to begin.</div>
+    </div>
+
+    <!-- Hand -->
+    <div class="hand-area">
+      <div class="hand-label">YOUR HAND — <span id="cards-played-label">0/5 played</span></div>
+      <div class="hand-scroll" id="player-hand"></div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <button class="btn-action" id="btn-discard" onclick="discardSelected()">Discard</button>
+      <button class="btn-action primary" id="btn-play" onclick="playSelected()">Play Card</button>
+      <button class="btn-action" id="btn-end-turn" onclick="endPlayerTurn()">End Turn</button>
+      <button class="btn-action" onclick="showRules()">📖</button>
+    </div>
+  </div>
+</div>
+
+<!-- WIN SCREEN -->
+<div id="win-screen" class="screen">
+  <div class="win-emblem" id="win-emblem">🏆</div>
+  <div class="win-title" id="win-title">Victory!</div>
+  <div class="win-subtitle" id="win-subtitle">The elements bow to your mastery</div>
+  <div class="win-scores">
+    <div class="win-score-block">
+      <div class="win-score-label">YOU</div>
+      <div class="win-score-num" id="final-player-score">0</div>
+    </div>
+    <div class="win-score-block">
+      <div class="win-score-label">AI</div>
+      <div class="win-score-num" id="final-ai-score">0</div>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="showScreen('title-screen')">Play Again</button>
+</div>
+
+<!-- MODAL: Wild Declare -->
+<div class="modal-overlay" id="wild-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Declare Wild Card</div>
+    <div class="modal-subtitle" id="wild-modal-subtitle">Choose element and number</div>
+    <div id="wild-el-row" class="declare-elements"></div>
+    <div id="wild-num-grid" class="declare-grid"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeModal('wild-modal')">Cancel</button>
+      <button class="modal-btn confirm" onclick="confirmWild()">Declare</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Slot Target -->
+<div class="modal-overlay" id="slot-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="slot-modal-title">Choose Spell Slot</div>
+    <div class="modal-subtitle" id="slot-modal-subtitle"></div>
+    <div class="modal-options" id="slot-modal-options"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeModal('slot-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Token Use -->
+<div class="modal-overlay" id="token-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="token-modal-title">Use Item Token</div>
+    <div class="modal-subtitle" id="token-modal-subtitle"></div>
+    <div class="modal-options" id="token-modal-options"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeModal('token-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Rules -->
+<div class="modal-overlay" id="rules-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Mage Craft Rules</div>
+    <div id="rules-content"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn confirm" onclick="closeModal('rules-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Discard choose -->
+<div class="modal-overlay" id="discard-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="discard-modal-title">Discard Cards</div>
+    <div class="modal-subtitle">Choose up to 3 cards to discard (draw replacements)</div>
+    <div class="modal-options" id="discard-modal-hand"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeModal('discard-modal')">Cancel</button>
+      <button class="modal-btn confirm" onclick="confirmDiscard()">Discard Selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Summon Stone -->
+<div class="modal-overlay" id="summon-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Summon Stone</div>
+    <div class="modal-subtitle">Choose a card from the discard pile</div>
+    <div class="modal-options" id="summon-modal-options"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeModal('summon-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Earth Wolf Discard Search -->
+<div class="modal-overlay" id="wolf-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Forest Body — Stone Wolf</div>
+    <div class="modal-subtitle">Choose an Earth card from the discard pile to place as active card</div>
+    <div class="modal-options" id="wolf-modal-options"></div>
+    <div class="modal-btn-row">
+      <button class="modal-btn" onclick="closeModal('wolf-modal')">Skip</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// GAME DATA
+// ============================================================
+const ELEMENTS = ['fire','water','air','earth'];
+const ELEMENT_ICONS = { fire:'🔥', water:'💧', air:'🌪️', earth:'🌿', void:'⬛', none:'✦' };
+const ELEMENT_NAMES = { fire:'Fire', water:'Water', air:'Air', earth:'Earth', void:'Void', none:'—' };
+
+const MAGES = [
+  { id:'fire', element:'fire', name:'Fire Mage', titan:'Ash Dragon', icon:'🐉', color:'var(--fire-glow)',
+    ability15:'Flame Claw: Swap 1 Fire slot card with any card in hand.',
+    ability25:'Blazing Heart: Swap up to 3 Fire slot cards.' },
+  { id:'water', element:'water', name:'Water Mage', titan:'Frost Leviathan', icon:'🐋', color:'var(--water-glow)',
+    ability15:'Frost Bite: Once per turn after drawing, discard 1 and draw 1.',
+    ability25:'Frozen Soul: Discard up to 2, draw same amount.' },
+  { id:'air', element:'air', name:'Air Mage', titan:'Thunder Eagle', icon:'🦅', color:'var(--air-glow)',
+    ability15:'Storm Talon: Move top card of any slot to adjacent slot.',
+    ability25:'Storm Mind: Move top card of any slot to any other slot.' },
+  { id:'earth', element:'earth', name:'Earth Mage', titan:'Stone Wolf', icon:'🐺', color:'var(--earth-glow)',
+    ability15:"Forest Blessing: On clear, search cleared slot's discards for Earth card → place as active.",
+    ability25:'Forest Body: On clear, search full discard pile for Earth card → place as active.' }
+];
+
+const TOKENS = {
+  element: { name:'Arcane Lock', icon:'🔒', desc:'Lock a slot — opponent cannot change its element/number next turn.' },
+  number:  { name:'Null Sigil',  icon:'⚫', desc:'Clear a slot immediately (sent to discard, reloaded).' },
+  run:     { name:'Summon Stone',icon:'💎', desc:'Search discard pile for any 1 card, add to hand.' },
+  vertical:{ name:'Crystal Ball',icon:'🔮', desc:'Look at top 3 deck cards, take 1, return 2 in any order.' },
+  horizontal:{ name:'Chaos Rune',icon:'🌀', desc:'Opponent discards a random card, cannot replace until end of their next turn.' }
+};
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let G = {};
+
+function initState() {
+  G = {
+    deck: [], discard: [],
+    slots: Array(5).fill(null).map(()=>({ stack:[], lock:null, nulled:false })),
+    playerHand: [], aiHand: [],
+    playerScore: 0, aiScore: 0,
+    playerMage: null, aiMage: null,
+    playerTokens: [], aiTokens: [],
+    playerAttunement: { typeStreak:0, typeKind:null, methodStreak:0, methodKind:null },
+    aiAttunement: { typeStreak:0, typeKind:null, methodStreak:0, methodKind:null },
+    playerVoidQual: { element:false, number:false, run:false },
+    aiVoidQual: { element:false, number:false, run:false },
+    playerVoidUsed: false, aiVoidUsed: false,
+    playerChaosRune: false, // cannot draw replacement
+    aiChaosRune: false,
+    playerTitanLevel: 0, aiTitanLevel: 0, // 0=locked, 1=awakened, 2=enhanced
+    turn: 1, isPlayerTurn: true,
+    phase: 'draw', // draw, action, resolution, end
+    selectedCardIdx: null,
+    selectedSlotIdx: null,
+    cardsPlayedThisTurn: 0,
+    discardUsedThisTurn: false,
+    wildPending: null, // { cardIdx, forSlot }
+    wildDeclared: null, // { element, number }
+    tokenActionPending: null,
+    pendingSlotAction: null, // for token slot targeting
+    frostBiteUsed: false,
+    flameclawUsed: false,
+    stormTalonUsed: false,
+    wolfBlessingUsed: false,
+    pendingWolfSlot: null,
+    pendingCrystalCards: [],
+    aiChaosCooldown: false,
+    playerTitanAbilityUsed: false,
+  };
+}
+
+// ============================================================
+// DECK BUILDING
+// ============================================================
+function buildDeck() {
+  const cards = [];
+  // Spell Cards 40
+  for(const el of ELEMENTS) {
+    for(let n=1;n<=5;n++) {
+      cards.push({type:'spell',element:el,number:n});
+      cards.push({type:'spell',element:el,number:n});
+    }
+  }
+  // Wild Creature Cards 10
+  const wildCreatures = [
+    {type:'wild',element:'fire',name:'Wyvern'},
+    {type:'wild',element:'fire',name:'Wyvern'},
+    {type:'wild',element:'water',name:'Kelpie'},
+    {type:'wild',element:'water',name:'Kelpie'},
+    {type:'wild',element:'air',name:'Harpy'},
+    {type:'wild',element:'air',name:'Harpy'},
+    {type:'wild',element:'earth',name:'Golem'},
+    {type:'wild',element:'earth',name:'Golem'},
+    {type:'wild',element:'void',name:'Primal Spirit',isUltimate:true},
+    {type:'wild',element:'void',name:'Primal Spirit',isUltimate:true},
+  ];
+  wildCreatures.forEach(c=>cards.push({...c,number:null,declaredElement:null,declaredNumber:null}));
+  // Field Cards 10
+  for(const el of [...ELEMENTS,'void']) {
+    cards.push({type:'field',element:el,number:null});
+    cards.push({type:'field',element:el,number:null});
+  }
+  return shuffle(cards);
+}
+
+function shuffle(arr) {
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function drawCard() {
+  if(G.deck.length===0) reshuffleDeck();
+  return G.deck.pop();
+}
+
+function reshuffleDeck() {
+  G.deck = shuffle([...G.discard]);
+  G.discard = [];
+  showMessage('Discard pile reshuffled into draw deck.','');
+}
+
+// ============================================================
+// SLOT HELPERS
+// ============================================================
+function slotTop(slot) { return slot.stack.length ? slot.stack[slot.stack.length-1] : null; }
+function slotElement(slot) {
+  const t = slotTop(slot);
+  if(!t) return null;
+  if(t.type==='field') return t.element;
+  if(t.type==='wild') return t.declaredElement || null;
+  return t.element;
+}
+function slotNumber(slot) {
+  const t = slotTop(slot);
+  if(!t) return null;
+  if(t.type==='field') return null;
+  if(t.type==='wild') return t.declaredNumber || null;
+  return t.number;
+}
+function reloadSlot(idx) {
+  const c = drawCard();
+  c.declaredElement = null; c.declaredNumber = null;
+  G.slots[idx].stack = [c];
+}
+
+// ============================================================
+// PLACEMENT VALIDATION
+// ============================================================
+function canPlayCard(card, slotIdx) {
+  const slot = G.slots[slotIdx];
+  if(slot.lock && G.isPlayerTurn) return false; // locked by opponent
+  if(card.type==='field') return true;
+  if(card.type==='wild' && card.isUltimate) return true; // ultimate wild can go anywhere
+  const top = slotTop(slot);
+  if(!top) return true; // empty slot
+  const topEl = slotElement(slot);
+  const topNum = slotNumber(slot);
+  // Wild element card: can go if element matches
+  if(card.type==='wild') {
+    if(card.element==='void') return true;
+    if(topEl === card.element) return true;
+    if(topNum !== null) return true; // can match number by declaration
+    return false;
+  }
+  // Spell card: number match or element match
+  if(topEl === card.element) return true; // element switch
+  if(topNum !== null && topNum === card.number) return true; // number switch
+  return false;
+}
+
+function getPlayableSlots(card) {
+  return G.slots.map((_,i)=>i).filter(i=>canPlayCard(card,i));
+}
+
+// ============================================================
+// PLAYING A CARD
+// ============================================================
+function placeCard(card, slotIdx) {
+  const slot = G.slots[slotIdx];
+  // Void field card clears slot
+  if(card.type==='field' && card.element==='void') {
+    const cleared = slot.stack;
+    G.discard.push(...cleared);
+    reloadSlot(slotIdx);
+    return;
+  }
+  // Field card — changes element, removes number
+  if(card.type==='field') {
+    slot.stack.push({...card});
+    return;
+  }
+  slot.stack.push({...card});
+}
+
+// ============================================================
+// COMBO DETECTION
+// ============================================================
+function detectCombos() {
+  const results = [];
+  // Vertical combos (within each slot)
+  for(let i=0;i<5;i++) {
+    if(G.slots[i].nulled) continue;
+    const combos = detectVerticalCombos(G.slots[i].stack, i);
+    results.push(...combos);
+  }
+  // Horizontal combos
+  const hCombos = detectHorizontalCombos();
+  results.push(...hCombos);
+  return results;
+}
+
+function getCardEl(card) {
+  if(!card) return null;
+  if(card.type==='field') return card.element==='void'?null:card.element;
+  if(card.type==='wild') return card.declaredElement || card.element;
+  return card.element;
+}
+function getCardNum(card) {
+  if(!card) return null;
+  if(card.type==='field') return null;
+  if(card.type==='wild') return card.declaredNumber||null;
+  return card.number;
+}
+
+function detectVerticalCombos(stack, slotIdx) {
+  const combos = [];
+  if(stack.length < 3) return combos;
+  // Check all windows of 3,4,5
+  for(let len=5;len>=3;len--) {
+    for(let start=stack.length-len;start>=0;start--) {
+      const window = stack.slice(start, start+len);
+      const els = window.map(getCardEl);
+      const nums = window.map(getCardNum);
+      // Twin Ultimates (len 2+ but check whole stack)
+      if(len===2) continue;
+      // Element Chain
+      if(els.every(e=>e&&e===els[0])) {
+        const pts = len===3?3:len===4?4:5;
+        combos.push({type:'element-chain',len,pts,slotIdx,start,kind:'element',method:'vertical'});
+      }
+      // Number Chain
+      if(nums.every(n=>n!==null&&n===nums[0])) {
+        const pts = len===3?4:len===4?5:6;
+        combos.push({type:'number-chain',len,pts,slotIdx,start,kind:'number',method:'vertical'});
+      }
+      // Run
+      const validNums = nums.filter(n=>n!==null);
+      if(validNums.length===len && isConsecutive(validNums)) {
+        const pts = len===3?3:len===4?5:7;
+        combos.push({type:'run',len,pts,slotIdx,start,kind:'run',method:'vertical'});
+      }
+    }
+  }
+  // Twin Ultimates — both in same stack
+  const ultimates = stack.filter(c=>c.type==='wild'&&c.isUltimate);
+  if(ultimates.length>=2) {
+    combos.push({type:'twin-ultimates',len:2,pts:8,slotIdx,start:0,kind:'element',method:'vertical'});
+  }
+  return combos;
+}
+
+function isConsecutive(nums) {
+  const sorted = [...nums].sort((a,b)=>a-b);
+  for(let i=1;i<sorted.length;i++) if(sorted[i]!==sorted[i-1]+1) return false;
+  return true;
+}
+
+function detectHorizontalCombos() {
+  const combos = [];
+  const tops = G.slots.map(s=>slotTop(s));
+  const els = G.slots.map(s=>slotElement(s));
+  const nums = G.slots.map(s=>slotNumber(s));
+  // Check nulled slots
+  const active = G.slots.map((s,i)=>!s.nulled);
+  // Element rows (3,4,5 adjacent)
+  for(let len=5;len>=3;len--) {
+    for(let start=0;start<=5-len;start++) {
+      const idxs = Array.from({length:len},(_,i)=>start+i);
+      if(idxs.some(i=>!active[i])) continue;
+      const slEls = idxs.map(i=>els[i]);
+      if(slEls.every(e=>e&&e===slEls[0])) {
+        const pts = len===3?4:len===4?7:10;
+        combos.push({type:'element-row',len,pts,slotIdxs:idxs,kind:'element',method:'horizontal'});
+      }
+      const slNums = idxs.map(i=>nums[i]);
+      if(slNums.every(n=>n!==null&&n===slNums[0])) {
+        const pts = len===3?5:len===4?8:12;
+        combos.push({type:'number-row',len,pts,slotIdxs:idxs,kind:'number',method:'horizontal'});
+      }
+      if(slNums.every(n=>n!==null) && isConsecutive(slNums)) {
+        const pts = len===3?6:len===4?9:13;
+        combos.push({type:'number-run',len,pts,slotIdxs:idxs,kind:'run',method:'horizontal'});
+      }
+    }
+  }
+  // Elemental Set (Fire+Water+Air+Earth anywhere in top 4 of 5 slots)
+  const uniqueEls = new Set(els.filter(e=>e&&ELEMENTS.includes(e)));
+  if(uniqueEls.size===4) {
+    const idxs = ELEMENTS.map(el=>els.indexOf(el)).filter(i=>i>=0);
+    combos.push({type:'elemental-set',pts:8,slotIdxs:idxs,kind:'element',method:'horizontal'});
+  }
+  // Perfect Harmony: 4 same + ultimate wild on top
+  for(let len=4;len<=4;len++) {
+    for(let start=0;start<=5-len;start++) {
+      const idxs = Array.from({length:len+1},(_,i)=>start+i).filter(i=>i<5);
+      if(idxs.length<5) continue;
+      const hasFourSame = (() => {
+        for(const el of ELEMENTS) {
+          const matching = idxs.filter(i=>els[i]===el);
+          if(matching.length>=4) {
+            const remaining = idxs.filter(i=>els[i]!==el);
+            if(remaining.length===1 && tops[remaining[0]] && tops[remaining[0]].type==='wild' && tops[remaining[0]].isUltimate) return true;
+          }
+        }
+        return false;
+      })();
+      if(hasFourSame) combos.push({type:'perfect-harmony',pts:11,slotIdxs:idxs,kind:'element',method:'horizontal'});
+    }
+  }
+  return combos;
+}
+
+// ============================================================
+// SCORING
+// ============================================================
+function scoreCombo(combo, isPlayer) {
+  let pts = combo.pts;
+  // Dragon enhanced ability fires from dragon passive not here
+  if(isPlayer && G.playerMage.id==='fire' && G.playerTitanLevel>=1 && combo.kind==='element' && combo.method==='horizontal') {
+    // Dragon doesn't add pts in this version — ability is active swap
+  }
+  if(isPlayer) G.playerScore += pts;
+  else G.aiScore += pts;
+
+  // Attunement tracking
+  updateAttunement(isPlayer, combo.kind, combo.method);
+  // Void qual tracking
+  updateVoidQual(isPlayer, combo);
+
+  // Clear scored slots
+  if(combo.slotIdxs) {
+    const uniqueSlots = [...new Set(combo.slotIdxs)];
+    uniqueSlots.forEach(i=>clearSlot(i, isPlayer));
+  } else if(combo.slotIdx !== undefined) {
+    clearSlot(combo.slotIdx, isPlayer);
+  }
+
+  // Check titan awakening
+  checkTitanLevel(isPlayer);
+  checkWin();
+}
+
+function clearSlot(idx, isPlayer) {
+  const slot = G.slots[idx];
+  G.discard.push(...slot.stack);
+  slot.stack = [];
+  slot.lock = null;
+  slot.nulled = false;
+  // Wolf ability
+  if(isPlayer && G.playerMage.id==='earth' && G.playerTitanLevel>=1 && !G.wolfBlessingUsed) {
+    triggerWolfBlessing(idx);
+    return;
+  }
+  reloadSlot(idx);
+}
+
+function triggerWolfBlessing(slotIdx) {
+  G.pendingWolfSlot = slotIdx;
+  // Find earth cards in discard
+  const pool = G.playerTitanLevel>=2 ? G.discard : G.discard; // both levels use discard (blessing uses cleared slot cards which are now in discard)
+  const earthCards = G.discard.filter(c=>getCardEl(c)==='earth');
+  if(earthCards.length===0) { reloadSlot(slotIdx); return; }
+  const opts = document.getElementById('wolf-modal-options');
+  opts.innerHTML = '';
+  earthCards.forEach((card,i)=>{
+    const div = document.createElement('div');
+    div.className = 'modal-option';
+    div.innerHTML = `<div class="modal-option-title">${cardLabel(card)}</div>`;
+    div.onclick = ()=>{
+      // Remove from discard
+      const realIdx = G.discard.lastIndexOf(card);
+      if(realIdx>=0) G.discard.splice(realIdx,1);
+      G.slots[slotIdx].stack = [{...card}];
+      G.wolfBlessingUsed = true;
+      closeModal('wolf-modal');
+      render();
+    };
+    opts.appendChild(div);
+  });
+  openModal('wolf-modal');
+}
+
+function updateAttunement(isPlayer, kind, method) {
+  const att = isPlayer ? G.playerAttunement : G.aiAttunement;
+  const tokenList = isPlayer ? G.playerTokens : G.aiTokens;
+
+  // Type streak
+  if(att.typeKind===kind) {
+    att.typeStreak++;
+  } else {
+    att.typeStreak = 1; att.typeKind = kind;
+  }
+  if(att.typeStreak>=3) {
+    awardToken(isPlayer, kind, tokenList);
+    att.typeStreak = 0;
+  }
+
+  // Method streak
+  if(att.methodKind===method) {
+    att.methodStreak++;
+  } else {
+    att.methodStreak = 1; att.methodKind = method;
+  }
+  if(att.methodStreak>=3) {
+    awardToken(isPlayer, method, tokenList);
+    att.methodStreak = 0;
+  }
+}
+
+function awardToken(isPlayer, tokenType, tokenList) {
+  if(tokenList.length>=2) {
+    tokenList.shift(); // discard oldest
+  }
+  tokenList.push(tokenType);
+  if(isPlayer) showMessage(`✨ Attunement! Earned: ${TOKENS[tokenType].name}`, 'success');
+}
+
+function updateVoidQual(isPlayer, combo) {
+  const qual = isPlayer ? G.playerVoidQual : G.aiVoidQual;
+  if(['element-chain','element-row','elemental-set','perfect-harmony'].includes(combo.type)) {
+    if(combo.len===5 || combo.type==='elemental-set' || combo.type==='perfect-harmony') qual.element = true;
+  }
+  if(['number-chain','number-row'].includes(combo.type) && combo.len===5) qual.number = true;
+  if(['run','number-run'].includes(combo.type) && combo.len===5) qual.run = true;
+}
+
+function checkTitanLevel(isPlayer) {
+  const score = isPlayer ? G.playerScore : G.aiScore;
+  const prev = isPlayer ? G.playerTitanLevel : G.aiTitanLevel;
+  let level = 0;
+  if(score>=25) level=2; else if(score>=15) level=1;
+  if(level>prev) {
+    if(isPlayer) G.playerTitanLevel=level;
+    else G.aiTitanLevel=level;
+    const mage = isPlayer ? G.playerMage : G.aiMage;
+    const msg = level===2 ? `🌟 ${mage.titan} enhanced! (${mage.ability25})` : `⚡ ${mage.titan} awakened! (${mage.ability15})`;
+    showMessage(msg, 'success');
+  }
+}
+
+function checkWin() {
+  if(G.playerScore>=50) { showWin(true); return true; }
+  if(G.aiScore>=50) { showWin(false); return true; }
+  return false;
+}
+
+// ============================================================
+// MAGE SELECT UI
+// ============================================================
+function renderMageSelect() {
+  const grid = document.getElementById('mage-grid');
+  grid.innerHTML = '';
+  MAGES.forEach(m=>{
+    const div = document.createElement('div');
+    div.className = `mage-card${G.aiMage&&G.aiMage.id===m.id?' disabled':''}`;
+    div.dataset.element = m.element;
+    div.dataset.id = m.id;
+    div.innerHTML = `
+      <div class="mage-icon">${m.icon}</div>
+      <div class="mage-name">${m.name}</div>
+      <div class="mage-titan">${m.titan}</div>
+      <div class="mage-ability" style="color:${m.color}">${m.ability15}</div>
+      <div class="mage-ability" style="color:var(--text3);margin-top:2px">${m.ability25}</div>
+    `;
+    div.onclick = ()=>{
+      document.querySelectorAll('.mage-card').forEach(c=>c.classList.remove('selected'));
+      div.classList.add('selected');
+      G.playerMage = m;
+      document.getElementById('start-game-btn').disabled = false;
+    };
+    grid.appendChild(div);
+  });
+}
+
+// ============================================================
+// GAME START
+// ============================================================
+function startGame() {
+  if(!G.playerMage) return;
+  // AI picks a different mage
+  const available = MAGES.filter(m=>m.id!==G.playerMage.id);
+  G.aiMage = available[Math.floor(Math.random()*available.length)];
+  // Build and deal
+  G.deck = buildDeck();
+  for(let i=0;i<5;i++) G.playerHand.push(drawCard());
+  for(let i=0;i<5;i++) G.aiHand.push(drawCard());
+  // Initial slot load
+  for(let i=0;i<5;i++) reloadSlot(i);
+  showScreen('game-screen');
+  G.isPlayerTurn = Math.random()<0.5;
+  if(G.isPlayerTurn) {
+    G.phase = 'action';
+    showMessage("Your turn! Play cards or end your turn.",'');
+  } else {
+    showMessage("AI goes first...",'');
+    setTimeout(()=>doAiTurn(), 1000);
+  }
+  render();
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  renderScores();
+  renderSlots();
+  renderPlayerHand();
+  renderAiHand();
+  renderAttunement();
+  renderTokens();
+  renderVoidMageBtn();
+  renderActionBar();
+  document.getElementById('turn-num').textContent = G.turn;
+  document.getElementById('current-turn-label').textContent = G.isPlayerTurn ? 'Your Turn' : "AI's Turn";
+  document.getElementById('phase-label').textContent = phaseLabel();
+  document.getElementById('cards-played-label').textContent = `${G.cardsPlayedThisTurn}/5 played`;
+}
+
+function phaseLabel() {
+  if(!G.isPlayerTurn) return 'AI Thinking...';
+  return G.phase==='action' ? 'Action Phase' : G.phase==='draw' ? 'Draw Phase' : 'Resolution';
+}
+
+function renderScores() {
+  document.getElementById('player-score').textContent = G.playerScore;
+  document.getElementById('ai-score').textContent = G.aiScore;
+  const pb = document.getElementById('player-titan-badge');
+  const ab = document.getElementById('ai-titan-badge');
+  const renderBadge = (el, mage, level) => {
+    if(!mage) return;
+    if(level===0) { el.textContent='🔒 Locked'; el.className='titan-badge'; }
+    else if(level===1) { el.textContent=`⚡ ${mage.icon} Awakened`; el.className='titan-badge awakened'; }
+    else { el.textContent=`🌟 ${mage.icon} Enhanced`; el.className='titan-badge enhanced'; }
+  };
+  if(G.playerMage) renderBadge(pb, G.playerMage, G.playerTitanLevel);
+  if(G.aiMage) renderBadge(ab, G.aiMage, G.aiTitanLevel);
+}
+
+function renderSlots() {
+  const row = document.getElementById('slots-row');
+  row.innerHTML = '';
+  G.slots.forEach((slot,i)=>{
+    const div = document.createElement('div');
+    div.className = 'spell-slot';
+    if(slot.lock) div.classList.add('locked');
+    if(slot.nulled) div.classList.add('nulled');
+    if(G.selectedSlotIdx===i) div.classList.add('selected-slot');
+
+    const top = slotTop(slot);
+    const el = slotElement(slot);
+    const num = slotNumber(slot);
+
+    if(top) {
+      if(top.type==='wild' && !top.declaredElement && !top.declaredNumber) {
+        div.innerHTML=`<div class="slot-element-display el-void">WILD</div><div class="slot-stack-count">Stack: ${slot.stack.length}</div>`;
+      } else if(top.type==='field') {
+        div.innerHTML=`<div style="font-size:20px">${ELEMENT_ICONS[top.element]}</div><div class="slot-element-display el-${el}">${ELEMENT_NAMES[el]||'—'}</div><div class="slot-stack-count">Field • ${slot.stack.length}</div>`;
+      } else {
+        div.innerHTML=`<div class="slot-number-display el-${el}">${num||'?'}</div><div style="font-size:14px">${ELEMENT_ICONS[el]||''}</div><div class="slot-element-display el-${el}">${ELEMENT_NAMES[el]||'—'}</div><div class="slot-stack-count">Stack: ${slot.stack.length}</div>`;
+      }
+    } else {
+      div.innerHTML=`<div class="slot-empty-label">Empty</div>`;
+    }
+    if(slot.lock) div.innerHTML+=`<div class="slot-lock-icon">🔒</div>`;
+    if(slot.nulled) div.innerHTML+=`<div class="slot-lock-icon">⚫</div>`;
+
+    div.onclick = ()=>handleSlotClick(i);
+    row.appendChild(div);
+  });
+}
+
+function renderPlayerHand() {
+  const hand = document.getElementById('player-hand');
+  hand.innerHTML = '';
+  G.playerHand.forEach((card,i)=>{
+    const div = document.createElement('div');
+    div.className = `card ${card.element}-card${card.type==='wild'?' wild-card':''}`;
+    if(G.selectedCardIdx===i) div.classList.add('selected');
+    div.innerHTML = cardInnerHTML(card);
+    div.onclick = ()=>handleCardClick(i);
+    hand.appendChild(div);
+  });
+}
+
+function cardInnerHTML(card) {
+  if(card.type==='field') {
+    return `<div class="card-icon">${ELEMENT_ICONS[card.element]}</div><div class="card-element el-${card.element}">Field</div><div class="card-type-label">${ELEMENT_NAMES[card.element]}</div>`;
+  }
+  if(card.type==='wild') {
+    const el = card.declaredElement||card.element;
+    const num = card.declaredNumber||'?';
+    const label = card.isUltimate ? 'Primal' : card.name||'Wild';
+    return `<div class="card-corner">${ELEMENT_ICONS[el]}</div><div class="card-number el-${el}">${num}</div><div class="card-element el-${el}">${card.isUltimate?'Primal':'Wild'}</div><div class="card-type-label">${label}</div>`;
+  }
+  return `<div class="card-corner">${ELEMENT_ICONS[card.element]}</div><div class="card-number el-${card.element}">${card.number}</div><div class="card-icon" style="font-size:14px">${ELEMENT_ICONS[card.element]}</div><div class="card-element el-${card.element}">${ELEMENT_NAMES[card.element]}</div>`;
+}
+
+function cardLabel(card) {
+  if(card.type==='field') return `${ELEMENT_ICONS[card.element]} ${ELEMENT_NAMES[card.element]} Field`;
+  if(card.type==='wild') return card.isUltimate ? `⬛ Primal Spirit (Wild)` : `${ELEMENT_ICONS[card.element]} ${card.name} (Wild)`;
+  return `${ELEMENT_ICONS[card.element]} ${ELEMENT_NAMES[card.element]} ${card.number}`;
+}
+
+function renderAiHand() {
+  const area = document.getElementById('ai-hand-display');
+  area.innerHTML = '';
+  for(let i=0;i<G.aiHand.length;i++) {
+    const div = document.createElement('div');
+    div.className = 'ai-card-back';
+    area.appendChild(div);
+  }
+  const str = document.getElementById('ai-streak-display');
+  str.textContent = `T:${G.aiAttunement.typeStreak} M:${G.aiAttunement.methodStreak}`;
+}
+
+function renderAttunement() {
+  const d = document.getElementById('attunement-display');
+  d.innerHTML = '';
+  const att = G.playerAttunement;
+  const makeStreak = (label, val, kind) => {
+    const span = document.createElement('span');
+    span.className = `streak-badge${val>=2?' active':''}${val>=3?' ready':''}`;
+    span.textContent = `${label}: ${val}/3`;
+    d.appendChild(span);
+  };
+  if(att.typeKind) makeStreak(att.typeKind.charAt(0).toUpperCase()+att.typeKind.slice(1), att.typeStreak, att.typeKind);
+  if(att.methodKind) makeStreak(att.methodKind.charAt(0).toUpperCase()+att.methodKind.slice(1), att.methodStreak, att.methodKind);
+  // Void qual
+  const qual = G.playerVoidQual;
+  if(qual.element||qual.number||qual.run) {
+    const span = document.createElement('span');
+    span.className = 'streak-badge';
+    span.style.color='var(--void-glow)';
+    span.textContent = `Void: ${qual.element?'El ':''}${qual.number?'Num ':''}${qual.run?'Run':''}`;
+    d.appendChild(span);
+  }
+}
+
+function renderTokens() {
+  const d = document.getElementById('player-tokens');
+  d.innerHTML = '';
+  G.playerTokens.forEach((tok,i)=>{
+    const btn = document.createElement('div');
+    btn.className = 'token-chip';
+    btn.title = TOKENS[tok].name;
+    btn.textContent = TOKENS[tok].icon;
+    btn.onclick = ()=>useToken(i);
+    d.appendChild(btn);
+  });
+}
+
+function renderVoidMageBtn() {
+  const c = document.getElementById('void-mage-btn-container');
+  c.innerHTML = '';
+  const qual = G.playerVoidQual;
+  if(!G.playerVoidUsed && qual.element && qual.number && qual.run) {
+    const btn = document.createElement('button');
+    btn.className = 'void-mage-btn';
+    btn.textContent = '⬛ Void Mage';
+    btn.onclick = ()=>activateVoidMage();
+    c.appendChild(btn);
+  }
+}
+
+function renderActionBar() {
+  const isPlayer = G.isPlayerTurn;
+  document.getElementById('btn-play').disabled = !isPlayer || G.selectedCardIdx===null || G.cardsPlayedThisTurn>=5 || G.phase!=='action';
+  document.getElementById('btn-discard').disabled = !isPlayer || G.phase!=='action';
+  document.getElementById('btn-end-turn').disabled = !isPlayer || G.phase!=='action';
+}
+
+// ============================================================
+// PLAYER INTERACTIONS
+// ============================================================
+function handleCardClick(idx) {
+  if(!G.isPlayerTurn || G.phase!=='action') return;
+  G.selectedCardIdx = G.selectedCardIdx===idx ? null : idx;
+  G.selectedSlotIdx = null;
+  render();
+  if(G.selectedCardIdx!==null) showMessage('Now tap a Spell Slot to play this card.','');
+  else showMessage('','');
+}
+
+function handleSlotClick(slotIdx) {
+  if(!G.isPlayerTurn || G.phase!=='action') return;
+  if(G.selectedCardIdx===null) {
+    showMessage('Select a card from your hand first.','error');
+    return;
+  }
+  const card = G.playerHand[G.selectedCardIdx];
+  if(!canPlayCard(card, slotIdx)) {
+    showMessage('Cannot play that card here. Check placement rules.','error');
+    return;
+  }
+  // Wild needs declaration?
+  if(card.type==='wild' && (!card.declaredElement || !card.declaredNumber)) {
+    G.wildPending = { cardIdx: G.selectedCardIdx, forSlot: slotIdx };
+    openWildModal(card);
+    return;
+  }
+  commitPlay(G.selectedCardIdx, slotIdx);
+}
+
+function commitPlay(cardIdx, slotIdx) {
+  const card = G.playerHand.splice(cardIdx,1)[0];
+  G.selectedCardIdx = null;
+  placeCard(card, slotIdx);
+  G.cardsPlayedThisTurn++;
+
+  // Check combos
+  const combos = detectCombos();
+  if(combos.length>0) {
+    combos.forEach(c=>{
+      showComboFlash(c);
+      scoreCombo(c, true);
+    });
+    if(checkWin()) return;
+  }
+
+  // Titan: Fire — Flame Claw (active ability, handled via titan btn, not auto)
+  // Eagle: Storm Talon — handled via button
+  render();
+  showMessage(`Card played. ${5-G.cardsPlayedThisTurn} plays remaining.`,'');
+}
+
+function playSelected() {
+  // Try Titan ability if applicable
+  if(G.selectedCardIdx===null && G.playerMage.id==='fire' && G.playerTitanLevel>=1 && !G.flameclawUsed) {
+    triggerFlameClawUI();
+    return;
+  }
+  if(G.selectedCardIdx===null) { showMessage('Select a card first.','error'); return; }
+  // Find valid slots
+  const card = G.playerHand[G.selectedCardIdx];
+  const validSlots = getPlayableSlots(card);
+  if(validSlots.length===0) { showMessage('No valid slots for this card.','error'); return; }
+  if(validSlots.length===1) { handleSlotClick(validSlots[0]); return; }
+  // Show slot picker if needed
+  showSlotPicker('Play Card', 'Choose a Spell Slot', validSlots, (si)=>{
+    closeModal('slot-modal');
+    handleSlotClick(si);
+  });
+}
+
+function discardSelected() {
+  if(!G.isPlayerTurn || G.phase!=='action') return;
+  // Show discard modal with hand
+  const opts = document.getElementById('discard-modal-hand');
+  opts.innerHTML = '';
+  let selected = [];
+  G.playerHand.forEach((card,i)=>{
+    const div = document.createElement('div');
+    div.className = 'modal-option';
+    div.innerHTML = `<div class="modal-option-title">${cardLabel(card)}</div>`;
+    div.onclick = ()=>{
+      if(selected.includes(i)) {
+        selected = selected.filter(x=>x!==i);
+        div.style.borderColor='var(--border2)';
+      } else if(selected.length<3) {
+        selected.push(i);
+        div.style.borderColor='var(--gold)';
+      }
+    };
+    opts.appendChild(div);
+  });
+  G._pendingDiscardSelected = ()=>selected;
+  openModal('discard-modal');
+}
+
+function confirmDiscard() {
+  const selected = G._pendingDiscardSelected ? G._pendingDiscardSelected() : [];
+  if(selected.length===0) { closeModal('discard-modal'); return; }
+  const sorted = [...selected].sort((a,b)=>b-a);
+  sorted.forEach(i=>{ G.discard.push(G.playerHand.splice(i,1)[0]); });
+  // Draw replacements
+  for(let i=0;i<sorted.length;i++) { if(G.deck.length||G.discard.length) G.playerHand.push(drawCard()); }
+  closeModal('discard-modal');
+  render();
+  showMessage(`Discarded ${sorted.length} card(s) and drew replacements.`,'');
+}
+
+// ============================================================
+// TITAN ABILITIES - PLAYER
+// ============================================================
+function triggerFlameClawUI() {
+  if(G.flameclawUsed) { showMessage('Flame Claw already used this turn.','error'); return; }
+  const fireSlots = G.slots.map((s,i)=>i).filter(i=>slotElement(G.slots[i])==='fire');
+  if(fireSlots.length===0) { showMessage('No Fire slots available.','error'); return; }
+  const maxSwaps = G.playerTitanLevel>=2 ? 3 : 1;
+  showSlotPicker('Flame Claw', `Swap a Fire slot card with a hand card (up to ${maxSwaps})`, fireSlots, (si)=>{
+    closeModal('slot-modal');
+    // Choose hand card to swap in
+    showHandPicker('Choose card from hand to place in slot', (hi)=>{
+      const slotCard = slotTop(G.slots[si]);
+      const handCard = G.playerHand.splice(hi,1)[0];
+      G.slots[si].stack[G.slots[si].stack.length-1] = handCard;
+      G.playerHand.push(slotCard);
+      G.flameclawUsed = true;
+      render();
+      showMessage('Flame Claw used! Card swapped.','success');
+    });
+  });
+}
+
+function triggerStormTalonUI() {
+  if(G.stormTalonUsed) { showMessage('Storm Talon already used this turn.','error'); return; }
+  const nonEmpty = G.slots.map((s,i)=>i).filter(i=>G.slots[i].stack.length>0);
+  if(nonEmpty.length<2) { showMessage('Need at least 2 non-empty slots.','error'); return; }
+  showSlotPicker('Storm Talon', 'Choose slot to move top card FROM', nonEmpty, (fromIdx)=>{
+    closeModal('slot-modal');
+    const maxDist = G.playerTitanLevel>=2 ? 4 : 1;
+    const valid = G.slots.map((_,i)=>i).filter(i=>i!==fromIdx && Math.abs(i-fromIdx)<=maxDist);
+    showSlotPicker('Storm Talon', 'Move top card TO this slot', valid, (toIdx)=>{
+      closeModal('slot-modal');
+      const card = G.slots[fromIdx].stack.pop();
+      G.slots[toIdx].stack.push(card);
+      if(G.slots[fromIdx].stack.length===0) reloadSlot(fromIdx);
+      G.stormTalonUsed = true;
+      render();
+      showMessage('Storm Talon used!','success');
+    });
+  });
+}
+
+function triggerFrostBiteUI() {
+  if(G.frostBiteUsed) { showMessage('Frost Bite already used this turn.','error'); return; }
+  const max = G.playerTitanLevel>=2 ? 2 : 1;
+  // Discard up to max cards and draw
+  const opts = document.getElementById('discard-modal-hand');
+  opts.innerHTML = '';
+  document.getElementById('discard-modal-title').textContent = `Frost Bite — Discard & Draw (up to ${max})`;
+  let selected = [];
+  G.playerHand.forEach((card,i)=>{
+    const div = document.createElement('div');
+    div.className = 'modal-option';
+    div.innerHTML = `<div class="modal-option-title">${cardLabel(card)}</div>`;
+    div.onclick = ()=>{
+      if(selected.includes(i)) {
+        selected = selected.filter(x=>x!==i);
+        div.style.borderColor='var(--border2)';
+      } else if(selected.length<max) {
+        selected.push(i);
+        div.style.borderColor='var(--gold)';
+      }
+    };
+    opts.appendChild(div);
+  });
+  G._pendingDiscardSelected = ()=>selected;
+  G._discardConfirmHook = ()=>{
+    const s = selected;
+    const sorted=[...s].sort((a,b)=>b-a);
+    sorted.forEach(i=>G.discard.push(G.playerHand.splice(i,1)[0]));
+    for(let i=0;i<sorted.length;i++) G.playerHand.push(drawCard());
+    G.frostBiteUsed = true;
+    closeModal('discard-modal');
+    document.getElementById('discard-modal-title').textContent='Discard Cards';
+    render();
+    showMessage('Frost Bite used!','success');
+  };
+  openModal('discard-modal');
+}
+
+function confirmDiscard() {
+  if(G._discardConfirmHook) { G._discardConfirmHook(); G._discardConfirmHook=null; return; }
+  const selected = G._pendingDiscardSelected ? G._pendingDiscardSelected() : [];
+  if(selected.length===0) { closeModal('discard-modal'); return; }
+  const sorted=[...selected].sort((a,b)=>b-a);
+  sorted.forEach(i=>G.discard.push(G.playerHand.splice(i,1)[0]));
+  for(let i=0;i<sorted.length;i++) if(G.deck.length||G.discard.length) G.playerHand.push(drawCard());
+  closeModal('discard-modal');
+  render();
+  showMessage(`Discarded ${sorted.length} card(s) and drew replacements.`,'');
+}
+
+// ============================================================
+// TOKEN USAGE
+// ============================================================
+function useToken(tokenIdx) {
+  if(!G.isPlayerTurn || G.phase!=='action') { showMessage('Can only use tokens on your turn.','error'); return; }
+  const tokenType = G.playerTokens[tokenIdx];
+  const tok = TOKENS[tokenType];
+  switch(tokenType) {
+    case 'element': // Arcane Lock
+      showSlotPicker('Arcane Lock', 'Lock this slot for opponent\'s next turn', G.slots.map((_,i)=>i), (si)=>{
+        G.slots[si].lock = true;
+        G.playerTokens.splice(tokenIdx,1);
+        closeModal('slot-modal');
+        render();
+        showMessage('🔒 Slot locked! Opponent cannot change it next turn.','success');
+      });
+      break;
+    case 'number': // Null Sigil — clears slot
+      showSlotPicker('Null Sigil', 'Clear this Spell Slot immediately', G.slots.map((_,i)=>i), (si)=>{
+        const cleared = G.slots[si].stack;
+        G.discard.push(...cleared);
+        G.slots[si].stack=[];
+        reloadSlot(si);
+        G.playerTokens.splice(tokenIdx,1);
+        closeModal('slot-modal');
+        render();
+        showMessage('⚫ Null Sigil — slot cleared!','success');
+      });
+      break;
+    case 'run': // Summon Stone
+      {
+        const earthCards = G.discard.filter(c=>true); // all discard
+        if(G.discard.length===0) { showMessage('Discard pile is empty.','error'); return; }
+        const opts = document.getElementById('summon-modal-options');
+        opts.innerHTML='';
+        // Show unique cards
+        const shown = G.discard.slice(-20);
+        shown.forEach((card,i)=>{
+          const div=document.createElement('div');
+          div.className='modal-option';
+          div.innerHTML=`<div class="modal-option-title">${cardLabel(card)}</div>`;
+          div.onclick=()=>{
+            const ri=G.discard.lastIndexOf(card);
+            if(ri>=0) G.discard.splice(ri,1);
+            G.playerHand.push({...card});
+            G.playerTokens.splice(tokenIdx,1);
+            closeModal('summon-modal');
+            render();
+            showMessage('💎 Summon Stone — card retrieved!','success');
+          };
+          opts.appendChild(div);
+        });
+        openModal('summon-modal');
+      }
+      break;
+    case 'vertical': // Crystal Ball
+      {
+        const top3=[];
+        for(let i=0;i<3&&(G.deck.length||G.discard.length);i++) top3.push(drawCard());
+        G.pendingCrystalCards = top3;
+        const opts = document.getElementById('summon-modal-options');
+        opts.innerHTML='';
+        document.querySelector('#summon-modal .modal-title').textContent='Crystal Ball';
+        document.querySelector('#summon-modal .modal-subtitle').textContent='Add one card to your hand, return the rest';
+        top3.forEach((card,i)=>{
+          const div=document.createElement('div');
+          div.className='modal-option';
+          div.innerHTML=`<div class="modal-option-title">${cardLabel(card)}</div>`;
+          div.onclick=()=>{
+            G.playerHand.push({...card});
+            const rest=top3.filter((_,j)=>j!==i);
+            // Return 2 in any order — just put back on deck bottom for simplicity
+            rest.reverse().forEach(c=>G.deck.unshift(c));
+            G.playerTokens.splice(tokenIdx,1);
+            closeModal('summon-modal');
+            document.querySelector('#summon-modal .modal-title').textContent='Summon Stone';
+            document.querySelector('#summon-modal .modal-subtitle').textContent='Choose a card from the discard pile';
+            render();
+            showMessage('🔮 Crystal Ball used!','success');
+          };
+          opts.appendChild(div);
+        });
+        openModal('summon-modal');
+      }
+      break;
+    case 'horizontal': // Chaos Rune
+      if(G.aiHand.length===0) { showMessage('AI has no cards.','error'); return; }
+      {
+        const randIdx=Math.floor(Math.random()*G.aiHand.length);
+        const discarded=G.aiHand.splice(randIdx,1)[0];
+        G.discard.push(discarded);
+        G.aiChaosCooldown=true;
+        G.playerTokens.splice(tokenIdx,1);
+        render();
+        showMessage(`🌀 Chaos Rune! Discarded AI\'s ${cardLabel(discarded)}. AI cannot replace until end of their turn.`,'success');
+      }
+      break;
+  }
+}
+
+// ============================================================
+// VOID MAGE
+// ============================================================
+function activateVoidMage() {
+  if(G.playerVoidUsed) return;
+  if(!G.isPlayerTurn || G.phase!=='action') { showMessage('Declare Void Mage at the start of your turn.','error'); return; }
+  // Board wipe + 25 pts
+  G.playerHand.forEach(c=>G.discard.push(c));
+  G.aiHand.forEach(c=>G.discard.push(c));
+  G.playerHand=[];
+  G.aiHand=[];
+  for(let i=0;i<5;i++) { G.discard.push(...G.slots[i].stack); G.slots[i].stack=[]; }
+  for(let i=0;i<5;i++) reloadSlot(i);
+  G.playerScore+=25;
+  G.playerVoidUsed=true;
+  // Reset attunement streaks
+  G.playerAttunement={typeStreak:0,typeKind:null,methodStreak:0,methodKind:null};
+  // Redraw hands
+  for(let i=0;i<5;i++) { if(G.deck.length||G.discard.length) G.playerHand.push(drawCard()); }
+  for(let i=0;i<5;i++) { if(G.deck.length||G.discard.length) G.aiHand.push(drawCard()); }
+  checkTitanLevel(true);
+  if(!checkWin()) {
+    showMessage('⬛ VOID MAGE ACTIVATED! Board cleared. +25 Points!','success');
+    render();
+  }
+}
+
+// ============================================================
+// WILD CARD MODAL
+// ============================================================
+function openWildModal(card) {
+  const elRow = document.getElementById('wild-el-row');
+  const numGrid = document.getElementById('wild-num-grid');
+  const subtitle = document.getElementById('wild-modal-subtitle');
+  elRow.innerHTML=''; numGrid.innerHTML='';
+  const els = card.isUltimate ? [...ELEMENTS] : [card.element];
+  subtitle.textContent = card.isUltimate ? 'Choose element and number' : `${card.name}: Choose number`;
+  G._wildChosenEl = card.isUltimate ? null : card.element;
+  G._wildChosenNum = null;
+
+  if(card.isUltimate) {
+    els.forEach(el=>{
+      const btn=document.createElement('div');
+      btn.className='declare-el';
+      btn.style.color=`var(--${el}-glow)`;
+      btn.innerHTML=`${ELEMENT_ICONS[el]}<br><span style="font-size:10px">${ELEMENT_NAMES[el]}</span>`;
+      btn.onclick=()=>{
+        document.querySelectorAll('.declare-el').forEach(b=>b.style.borderColor='var(--border2)');
+        btn.style.borderColor='var(--gold)';
+        G._wildChosenEl=el;
+      };
+      elRow.appendChild(btn);
+    });
+  }
+
+  for(let n=1;n<=5;n++) {
+    const btn=document.createElement('div');
+    btn.className='declare-btn';
+    btn.textContent=n;
+    btn.onclick=()=>{
+      document.querySelectorAll('.declare-btn').forEach(b=>b.style.borderColor='var(--border2)');
+      btn.style.borderColor='var(--gold)';
+      G._wildChosenNum=n;
+    };
+    numGrid.appendChild(btn);
+  }
+  openModal('wild-modal');
+}
+
+function confirmWild() {
+  if(!G._wildChosenEl || !G._wildChosenNum) { showMessage('Choose both element and number.','error'); return; }
+  const {cardIdx,forSlot}=G.wildPending;
+  G.playerHand[cardIdx].declaredElement=G._wildChosenEl;
+  G.playerHand[cardIdx].declaredNumber=G._wildChosenNum;
+  closeModal('wild-modal');
+  commitPlay(cardIdx, forSlot);
+}
+
+// ============================================================
+// END TURN
+// ============================================================
+function endPlayerTurn() {
+  if(!G.isPlayerTurn) return;
+  // Clear slot locks/nulls from this turn that were set by opponent (they lasted 1 opponent turn)
+  G.slots.forEach(s=>{ s.lock=false; s.nulled=false; });
+  G.isPlayerTurn=false;
+  G.turn++;
+  G.cardsPlayedThisTurn=0;
+  G.flameclawUsed=false; G.frostBiteUsed=false; G.stormTalonUsed=false; G.wolfBlessingUsed=false;
+  G.playerTitanAbilityUsed=false;
+  G.phase='action';
+  render();
+  showMessage("AI is thinking...",'');
+  setTimeout(()=>doAiTurn(), 800);
+}
+
+// ============================================================
+// AI TURN
+// ============================================================
+function doAiTurn() {
+  // Draw
+  while(G.aiHand.length<5 && !G.aiChaosCooldown) {
+    if(!G.deck.length && !G.discard.length) break;
+    G.aiHand.push(drawCard());
+  }
+  G.aiChaosCooldown=false;
+
+  // Frost Bite
+  if(G.aiMage.id==='water' && G.aiTitanLevel>=1) {
+    const max=G.aiTitanLevel>=2?2:1;
+    // discard worst cards (highest numbers if focusing on small runs, simplified)
+    const toDiscard=G.aiHand.filter(c=>c.type==='spell').slice(0,max);
+    toDiscard.forEach(c=>{G.discard.push(c);G.aiHand.splice(G.aiHand.indexOf(c),1);G.aiHand.push(drawCard());});
+  }
+
+  // Void Mage check
+  const avq=G.aiVoidQual;
+  if(!G.aiVoidUsed && avq.element && avq.number && avq.run && G.aiScore+25>=50) {
+    aiActivateVoidMage();
+    return;
+  }
+
+  // Simple AI: try to play cards that create combos, else play anything
+  let played=0;
+  const maxPlays=5;
+  while(played<maxPlays && G.aiHand.length>0) {
+    const move=findBestAiMove();
+    if(!move) break;
+    const {cardIdx,slotIdx}=move;
+    const card=G.aiHand.splice(cardIdx,1)[0];
+    // Auto-declare wilds
+    if(card.type==='wild') {
+      if(card.isUltimate) { card.declaredElement=ELEMENTS[Math.floor(Math.random()*4)]; card.declaredNumber=Math.ceil(Math.random()*5); }
+      else { card.declaredElement=card.element; card.declaredNumber=Math.ceil(Math.random()*5); }
+    }
+    placeCard(card,slotIdx);
+    played++;
+    const combos=detectCombos();
+    if(combos.length>0) {
+      combos.forEach(c=>{ showComboFlash(c); scoreCombo(c,false); });
+      if(checkWin()) return;
+    }
+    render();
+  }
+
+  // AI use token
+  if(G.aiTokens.length>0) {
+    const tok=G.aiTokens[0];
+    if(tok==='element') {
+      // Lock a slot the player might use
+      const si=Math.floor(Math.random()*5);
+      G.slots[si].lock=true;
+      G.aiTokens.shift();
+    } else if(tok==='number') {
+      // Null a slot
+      const si=Math.floor(Math.random()*5);
+      G.discard.push(...G.slots[si].stack);
+      G.slots[si].stack=[];
+      reloadSlot(si);
+      G.aiTokens.shift();
+    }
+  }
+
+  // Reset for player
+  G.slots.forEach(s=>{s.lock=false;s.nulled=false;});
+  G.isPlayerTurn=true;
+  G.cardsPlayedThisTurn=0;
+  G.flameclawUsed=false;G.frostBiteUsed=false;G.stormTalonUsed=false;G.wolfBlessingUsed=false;
+  G.phase='action';
+
+  // Player draws
+  while(G.playerHand.length<5) {
+    if(!G.deck.length && !G.discard.length) break;
+    G.playerHand.push(drawCard());
+  }
+
+  render();
+  showMessage('Your turn! Play up to 5 cards.','');
+}
+
+function findBestAiMove() {
+  // Try each card in each slot, score moves by potential
+  let best=null; let bestScore=-1;
+  G.aiHand.forEach((card,ci)=>{
+    for(let si=0;si<5;si++){
+      if(!canPlayCard(card,si)) continue;
+      // Simulate play
+      const simCard={...card};
+      if(simCard.type==='wild') {
+        if(simCard.isUltimate){ simCard.declaredElement=ELEMENTS[0]; simCard.declaredNumber=3; }
+        else { simCard.declaredElement=simCard.element; simCard.declaredNumber=3; }
+      }
+      const origStack=[...G.slots[si].stack];
+      G.slots[si].stack=[...origStack,simCard];
+      const combos=detectCombos();
+      const pts=combos.reduce((s,c)=>s+c.pts,0);
+      G.slots[si].stack=origStack;
+      if(pts>bestScore||(pts===0&&bestScore<0)) { bestScore=pts; best={cardIdx:ci,slotIdx:si}; }
+    }
+  });
+  return best;
+}
+
+function aiActivateVoidMage() {
+  G.playerHand.forEach(c=>G.discard.push(c)); G.aiHand.forEach(c=>G.discard.push(c));
+  G.playerHand=[]; G.aiHand=[];
+  for(let i=0;i<5;i++){G.discard.push(...G.slots[i].stack);G.slots[i].stack=[];}
+  for(let i=0;i<5;i++) reloadSlot(i);
+  G.aiScore+=25;
+  G.aiVoidUsed=true;
+  G.aiAttunement={typeStreak:0,typeKind:null,methodStreak:0,methodKind:null};
+  for(let i=0;i<5;i++){if(G.deck.length||G.discard.length)G.aiHand.push(drawCard());}
+  for(let i=0;i<5;i++){if(G.deck.length||G.discard.length)G.playerHand.push(drawCard());}
+  checkTitanLevel(false);
+  if(!checkWin()){
+    showMessage('⬛ AI activated Void Mage! Board cleared. AI +25 Points!','error');
+    G.isPlayerTurn=true; G.cardsPlayedThisTurn=0; G.phase='action';
+    render();
+  }
+}
+
+// ============================================================
+// TITAN ABILITY BUTTONS — accessible via hand-label tap
+// ============================================================
+document.querySelector('.hand-label')?.addEventListener('click', ()=>{
+  if(!G.isPlayerTurn || !G.playerMage) return;
+  const m=G.playerMage;
+  if(G.playerTitanLevel===0) { showMessage('Titan not yet awakened (need 15 pts).','error'); return; }
+  if(m.id==='fire') triggerFlameClawUI();
+  else if(m.id==='water') triggerFrostBiteUI();
+  else if(m.id==='air') triggerStormTalonUI();
+  else showMessage('Wolf ability triggers automatically on slot clear.','');
+});
+
+// ============================================================
+// SHOW/HIDE HELPERS
+// ============================================================
+function showSlotPicker(title, subtitle, validSlots, cb) {
+  document.getElementById('slot-modal-title').textContent=title;
+  document.getElementById('slot-modal-subtitle').textContent=subtitle;
+  const opts=document.getElementById('slot-modal-options');
+  opts.innerHTML='';
+  validSlots.forEach(si=>{
+    const slot=G.slots[si];
+    const top=slotTop(slot);
+    const div=document.createElement('div');
+    div.className='modal-option';
+    div.innerHTML=`<div class="modal-option-title">Slot ${si+1}</div><div class="modal-option-desc">${top?cardLabel(top):'Empty'} (Stack: ${slot.stack.length})</div>`;
+    div.onclick=()=>cb(si);
+    opts.appendChild(div);
+  });
+  openModal('slot-modal');
+}
+
+function showHandPicker(subtitle, cb) {
+  document.getElementById('slot-modal-title').textContent='Choose from Hand';
+  document.getElementById('slot-modal-subtitle').textContent=subtitle;
+  const opts=document.getElementById('slot-modal-options');
+  opts.innerHTML='';
+  G.playerHand.forEach((card,i)=>{
+    const div=document.createElement('div');
+    div.className='modal-option';
+    div.innerHTML=`<div class="modal-option-title">${cardLabel(card)}</div>`;
+    div.onclick=()=>{ closeModal('slot-modal'); cb(i); };
+    opts.appendChild(div);
+  });
+  openModal('slot-modal');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function showComboFlash(combo) {
+  const el=document.createElement('div');
+  el.className='combo-flash';
+  const name = comboName(combo);
+  el.innerHTML=`<div class="combo-flash-title">${name}</div><div class="combo-flash-pts">+${combo.pts} pts</div>`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1600);
+}
+
+function comboName(c) {
+  const names={
+    'element-chain':`Element Chain (${c.len})`,
+    'number-chain':`Number Chain (${c.len})`,
+    'run':`Run of ${c.len}`,
+    'element-row':`Element Row (${c.len})`,
+    'number-row':`Number Row (${c.len})`,
+    'number-run':`Number Run (${c.len})`,
+    'twin-ultimates':'Twin Ultimates!',
+    'elemental-set':'Elemental Set!',
+    'perfect-harmony':'Perfect Harmony!'
+  };
+  return names[c.type]||c.type;
+}
+
+function showMessage(msg, type='') {
+  const el=document.getElementById('game-message');
+  el.textContent=msg;
+  el.className=`game-message${type?' '+type:''}`;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='title-screen') { initState(); }
+  if(id==='mage-screen') { initState(); G.playerMage=null; renderMageSelect(); }
+}
+
+function showWin(playerWon) {
+  document.getElementById('win-emblem').textContent = playerWon ? '🏆' : '💀';
+  document.getElementById('win-title').textContent = playerWon ? 'Victory!' : 'Defeat';
+  document.getElementById('win-subtitle').textContent = playerWon ? 'The elements bow to your mastery.' : 'The AI mage prevails... for now.';
+  document.getElementById('final-player-score').textContent = G.playerScore;
+  document.getElementById('final-ai-score').textContent = G.aiScore;
+  setTimeout(()=>showScreen('win-screen'), 800);
+}
+
+function showRules() {
+  const rc=document.getElementById('rules-content');
+  rc.innerHTML=`
+    <div class="rules-section"><div class="rules-section-title">Objective</div><div class="rules-text">Be the first to reach 50 Points.</div></div>
+    <div class="rules-section"><div class="rules-section-title">Placement Rules</div><div class="rules-text"><ul><li><b>Number Switch:</b> Match top card's number → change slot's element to yours.</li><li><b>Element Switch:</b> Match top card's element → change slot's number to yours.</li><li><b>Field Card:</b> Play anywhere. Changes slot's element. Removes number.</li><li><b>Void Field:</b> Clears the entire slot stack immediately.</li><li><b>Wild Card:</b> Declare as any number 1–5 (same element). Primal Spirit: any element + number.</li></ul></div></div>
+    <div class="rules-section"><div class="rules-section-title">Vertical Combos (in one slot)</div><div class="rules-text"><ul><li>Element Chain 3/4/5: 3/4/5 pts</li><li>Number Chain 3/4/5: 4/5/6 pts</li><li>Run 3/4/5: 3/5/7 pts</li><li>Twin Ultimates: 8 pts</li></ul></div></div>
+    <div class="rules-section"><div class="rules-section-title">Horizontal Combos (across slots)</div><div class="rules-text"><ul><li>Element Row 3/4/5: 4/7/10 pts</li><li>Number Row 3/4/5: 5/8/12 pts</li><li>Number Run 3/4/5: 6/9/13 pts</li><li>Elemental Set (all 4 elements): 8 pts</li><li>Perfect Harmony (4 same + Ultimate): 11 pts</li></ul></div></div>
+    <div class="rules-section"><div class="rules-section-title">Attunement (Streaks)</div><div class="rules-text">Score the same combo Type (Element/Number/Run) or Method (Vertical/Horizontal) 3 turns in a row to earn an Item Token.<br><br><b>Arcane Lock 🔒</b> — Lock a slot for opponent's next turn.<br><b>Null Sigil ⚫</b> — Clear a slot immediately.<br><b>Summon Stone 💎</b> — Take any card from discard pile.<br><b>Crystal Ball 🔮</b> — Peek top 3 deck cards, keep 1.<br><b>Chaos Rune 🌀</b> — Opponent discards a random card, can't replace next turn.</div></div>
+    <div class="rules-section"><div class="rules-section-title">Titan Abilities</div><div class="rules-text">Awaken at 15 pts, enhance at 25 pts.<br><b>Ash Dragon:</b> Tap "YOUR HAND" label to swap Fire slot cards with hand cards.<br><b>Frost Leviathan:</b> Tap "YOUR HAND" to discard & draw.<br><b>Thunder Eagle:</b> Tap "YOUR HAND" to move top card between slots.<br><b>Stone Wolf:</b> Auto-triggers on slot clear — search discard for Earth card.</div></div>
+    <div class="rules-section"><div class="rules-section-title">Void Mage</div><div class="rules-text">Score Element Chain/Row (5) + Number Chain/Row (5) + Run of Five/Number Run (5). Then the ⬛ Void Mage button appears. Activating it: clears the board, resets both hands, grants +25 Points. Once per game.</div></div>
+  `;
+  openModal('rules-modal');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+initState();
+</script>
+</body>
+</html>
