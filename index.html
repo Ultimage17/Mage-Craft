@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -6,1764 +7,695 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Mage Craft</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600&family=Crimson+Pro:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600&family=Crimson+Pro:ital,wght@0,400;1,300&display=swap" rel="stylesheet">
 <style>
-:root {
-  --fire: #e8541a; --fire-dark: #8b2500; --fire-glow: #ff6b2b;
-  --water: #1a78e8; --water-dark: #00308b; --water-glow: #4da6ff;
-  --air: #c8e81a; --air-dark: #5a7000; --air-glow: #e4ff4d;
-  --earth: #3ae81a; --earth-dark: #006b00; --earth-glow: #5aff3a;
-  --void: #9b1ae8; --void-dark: #3d0070; --void-glow: #c44dff;
-  --gold: #c9a84c; --gold-light: #f0d080;
-  --bg: #0a0610; --bg2: #110d1c; --bg3: #1a1428;
-  --surface: #1e1830; --surface2: #261f3e;
-  --border: #2e2550; --border2: #3d3268;
-  --text: #e8e0f8; --text2: #a090c8; --text3: #6858a0;
-  --radius: 12px; --radius-sm: 8px;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Crimson Pro', serif; }
-
-/* ===== SCREENS ===== */
-.screen { display: none; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
-.screen.active { display: flex; }
-
-/* ===== BACKGROUND ===== */
-.arcane-bg {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background: radial-gradient(ellipse at 20% 20%, #1a0830 0%, transparent 50%),
-              radial-gradient(ellipse at 80% 80%, #0a1830 0%, transparent 50%),
-              radial-gradient(ellipse at 50% 50%, #0d0820 0%, var(--bg) 70%);
-}
-.arcane-bg::after {
-  content: ''; position: absolute; inset: 0;
-  background-image: radial-gradient(circle, #ffffff08 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-
-/* ===== TITLE SCREEN ===== */
-#title-screen { align-items: center; justify-content: center; gap: 32px; position: relative; z-index: 1; }
-.title-emblem { font-size: 80px; filter: drop-shadow(0 0 20px var(--void-glow)); animation: pulse 3s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.05);opacity:0.85} }
-.title-main { font-family: 'Cinzel Decorative', serif; font-size: clamp(28px,8vw,48px); font-weight: 900; color: var(--gold-light); text-align: center; text-shadow: 0 0 30px var(--gold), 0 0 60px var(--void-glow); letter-spacing: 4px; }
-.title-sub { font-family: 'Cinzel', serif; font-size: 14px; letter-spacing: 6px; color: var(--text2); text-transform: uppercase; }
-.btn-primary { background: linear-gradient(135deg, #3d2870, #1e1440); border: 1px solid var(--gold); color: var(--gold-light); font-family: 'Cinzel', serif; font-size: 16px; letter-spacing: 2px; padding: 16px 40px; border-radius: 4px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 20px #00000080, inset 0 1px 0 #ffffff20; width: 100%; max-width: 280px; }
-.btn-primary:active { transform: scale(0.97); box-shadow: 0 0 10px var(--gold) }
-.btn-secondary { background: transparent; border: 1px solid var(--border2); color: var(--text2); font-family: 'Cinzel', serif; font-size: 14px; letter-spacing: 1px; padding: 12px 32px; border-radius: 4px; cursor: pointer; transition: all 0.2s; width: 100%; max-width: 280px; }
-.btn-secondary:active { background: var(--surface); }
-
-/* ===== MAGE SELECT ===== */
-#mage-screen { overflow-y: auto; position: relative; z-index: 1; }
-.screen-header { padding: 20px 20px 12px; text-align: center; flex-shrink: 0; }
-.screen-title { font-family: 'Cinzel', serif; font-size: 18px; color: var(--gold-light); letter-spacing: 3px; }
-.screen-subtitle { font-size: 13px; color: var(--text2); margin-top: 4px; }
-.mage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px 16px 24px; }
-.mage-card { background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius); padding: 16px 12px; cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; overflow: hidden; }
-.mage-card.selected { border-color: var(--gold); box-shadow: 0 0 20px #c9a84c40; }
-.mage-card.disabled { opacity: 0.4; pointer-events: none; }
-.mage-card::before { content:''; position:absolute; inset:0; opacity:0; transition:opacity 0.2s; }
-.mage-card[data-element=fire]::before { background: radial-gradient(circle at 50% 0%, #e8541a20, transparent 70%); }
-.mage-card[data-element=water]::before { background: radial-gradient(circle at 50% 0%, #1a78e820, transparent 70%); }
-.mage-card[data-element=air]::before { background: radial-gradient(circle at 50% 0%, #c8e81a20, transparent 70%); }
-.mage-card[data-element=earth]::before { background: radial-gradient(circle at 50% 0%, #3ae81a20, transparent 70%); }
-.mage-card.selected::before { opacity: 1; }
-.mage-icon { font-size: 36px; }
-.mage-name { font-family: 'Cinzel', serif; font-size: 13px; color: var(--text); text-align: center; }
-.mage-titan { font-size: 11px; color: var(--text2); text-align: center; }
-.mage-ability { font-size: 11px; color: var(--text3); text-align: center; line-height: 1.4; margin-top: 4px; }
-.ability-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; margin-top: 4px; }
-.confirm-row { padding: 12px 16px 32px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
-
-/* ===== GAME SCREEN ===== */
-#game-screen { position: relative; z-index: 1; }
-.game-layout { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
-
-/* Score bar */
-.score-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px 8px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; gap: 8px; }
-.player-score { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 80px; }
-.player-label { font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 1px; color: var(--text2); }
-.player-name-display { font-size: 11px; color: var(--text3); }
-.score-num { font-family: 'Cinzel Decorative', serif; font-size: 26px; color: var(--gold-light); line-height: 1; }
-.score-target { font-size: 10px; color: var(--text3); }
-.score-divider { font-family: 'Cinzel Decorative', serif; font-size: 18px; color: var(--border2); }
-.titan-badge { display: flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; border: 1px solid var(--border2); font-size: 10px; color: var(--text2); margin-top: 2px; }
-.titan-badge.awakened { border-color: var(--gold); color: var(--gold); }
-.titan-badge.enhanced { border-color: var(--fire-glow); color: var(--fire-glow); }
-
-/* Status bar */
-.status-bar { padding: 6px 14px; background: var(--bg3); border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.turn-indicator { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 1px; color: var(--text2); }
-.turn-indicator span { color: var(--gold-light); }
-.phase-indicator { font-size: 11px; color: var(--text3); }
-.item-tokens { display: flex; gap: 4px; }
-.token-chip { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--gold); display: flex; align-items: center; justify-content: center; font-size: 12px; background: var(--surface); cursor: pointer; }
-.token-chip:active { transform: scale(0.9); }
-
-/* Spell Slots */
-.slots-area { padding: 10px 12px; background: var(--bg); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.slots-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; color: var(--text3); text-align: center; margin-bottom: 8px; text-transform: uppercase; }
-.slots-row { display: flex; gap: 6px; justify-content: center; }
-.spell-slot { flex: 1; max-width: 64px; min-height: 88px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; padding: 4px; gap: 2px; }
-.spell-slot.targetable { border-color: var(--gold); box-shadow: 0 0 12px #c9a84c60; animation: targetPulse 1s ease-in-out infinite; }
-.spell-slot.selected-slot { border-color: var(--void-glow); box-shadow: 0 0 16px #c44dff60; }
-.spell-slot.locked { border-color: #888; opacity: 0.7; }
-.spell-slot.nulled { border-color: #555; opacity: 0.5; }
-@keyframes targetPulse { 0%,100%{box-shadow:0 0 8px #c9a84c40} 50%{box-shadow:0 0 20px #c9a84c80} }
-.slot-number-display { font-family: 'Cinzel Decorative', serif; font-size: 20px; line-height: 1; }
-.slot-element-display { font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
-.slot-stack-count { font-size: 9px; color: var(--text3); }
-.slot-empty-label { font-size: 10px; color: var(--text3); }
-.slot-lock-icon { position: absolute; top: 2px; right: 2px; font-size: 10px; }
-
-.el-fire { color: var(--fire-glow); } .el-water { color: var(--water-glow); }
-.el-air { color: var(--air-glow); } .el-earth { color: var(--earth-glow); }
-.el-void { color: var(--void-glow); } .el-none { color: var(--text3); }
-
-/* AI zone */
-.ai-zone { padding: 6px 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; }
-.ai-hand-display { display: flex; gap: 4px; }
-.ai-card-back { width: 28px; height: 40px; background: linear-gradient(135deg, #1e1440, #2e1860); border: 1px solid var(--border2); border-radius: 4px; }
-.ai-label { font-size: 10px; color: var(--text3); font-family: 'Cinzel', serif; letter-spacing: 1px; }
-
-/* Message area */
-.message-area { padding: 6px 14px; flex-shrink: 0; min-height: 32px; }
-.game-message { font-size: 12px; color: var(--gold-light); text-align: center; font-style: italic; }
-.game-message.error { color: #ff6060; }
-.game-message.success { color: var(--earth-glow); }
-
-/* Player hand */
-.hand-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
-.hand-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; color: var(--text3); text-align: center; padding: 4px 0; flex-shrink: 0; }
-.hand-scroll { overflow-x: auto; overflow-y: hidden; flex: 1; display: flex; align-items: center; padding: 4px 12px 8px; gap: 8px; scrollbar-width: none; }
-.hand-scroll::-webkit-scrollbar { display: none; }
-.card { width: 56px; min-width: 56px; height: 80px; border-radius: var(--radius-sm); border: 1.5px solid var(--border2); background: var(--surface2); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; position: relative; gap: 2px; flex-shrink: 0; }
-.card:active { transform: scale(0.94); }
-.card.selected { border-color: var(--gold); box-shadow: 0 0 16px #c9a84c60; transform: translateY(-8px); }
-.card.played { opacity: 0.3; pointer-events: none; }
-.card-number { font-family: 'Cinzel Decorative', serif; font-size: 22px; line-height: 1; }
-.card-element { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
-.card-icon { font-size: 18px; }
-.card-type-label { font-size: 8px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
-.card-corner { position: absolute; top: 3px; left: 5px; font-size: 9px; opacity: 0.7; }
-.card.fire-card { background: linear-gradient(160deg, #1e0a00, var(--surface2)); border-color: var(--fire-dark); }
-.card.fire-card.selected { border-color: var(--fire-glow); box-shadow: 0 0 16px #e8541a60; }
-.card.water-card { background: linear-gradient(160deg, #00061e, var(--surface2)); border-color: var(--water-dark); }
-.card.water-card.selected { border-color: var(--water-glow); box-shadow: 0 0 16px #1a78e860; }
-.card.air-card { background: linear-gradient(160deg, #0e1400, var(--surface2)); border-color: var(--air-dark); }
-.card.air-card.selected { border-color: var(--air-glow); box-shadow: 0 0 16px #c8e81a60; }
-.card.earth-card { background: linear-gradient(160deg, #001400, var(--surface2)); border-color: var(--earth-dark); }
-.card.earth-card.selected { border-color: var(--earth-glow); box-shadow: 0 0 16px #3ae81a60; }
-.card.void-card { background: linear-gradient(160deg, #0d0020, var(--surface2)); border-color: var(--void-dark); }
-.card.void-card.selected { border-color: var(--void-glow); box-shadow: 0 0 16px #9b1ae860; }
-.card.wild-card { border-style: dashed; }
-
-/* Action bar */
-.action-bar { display: flex; gap: 6px; padding: 8px 12px 16px; flex-shrink: 0; background: var(--bg2); border-top: 1px solid var(--border); }
-.btn-action { flex: 1; padding: 10px 4px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text2); font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 1px; cursor: pointer; transition: all 0.15s; }
-.btn-action:active { transform: scale(0.96); background: var(--surface2); }
-.btn-action.primary { background: linear-gradient(135deg, #3d2870, #1e1440); border-color: var(--gold); color: var(--gold-light); }
-.btn-action.danger { border-color: var(--fire-dark); color: var(--fire-glow); }
-.btn-action:disabled { opacity: 0.35; pointer-events: none; }
-
-/* ===== MODALS ===== */
-.modal-overlay { position: fixed; inset: 0; background: #00000090; z-index: 100; display: none; align-items: flex-end; }
-.modal-overlay.active { display: flex; }
-.modal-sheet { background: var(--bg2); border-radius: 20px 20px 0 0; border-top: 1px solid var(--border2); width: 100%; max-height: 80vh; overflow-y: auto; padding: 20px 20px 40px; }
-.modal-handle { width: 40px; height: 4px; background: var(--border2); border-radius: 2px; margin: 0 auto 16px; }
-.modal-title { font-family: 'Cinzel', serif; font-size: 16px; color: var(--gold-light); margin-bottom: 4px; text-align: center; }
-.modal-subtitle { font-size: 13px; color: var(--text2); text-align: center; margin-bottom: 16px; }
-.modal-options { display: flex; flex-direction: column; gap: 8px; }
-.modal-option { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 12px 16px; cursor: pointer; transition: all 0.15s; }
-.modal-option:active { background: var(--surface2); border-color: var(--gold); }
-.modal-option-title { font-family: 'Cinzel', serif; font-size: 14px; color: var(--text); }
-.modal-option-desc { font-size: 12px; color: var(--text2); margin-top: 2px; }
-.modal-btn-row { display: flex; gap: 8px; margin-top: 16px; }
-.modal-btn { flex: 1; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text2); font-family: 'Cinzel', serif; font-size: 13px; cursor: pointer; }
-.modal-btn.confirm { border-color: var(--gold); color: var(--gold-light); background: linear-gradient(135deg, #3d2870, #1e1440); }
-.modal-btn:active { transform: scale(0.97); }
-
-/* Wild declare */
-.declare-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 12px 0; }
-.declare-btn { padding: 8px 4px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: 'Cinzel', serif; font-size: 13px; cursor: pointer; text-align: center; }
-.declare-btn:active { background: var(--surface2); border-color: var(--gold); }
-.declare-elements { display: flex; gap: 8px; margin: 8px 0; }
-.declare-el { flex: 1; padding: 10px 4px; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); font-size: 11px; text-align: center; cursor: pointer; }
-.declare-el:active { transform: scale(0.95); }
-
-/* Attunement tracker */
-.attunement-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-.streak-badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; border: 1px solid var(--border2); color: var(--text2); }
-.streak-badge.active { border-color: var(--gold); color: var(--gold); }
-.streak-badge.ready { border-color: var(--earth-glow); color: var(--earth-glow); animation: pulse 1s ease-in-out infinite; }
-
-/* Combo flash */
-.combo-flash { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 200; pointer-events: none; text-align: center; animation: comboAnim 1.5s ease-out forwards; }
-.combo-flash-title { font-family: 'Cinzel Decorative', serif; font-size: 28px; color: var(--gold-light); text-shadow: 0 0 20px var(--gold), 0 0 40px var(--void-glow); }
-.combo-flash-pts { font-family: 'Cinzel', serif; font-size: 18px; color: var(--earth-glow); }
-@keyframes comboAnim { 0%{opacity:0;transform:translate(-50%,-60%) scale(0.8)} 20%{opacity:1;transform:translate(-50%,-50%) scale(1.05)} 70%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-40%) scale(0.95)} }
-
-/* Win screen */
-#win-screen { align-items: center; justify-content: center; gap: 24px; position: relative; z-index: 1; }
-.win-emblem { font-size: 80px; animation: pulse 2s ease-in-out infinite; }
-.win-title { font-family: 'Cinzel Decorative', serif; font-size: 32px; color: var(--gold-light); text-shadow: 0 0 30px var(--gold); text-align: center; }
-.win-subtitle { font-family: 'Cinzel', serif; font-size: 16px; color: var(--text2); letter-spacing: 2px; text-align: center; }
-.win-scores { display: flex; gap: 32px; }
-.win-score-block { text-align: center; }
-.win-score-label { font-size: 12px; color: var(--text3); letter-spacing: 2px; }
-.win-score-num { font-family: 'Cinzel Decorative', serif; font-size: 40px; color: var(--gold-light); }
-
-/* Attunement panel */
-.attunement-panel { padding: 8px 14px; background: var(--bg3); border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.attunement-label { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 2px; color: var(--text3); flex-shrink: 0; }
-
-/* Void Mage indicator */
-.void-mage-btn { font-size: 10px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--void-glow); color: var(--void-glow); background: transparent; cursor: pointer; font-family: 'Cinzel', serif; animation: voidPulse 1.5s ease-in-out infinite; }
-@keyframes voidPulse { 0%,100%{box-shadow:0 0 8px #c44dff40} 50%{box-shadow:0 0 20px #c44dff80} }
-
-/* Rules modal */
-.rules-section { margin-bottom: 16px; }
-.rules-section-title { font-family: 'Cinzel', serif; font-size: 14px; color: var(--gold-light); margin-bottom: 6px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
-.rules-text { font-size: 12px; color: var(--text2); line-height: 1.6; }
-.rules-text li { margin: 4px 0 4px 16px; }
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+:root{--fire:#e8541a;--fire-d:#6b2000;--fire-g:#ff6b2b;--water:#1a78e8;--water-d:#00308b;--water-g:#4da6ff;--air:#c8e81a;--air-d:#5a7000;--air-g:#e4ff4d;--earth:#3ae81a;--earth-d:#006b00;--earth-g:#5aff3a;--void:#9b1ae8;--void-d:#3d0070;--void-g:#c44dff;--gold:#c9a84c;--goldl:#f0d080;--bg:#0a0610;--bg2:#110d1c;--bg3:#1a1428;--sf:#1e1830;--sf2:#261f3e;--bd:#2e2550;--bd2:#3d3268;--tx:#e8e0f8;--tx2:#a090c8;--tx3:#6858a0;--r:12px;--rs:8px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:'Crimson Pro',serif;}
+.screen{display:none;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+.screen.active{display:flex;}
+.abg{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 20% 20%,#1a0830 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,#0a1830 0%,transparent 50%),radial-gradient(ellipse at 50% 50%,#0d0820 0%,var(--bg) 70%);}
+.abg::after{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,#ffffff08 1px,transparent 1px);background-size:40px 40px;}
+#ts{align-items:center;justify-content:center;gap:28px;position:relative;z-index:1;}
+.temb{font-size:80px;filter:drop-shadow(0 0 20px var(--void-g));animation:pulse 3s ease-in-out infinite;}
+.tmain{font-family:'Cinzel Decorative',serif;font-size:clamp(26px,8vw,46px);font-weight:900;color:var(--goldl);text-align:center;text-shadow:0 0 30px var(--gold),0 0 60px var(--void-g);letter-spacing:4px;}
+.tsub{font-family:'Cinzel',serif;font-size:13px;letter-spacing:6px;color:var(--tx2);text-transform:uppercase;}
+.btnp{background:linear-gradient(135deg,#3d2870,#1e1440);border:1px solid var(--gold);color:var(--goldl);font-family:'Cinzel',serif;font-size:16px;letter-spacing:2px;padding:16px 40px;border-radius:4px;cursor:pointer;width:100%;max-width:280px;}
+.btnp:active{transform:scale(0.97);}
+.btns{background:transparent;border:1px solid var(--bd2);color:var(--tx2);font-family:'Cinzel',serif;font-size:14px;padding:12px 32px;border-radius:4px;cursor:pointer;width:100%;max-width:280px;}
+#ms{overflow-y:auto;position:relative;z-index:1;}
+.shead{padding:20px 20px 12px;text-align:center;flex-shrink:0;}
+.stitle{font-family:'Cinzel',serif;font-size:18px;color:var(--goldl);letter-spacing:3px;}
+.ssub{font-size:13px;color:var(--tx2);margin-top:4px;}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px 24px;}
+.mc{background:var(--sf);border:2px solid var(--bd);border-radius:var(--r);padding:14px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;overflow:hidden;}
+.mc.sel{border-color:var(--gold);box-shadow:0 0 20px #c9a84c40;}
+.mc::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity 0.2s;}
+.mc[data-el=fire]::before{background:radial-gradient(circle at 50% 0%,#e8541a20,transparent 70%);}
+.mc[data-el=water]::before{background:radial-gradient(circle at 50% 0%,#1a78e820,transparent 70%);}
+.mc[data-el=air]::before{background:radial-gradient(circle at 50% 0%,#c8e81a20,transparent 70%);}
+.mc[data-el=earth]::before{background:radial-gradient(circle at 50% 0%,#3ae81a20,transparent 70%);}
+.mc.sel::before{opacity:1;}
+.crow{padding:12px 16px 32px;display:flex;flex-direction:column;gap:8px;align-items:center;}
+#gs{position:relative;z-index:1;}
+.glayout{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;}
+.sbar{display:flex;align-items:center;justify-content:space-between;padding:8px 12px 6px;background:var(--bg2);border-bottom:1px solid var(--bd);flex-shrink:0;}
+.psc{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:72px;}
+.plbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--tx2);}
+.scnum{font-family:'Cinzel Decorative',serif;font-size:24px;color:var(--goldl);line-height:1;}
+.sctgt{font-size:9px;color:var(--tx3);}
+.tbadge{padding:2px 6px;border-radius:20px;border:1px solid var(--bd2);font-size:9px;color:var(--tx2);margin-top:2px;}
+.tbadge.awk{border-color:var(--gold);color:var(--gold);}
+.tbadge.enh{border-color:var(--fire-g);color:var(--fire-g);}
+.stbar{padding:5px 12px;background:var(--bg3);border-bottom:1px solid var(--bd);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+.ppill{font-size:10px;color:var(--tx3);background:var(--sf);padding:2px 8px;border-radius:20px;}
+.itoks{display:flex;gap:4px;}
+.tokchip{width:22px;height:22px;border-radius:50%;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;background:var(--sf);cursor:pointer;}
+.attpan{padding:4px 12px;background:var(--bg3);border-bottom:1px solid var(--bd);flex-shrink:0;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.attlbl{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--tx3);flex-shrink:0;}
+.sbadge{font-size:9px;padding:1px 6px;border-radius:20px;border:1px solid var(--bd2);color:var(--tx3);}
+.sbadge.on{border-color:var(--gold);color:var(--gold);}
+.aizone{padding:4px 12px;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+.aicb{width:22px;height:34px;background:linear-gradient(135deg,#1e1440,#2e1860);border:1px solid var(--bd2);border-radius:4px;}
+.aiinf{font-size:9px;color:var(--tx3);font-family:'Cinzel',serif;}
+.slarea{padding:7px 10px;background:var(--bg);border-bottom:1px solid var(--bd);flex-shrink:0;}
+.sllbl{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--tx3);text-align:center;margin-bottom:5px;}
+.slrow{display:flex;gap:5px;justify-content:center;}
+.slot{flex:1;max-width:62px;min-height:82px;background:var(--sf);border:1.5px solid var(--bd);border-radius:var(--rs);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;position:relative;padding:3px;gap:1px;}
+.slot.undecl{border-color:var(--void-g);border-style:dashed;animation:vp 1.5s ease-in-out infinite;}
+.slot.lkd{opacity:0.6;}
+@keyframes vp{0%,100%{box-shadow:0 0 6px #c44dff30}50%{box-shadow:0 0 16px #c44dff70}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.slnum{font-family:'Cinzel Decorative',serif;font-size:18px;line-height:1;}
+.slel{font-size:8px;letter-spacing:1px;text-transform:uppercase;}
+.slstk{font-size:8px;color:var(--tx3);}
+.slic{font-size:13px;}
+.slico{position:absolute;top:2px;right:2px;font-size:9px;}
+.ef{color:var(--fire-g);}.ew{color:var(--water-g);}.ea{color:var(--air-g);}.ee{color:var(--earth-g);}.ev{color:var(--void-g);}
+.msgarea{padding:3px 12px;flex-shrink:0;min-height:24px;}
+.gmsg{font-size:11px;color:var(--goldl);text-align:center;font-style:italic;}
+.gmsg.err{color:#ff6060;}.gmsg.ok{color:var(--earth-g);}
+.harea{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
+.hhdr{display:flex;align-items:center;justify-content:space-between;padding:2px 12px;flex-shrink:0;}
+.hlbl{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--tx3);}
+.hmeta{font-size:9px;color:var(--tx3);}
+.hscroll{overflow-x:auto;overflow-y:hidden;flex:1;display:flex;align-items:center;padding:3px 10px 6px;gap:7px;scrollbar-width:none;}
+.hscroll::-webkit-scrollbar{display:none;}
+.card{width:52px;min-width:52px;height:76px;border-radius:var(--rs);border:1.5px solid var(--bd2);background:var(--sf2);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;position:relative;gap:1px;flex-shrink:0;}
+.card:active{transform:scale(0.93);}
+.card.csel{border-color:var(--gold);box-shadow:0 0 14px #c9a84c60;transform:translateY(-8px);}
+.cnum{font-family:'Cinzel Decorative',serif;font-size:19px;line-height:1;}
+.cel{font-size:8px;letter-spacing:1px;text-transform:uppercase;}
+.cic{font-size:13px;}
+.ctp{font-size:7px;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;}
+.ccr{position:absolute;top:2px;left:4px;font-size:8px;opacity:0.7;}
+.fc{background:linear-gradient(160deg,#1e0a00,var(--sf2));border-color:var(--fire-d);}
+.fc.csel{border-color:var(--fire-g);box-shadow:0 0 14px #e8541a60;}
+.wc{background:linear-gradient(160deg,#00061e,var(--sf2));border-color:var(--water-d);}
+.wc.csel{border-color:var(--water-g);}
+.ac{background:linear-gradient(160deg,#0e1400,var(--sf2));border-color:var(--air-d);}
+.ac.csel{border-color:var(--air-g);}
+.ec{background:linear-gradient(160deg,#001400,var(--sf2));border-color:var(--earth-d);}
+.ec.csel{border-color:var(--earth-g);}
+.vc{background:linear-gradient(160deg,#0d0020,var(--sf2));border-color:var(--void-d);}
+.vc.csel{border-color:var(--void-g);}
+.wld{border-style:dashed;}
+.abar{display:flex;gap:5px;padding:7px 10px 18px;flex-shrink:0;background:var(--bg2);border-top:1px solid var(--bd);}
+.ba{flex:1;padding:9px 3px;border-radius:var(--rs);border:1px solid var(--bd2);background:var(--sf);color:var(--tx2);font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;cursor:pointer;}
+.ba:active{transform:scale(0.96);}
+.ba.pr{background:linear-gradient(135deg,#3d2870,#1e1440);border-color:var(--gold);color:var(--goldl);}
+.ba.ti{border-color:var(--fire-g);color:var(--fire-g);}
+.ba.ti.water{border-color:var(--water-g);color:var(--water-g);}
+.ba.ti.air{border-color:var(--air-g);color:var(--air-g);}
+.ba.ti.earth{border-color:var(--earth-g);color:var(--earth-g);}
+.ba:disabled{opacity:0.3;pointer-events:none;}
+.vmbtn{font-size:9px;padding:3px 8px;border-radius:20px;border:1px solid var(--void-g);color:var(--void-g);background:transparent;cursor:pointer;font-family:'Cinzel',serif;animation:vp 1.5s ease-in-out infinite;}
+.moverlay{position:fixed;inset:0;background:#00000090;z-index:100;display:none;align-items:flex-end;}
+.moverlay.active{display:flex;}
+.msheet{background:var(--bg2);border-radius:20px 20px 0 0;border-top:1px solid var(--bd2);width:100%;max-height:80vh;overflow-y:auto;padding:16px 16px 34px;}
+.mhdl{width:36px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 12px;}
+.mtit{font-family:'Cinzel',serif;font-size:15px;color:var(--goldl);margin-bottom:3px;text-align:center;}
+.msub{font-size:12px;color:var(--tx2);text-align:center;margin-bottom:12px;}
+.mopts{display:flex;flex-direction:column;gap:6px;}
+.mopt{background:var(--sf);border:1px solid var(--bd2);border-radius:var(--rs);padding:10px 13px;cursor:pointer;}
+.mopt:active{background:var(--sf2);border-color:var(--gold);}
+.moptt{font-family:'Cinzel',serif;font-size:13px;color:var(--tx);}
+.moptd{font-size:11px;color:var(--tx2);margin-top:2px;}
+.mbtns{display:flex;gap:8px;margin-top:12px;}
+.mbtn{flex:1;padding:11px;border-radius:var(--rs);border:1px solid var(--bd2);background:var(--sf);color:var(--tx2);font-family:'Cinzel',serif;font-size:12px;cursor:pointer;}
+.mbtn.conf{border-color:var(--gold);color:var(--goldl);background:linear-gradient(135deg,#3d2870,#1e1440);}
+.mbtn:active{transform:scale(0.97);}
+.dgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:8px 0;}
+.dbtn{padding:8px 3px;background:var(--sf);border:1px solid var(--bd2);border-radius:var(--rs);color:var(--tx);font-family:'Cinzel',serif;font-size:13px;cursor:pointer;text-align:center;}
+.dbtn.ds{border-color:var(--gold);background:var(--sf2);}
+.dels{display:flex;gap:6px;margin:8px 0;}
+.del{flex:1;padding:9px 3px;background:var(--sf);border:1px solid var(--bd2);border-radius:var(--rs);font-size:10px;text-align:center;cursor:pointer;}
+.del.ds{border-color:var(--gold);}
+.cflash{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);z-index:200;pointer-events:none;text-align:center;animation:cfa 1.6s ease-out forwards;}
+.cft{font-family:'Cinzel Decorative',serif;font-size:24px;color:var(--goldl);text-shadow:0 0 20px var(--gold);}
+.cfp{font-family:'Cinzel',serif;font-size:16px;color:var(--earth-g);}
+@keyframes cfa{0%{opacity:0;transform:translate(-50%,-60%) scale(0.8)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-40%)}}
+#ws{align-items:center;justify-content:center;gap:22px;position:relative;z-index:1;}
+.wemb{font-size:72px;animation:pulse 2s ease-in-out infinite;}
+.wtit{font-family:'Cinzel Decorative',serif;font-size:30px;color:var(--goldl);text-shadow:0 0 30px var(--gold);text-align:center;}
+.wsub{font-family:'Cinzel',serif;font-size:14px;color:var(--tx2);letter-spacing:2px;text-align:center;}
+.wscores{display:flex;gap:32px;}
+.wsb{text-align:center;}
+.wsl{font-size:11px;color:var(--tx3);letter-spacing:2px;}
+.wsn{font-family:'Cinzel Decorative',serif;font-size:38px;color:var(--goldl);}
+::-webkit-scrollbar{width:3px;height:3px;}::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
 </style>
 </head>
 <body>
-
-<div class="arcane-bg"></div>
-
-<!-- TITLE SCREEN -->
-<div id="title-screen" class="screen active">
-  <div class="title-emblem">⚗️</div>
-  <div class="title-main">MAGE CRAFT</div>
-  <div class="title-sub">The Elemental Duel</div>
-  <button class="btn-primary" onclick="showScreen('mage-screen')">Begin</button>
-  <button class="btn-secondary" onclick="showRules()">Rules</button>
+<div class="abg"></div>
+<div id="ts" class="screen active">
+  <div class="temb">⚗️</div>
+  <div class="tmain">MAGE CRAFT</div>
+  <div class="tsub">The Elemental Duel</div>
+  <button class="btnp" onclick="goMageSelect()">Begin</button>
+  <button class="btns" onclick="openRules()">Rules</button>
 </div>
-
-<!-- MAGE SELECT SCREEN -->
-<div id="mage-screen" class="screen">
-  <div class="screen-header">
-    <div class="screen-title">Choose Your Mage</div>
-    <div class="screen-subtitle">Select your elemental affinity and Titan</div>
-  </div>
-  <div class="mage-grid" id="mage-grid"></div>
-  <div class="confirm-row">
-    <button class="btn-primary" id="start-game-btn" onclick="startGame()" disabled>Summon the Arena</button>
-    <button class="btn-secondary" onclick="showScreen('title-screen')">Back</button>
+<div id="ms" class="screen">
+  <div class="shead"><div class="stitle">Choose Your Mage</div><div class="ssub">Select your elemental affinity and Titan</div></div>
+  <div class="mgrid" id="mgrid"></div>
+  <div class="crow">
+    <button class="btnp" id="startbtn" onclick="startGame()" disabled>Summon the Arena</button>
+    <button class="btns" onclick="showScreen('ts')">Back</button>
   </div>
 </div>
-
-<!-- GAME SCREEN -->
-<div id="game-screen" class="screen">
-  <div class="game-layout">
-    <!-- Score Bar -->
-    <div class="score-bar">
-      <div class="player-score">
-        <div class="player-label">YOU</div>
-        <div class="score-num" id="player-score">0</div>
-        <div class="score-target">/ 50</div>
-        <div class="titan-badge" id="player-titan-badge">🔒 Locked</div>
+<div id="gs" class="screen">
+  <div class="glayout">
+    <div class="sbar">
+      <div class="psc"><div class="plbl">YOU</div><div class="scnum" id="psc">0</div><div class="sctgt">/50</div><div class="tbadge" id="ptb">🔒 Locked</div></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+        <div style="font-family:'Cinzel Decorative',serif;font-size:16px;color:var(--bd2)">⚔</div>
+        <div style="font-family:'Cinzel',serif;font-size:10px;color:var(--tx2)">Turn <span id="tnum">1</span></div>
+        <div id="vba"></div>
       </div>
-      <div class="score-divider">⚔</div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
-        <div class="turn-indicator">Turn <span id="turn-num">1</span></div>
-        <div id="void-mage-btn-container"></div>
-      </div>
-      <div class="score-divider">⚔</div>
-      <div class="player-score">
-        <div class="player-label">AI</div>
-        <div class="score-num" id="ai-score">0</div>
-        <div class="score-target">/ 50</div>
-        <div class="titan-badge" id="ai-titan-badge">🔒 Locked</div>
-      </div>
+      <div class="psc"><div class="plbl">AI</div><div class="scnum" id="aisc">0</div><div class="sctgt">/50</div><div class="tbadge" id="aitb">🔒 Locked</div></div>
     </div>
-
-    <!-- Status Bar -->
-    <div class="status-bar">
-      <div class="turn-indicator"><span id="current-turn-label">Your Turn</span></div>
-      <div class="phase-indicator" id="phase-label">Draw Phase</div>
-      <div class="item-tokens" id="player-tokens"></div>
+    <div class="stbar">
+      <div style="font-family:'Cinzel',serif;font-size:10px;color:var(--tx2)"><span id="tlbl">Your Turn</span></div>
+      <div class="ppill" id="plbl">Action Phase</div>
+      <div class="itoks" id="ptoks"></div>
     </div>
-
-    <!-- Attunement -->
-    <div class="attunement-panel">
-      <div class="attunement-label">ATTUNEMENT</div>
-      <div class="attunement-row" id="attunement-display"></div>
+    <div class="attpan"><div class="attlbl">ATTUNEMENT</div><div style="display:flex;gap:5px;flex-wrap:wrap" id="attd"></div></div>
+    <div class="aizone">
+      <div class="aiinf" id="ailbl">AI Mage</div>
+      <div style="display:flex;gap:3px" id="aihd"></div>
+      <div class="aiinf" id="aisl"></div>
     </div>
-
-    <!-- AI Zone -->
-    <div class="ai-zone">
-      <div class="ai-label">AI HAND</div>
-      <div class="ai-hand-display" id="ai-hand-display"></div>
-      <div style="font-size:10px;color:var(--text3)" id="ai-streak-display"></div>
+    <div class="slarea">
+      <div class="sllbl">Spell Slots — tap glowing WILD? to declare</div>
+      <div class="slrow" id="slrow"></div>
     </div>
-
-    <!-- Spell Slots -->
-    <div class="slots-area">
-      <div class="slots-label">Spell Slots</div>
-      <div class="slots-row" id="slots-row"></div>
+    <div class="msgarea"><div class="gmsg" id="gmsg">Select a card then tap a Spell Slot.</div></div>
+    <div class="harea">
+      <div class="hhdr"><div class="hlbl">YOUR HAND</div><div class="hmeta" id="hmeta">0/5 played</div></div>
+      <div class="hscroll" id="phand"></div>
     </div>
-
-    <!-- Message -->
-    <div class="message-area">
-      <div class="game-message" id="game-message">Draw your cards to begin.</div>
-    </div>
-
-    <!-- Hand -->
-    <div class="hand-area">
-      <div class="hand-label">YOUR HAND — <span id="cards-played-label">0/5 played</span></div>
-      <div class="hand-scroll" id="player-hand"></div>
-    </div>
-
-    <!-- Action Bar -->
-    <div class="action-bar">
-      <button class="btn-action" id="btn-discard" onclick="discardSelected()">Discard</button>
-      <button class="btn-action primary" id="btn-play" onclick="playSelected()">Play Card</button>
-      <button class="btn-action" id="btn-end-turn" onclick="endPlayerTurn()">End Turn</button>
-      <button class="btn-action" onclick="showRules()">📖</button>
+    <div class="abar">
+      <button class="ba pr" id="bplay" onclick="playSelected()">Play Card</button>
+      <button class="ba ti" id="btitan" onclick="useTitan()">⚡ Titan</button>
+      <button class="ba pr" id="bend" onclick="endTurn()">End Turn</button>
+      <button class="ba" onclick="openRules()">📖</button>
     </div>
   </div>
 </div>
-
-<!-- WIN SCREEN -->
-<div id="win-screen" class="screen">
-  <div class="win-emblem" id="win-emblem">🏆</div>
-  <div class="win-title" id="win-title">Victory!</div>
-  <div class="win-subtitle" id="win-subtitle">The elements bow to your mastery</div>
-  <div class="win-scores">
-    <div class="win-score-block">
-      <div class="win-score-label">YOU</div>
-      <div class="win-score-num" id="final-player-score">0</div>
-    </div>
-    <div class="win-score-block">
-      <div class="win-score-label">AI</div>
-      <div class="win-score-num" id="final-ai-score">0</div>
-    </div>
-  </div>
-  <button class="btn-primary" onclick="showScreen('title-screen')">Play Again</button>
+<div id="ws" class="screen">
+  <div class="wemb" id="wemb">🏆</div>
+  <div class="wtit" id="wtit">Victory!</div>
+  <div class="wsub" id="wsub">The elements bow to your mastery</div>
+  <div class="wscores"><div class="wsb"><div class="wsl">YOU</div><div class="wsn" id="wps">0</div></div><div class="wsb"><div class="wsl">AI</div><div class="wsn" id="wais">0</div></div></div>
+  <button class="btnp" onclick="goMageSelect()">Play Again</button>
 </div>
-
-<!-- MODAL: Wild Declare -->
-<div class="modal-overlay" id="wild-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Declare Wild Card</div>
-    <div class="modal-subtitle" id="wild-modal-subtitle">Choose element and number</div>
-    <div id="wild-el-row" class="declare-elements"></div>
-    <div id="wild-num-grid" class="declare-grid"></div>
-    <div class="modal-btn-row">
-      <button class="modal-btn" onclick="closeModal('wild-modal')">Cancel</button>
-      <button class="modal-btn confirm" onclick="confirmWild()">Declare</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Slot Target -->
-<div class="modal-overlay" id="slot-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="slot-modal-title">Choose Spell Slot</div>
-    <div class="modal-subtitle" id="slot-modal-subtitle"></div>
-    <div class="modal-options" id="slot-modal-options"></div>
-    <div class="modal-btn-row">
-      <button class="modal-btn" onclick="closeModal('slot-modal')">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Token Use -->
-<div class="modal-overlay" id="token-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="token-modal-title">Use Item Token</div>
-    <div class="modal-subtitle" id="token-modal-subtitle"></div>
-    <div class="modal-options" id="token-modal-options"></div>
-    <div class="modal-btn-row">
-      <button class="modal-btn" onclick="closeModal('token-modal')">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Rules -->
-<div class="modal-overlay" id="rules-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Mage Craft Rules</div>
-    <div id="rules-content"></div>
-    <div class="modal-btn-row">
-      <button class="modal-btn confirm" onclick="closeModal('rules-modal')">Close</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Discard choose -->
-<div class="modal-overlay" id="discard-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="discard-modal-title">Discard Cards</div>
-    <div class="modal-subtitle">Choose up to 3 cards to discard (draw replacements)</div>
-    <div class="modal-options" id="discard-modal-hand"></div>
-    <div class="modal-btn-row">
-      <button class="modal-btn" onclick="closeModal('discard-modal')">Cancel</button>
-      <button class="modal-btn confirm" onclick="confirmDiscard()">Discard Selected</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Summon Stone -->
-<div class="modal-overlay" id="summon-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Summon Stone</div>
-    <div class="modal-subtitle">Choose a card from the discard pile</div>
-    <div class="modal-options" id="summon-modal-options"></div>
-    <div class="modal-btn-row">
-      <button class="modal-btn" onclick="closeModal('summon-modal')">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: Earth Wolf Discard Search -->
-<div class="modal-overlay" id="wolf-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Forest Body — Stone Wolf</div>
-    <div class="modal-subtitle">Choose an Earth card from the discard pile to place as active card</div>
-    <div class="modal-options" id="wolf-modal-options"></div>
-    <div class="modal-btn-row">
-      <button class="modal-btn" onclick="closeModal('wolf-modal')">Skip</button>
-    </div>
-  </div>
-</div>
-
+<!-- Modals -->
+<div class="moverlay" id="wm"><div class="msheet"><div class="mhdl"></div><div class="mtit">Declare Wild Card</div><div class="msub" id="wmsub"></div><div class="dels" id="wmels"></div><div class="dgrid" id="wmnums"></div><div class="mbtns"><button class="mbtn" onclick="cm('wm')">Cancel</button><button class="mbtn conf" onclick="confirmWild()">Declare</button></div></div></div>
+<div class="moverlay" id="slotm"><div class="msheet"><div class="mhdl"></div><div class="mtit" id="slmt"></div><div class="msub" id="slms"></div><div class="mopts" id="slmo"></div><div class="mbtns"><button class="mbtn" onclick="cm('slotm')">Cancel</button></div></div></div>
+<div class="moverlay" id="pickm"><div class="msheet"><div class="mhdl"></div><div class="mtit" id="pickt">Choose</div><div class="msub" id="picks"></div><div class="mopts" id="picko"></div><div class="mbtns"><button class="mbtn" onclick="cm('pickm')">Cancel</button></div></div></div>
+<div class="moverlay" id="wolfm"><div class="msheet"><div class="mhdl"></div><div class="mtit">Stone Wolf</div><div class="msub" id="wolfsub"></div><div class="mopts" id="wolfopts"></div><div class="mbtns"><button class="mbtn" onclick="wolfSkip()">Skip</button></div></div></div>
+<div class="moverlay" id="handm"><div class="msheet"><div class="mhdl"></div><div class="mtit" id="hmt">Your Hand</div><div class="msub" id="hms"></div><div class="mopts" id="hmo"></div><div class="mbtns"><button class="mbtn" onclick="cm('handm')">Cancel</button></div></div></div>
+<div class="moverlay" id="rulesm"><div class="msheet"><div class="mhdl"></div><div class="mtit">Mage Craft — Rules</div><div id="rcon"></div><div class="mbtns"><button class="mbtn conf" onclick="cm('rulesm')">Close</button></div></div></div>
 <script>
-// ============================================================
-// GAME DATA
-// ============================================================
-const ELEMENTS = ['fire','water','air','earth'];
-const ELEMENT_ICONS = { fire:'🔥', water:'💧', air:'🌪️', earth:'🌿', void:'⬛', none:'✦' };
-const ELEMENT_NAMES = { fire:'Fire', water:'Water', air:'Air', earth:'Earth', void:'Void', none:'—' };
-
-const MAGES = [
-  { id:'fire', element:'fire', name:'Fire Mage', titan:'Ash Dragon', icon:'🐉', color:'var(--fire-glow)',
-    ability15:'Flame Claw: Swap 1 Fire slot card with any card in hand.',
-    ability25:'Blazing Heart: Swap up to 3 Fire slot cards.' },
-  { id:'water', element:'water', name:'Water Mage', titan:'Frost Leviathan', icon:'🐋', color:'var(--water-glow)',
-    ability15:'Frost Bite: Once per turn after drawing, discard 1 and draw 1.',
-    ability25:'Frozen Soul: Discard up to 2, draw same amount.' },
-  { id:'air', element:'air', name:'Air Mage', titan:'Thunder Eagle', icon:'🦅', color:'var(--air-glow)',
-    ability15:'Storm Talon: Move top card of any slot to adjacent slot.',
-    ability25:'Storm Mind: Move top card of any slot to any other slot.' },
-  { id:'earth', element:'earth', name:'Earth Mage', titan:'Stone Wolf', icon:'🐺', color:'var(--earth-glow)',
-    ability15:"Forest Blessing: On clear, search cleared slot's discards for Earth card → place as active.",
-    ability25:'Forest Body: On clear, search full discard pile for Earth card → place as active.' }
+const ELS=['fire','water','air','earth'];
+const EI={fire:'🔥',water:'💧',air:'🌪️',earth:'🌿',void:'⬛'};
+const EN={fire:'Fire',water:'Water',air:'Air',earth:'Earth',void:'Void'};
+const MAGES=[
+  {id:'fire',el:'fire',name:'Fire Mage',titan:'Ash Dragon',icon:'🐉',clr:'var(--fire-g)',a15:'Flame Claw: Swap active Fire slot card(s) with hand cards.',a25:'Blazing Heart: Swap up to 3 Fire slot cards.'},
+  {id:'water',el:'water',name:'Water Mage',titan:'Frost Leviathan',icon:'🐋',clr:'var(--water-g)',a15:'Frost Bite: Discard 1, draw 1.',a25:'Frozen Soul: Discard up to 2, draw same.'},
+  {id:'air',el:'air',name:'Air Mage',titan:'Thunder Eagle',icon:'🦅',clr:'var(--air-g)',a15:'Storm Talon: Move top card to adjacent slot.',a25:'Storm Mind: Move top card to any slot.'},
+  {id:'earth',el:'earth',name:'Earth Mage',titan:'Stone Wolf',icon:'🐺',clr:'var(--earth-g)',a15:"Forest Blessing: On clear, pick Earth card from cleared cards.",a25:'Forest Body: On clear, pick Earth card from full discard pile.'}
 ];
+const TOKS={element:{name:'Arcane Lock',icon:'🔒',desc:'Lock a slot — opponent cannot change element/number next turn.'},number:{name:'Null Sigil',icon:'⚫',desc:'Clear a chosen slot immediately.'},run:{name:'Summon Stone',icon:'💎',desc:'Take any card from the discard pile.'},vertical:{name:'Crystal Ball',icon:'🔮',desc:'Peek top 3 deck cards, keep 1.'},horizontal:{name:'Chaos Rune',icon:'🌀',desc:"Discard a random opponent card; they can't replace next turn."}};
 
-const TOKENS = {
-  element: { name:'Arcane Lock', icon:'🔒', desc:'Lock a slot — opponent cannot change its element/number next turn.' },
-  number:  { name:'Null Sigil',  icon:'⚫', desc:'Clear a slot immediately (sent to discard, reloaded).' },
-  run:     { name:'Summon Stone',icon:'💎', desc:'Search discard pile for any 1 card, add to hand.' },
-  vertical:{ name:'Crystal Ball',icon:'🔮', desc:'Look at top 3 deck cards, take 1, return 2 in any order.' },
-  horizontal:{ name:'Chaos Rune',icon:'🌀', desc:'Opponent discards a random card, cannot replace until end of their next turn.' }
+// STATE
+let G={};
+function initG(){
+G={deck:[],disc:[],
+slots:Array(5).fill(0).map(()=>({stk:[],lock:false,lockFor:‘none’})),
+pH:[],aiH:[],pSc:0,aiSc:0,pM:null,aiM:null,
+pToks:[],aiToks:[],
+pAtt:{ts:0,tk:null,ms:0,mk:null},
+aiAtt:{ts:0,tk:null,ms:0,mk:null},
+pVQ:{el:false,num:false,run:false},
+aiVQ:{el:false,num:false,run:false},
+pVU:false,aiVU:false,
+pTL:0,aiTL:0,pTU:false,
+aiCB:false,pCB:false,
+pTurn:true,turn:1,selC:null,played:0,
+pw:{ci:null,si:null,isSlot:false,ssi:null},
+wEl:null,wN:null,wSlot:null
 };
-
-// ============================================================
-// GAME STATE
-// ============================================================
-let G = {};
-
-function initState() {
-  G = {
-    deck: [], discard: [],
-    slots: Array(5).fill(null).map(()=>({ stack:[], lock:null, nulled:false })),
-    playerHand: [], aiHand: [],
-    playerScore: 0, aiScore: 0,
-    playerMage: null, aiMage: null,
-    playerTokens: [], aiTokens: [],
-    playerAttunement: { typeStreak:0, typeKind:null, methodStreak:0, methodKind:null },
-    aiAttunement: { typeStreak:0, typeKind:null, methodStreak:0, methodKind:null },
-    playerVoidQual: { element:false, number:false, run:false },
-    aiVoidQual: { element:false, number:false, run:false },
-    playerVoidUsed: false, aiVoidUsed: false,
-    playerChaosRune: false, // cannot draw replacement
-    aiChaosRune: false,
-    playerTitanLevel: 0, aiTitanLevel: 0, // 0=locked, 1=awakened, 2=enhanced
-    turn: 1, isPlayerTurn: true,
-    phase: 'draw', // draw, action, resolution, end
-    selectedCardIdx: null,
-    selectedSlotIdx: null,
-    cardsPlayedThisTurn: 0,
-    discardUsedThisTurn: false,
-    wildPending: null, // { cardIdx, forSlot }
-    wildDeclared: null, // { element, number }
-    tokenActionPending: null,
-    pendingSlotAction: null, // for token slot targeting
-    frostBiteUsed: false,
-    flameclawUsed: false,
-    stormTalonUsed: false,
-    wolfBlessingUsed: false,
-    pendingWolfSlot: null,
-    pendingCrystalCards: [],
-    aiChaosCooldown: false,
-    playerTitanAbilityUsed: false,
-  };
 }
 
-// ============================================================
-// DECK BUILDING
-// ============================================================
-function buildDeck() {
-  const cards = [];
-  // Spell Cards 40
-  for(const el of ELEMENTS) {
-    for(let n=1;n<=5;n++) {
-      cards.push({type:'spell',element:el,number:n});
-      cards.push({type:'spell',element:el,number:n});
-    }
-  }
-  // Wild Creature Cards 10
-  const wildCreatures = [
-    {type:'wild',element:'fire',name:'Wyvern'},
-    {type:'wild',element:'fire',name:'Wyvern'},
-    {type:'wild',element:'water',name:'Kelpie'},
-    {type:'wild',element:'water',name:'Kelpie'},
-    {type:'wild',element:'air',name:'Harpy'},
-    {type:'wild',element:'air',name:'Harpy'},
-    {type:'wild',element:'earth',name:'Golem'},
-    {type:'wild',element:'earth',name:'Golem'},
-    {type:'wild',element:'void',name:'Primal Spirit',isUltimate:true},
-    {type:'wild',element:'void',name:'Primal Spirit',isUltimate:true},
-  ];
-  wildCreatures.forEach(c=>cards.push({...c,number:null,declaredElement:null,declaredNumber:null}));
-  // Field Cards 10
-  for(const el of [...ELEMENTS,'void']) {
-    cards.push({type:'field',element:el,number:null});
-    cards.push({type:'field',element:el,number:null});
-  }
-  return shuffle(cards);
+// DECK BUILDERS
+const mkSp=(el,n)=>({t:‘sp’,el,n,dEl:null,dN:null});
+const mkWd=(el,nm)=>({t:‘wd’,el,nm,n:null,dEl:null,dN:null,ult:false});
+const mkUlt=()=>({t:‘wd’,el:‘void’,nm:‘Primal Spirit’,n:null,dEl:null,dN:null,ult:true});
+const mkFd=(el)=>({t:‘fd’,el,n:null});
+function buildDeck(){
+const d=[];
+for(const el of ELS) for(let n=1;n<=5;n++){d.push(mkSp(el,n));d.push(mkSp(el,n));}
+[{el:‘fire’,nm:‘Wyvern’},{el:‘water’,nm:‘Kelpie’},{el:‘air’,nm:‘Harpy’},{el:‘earth’,nm:‘Golem’}].forEach(w=>{d.push(mkWd(w.el,w.nm));d.push(mkWd(w.el,w.nm));});
+d.push(mkUlt());d.push(mkUlt());
+[…ELS,‘void’].forEach(el=>{d.push(mkFd(el));d.push(mkFd(el));});
+return shuf(d);
+}
+function shuf(a){const b=[…a];for(let i=b.length-1;i>0;i–){const j=0|Math.random()*(i+1);[b[i],b[j]]=[b[j],b[i]];}return b;}
+function drawCard(){if(!G.deck.length){G.deck=shuf([…G.disc]);G.disc=[];setMsg(‘Discard reshuffled.’);}return G.deck.pop();}
+
+// SLOT HELPERS — renamed from ‘top’ to ‘slotTop’ to avoid collision with window.top
+function slotTop(si){return G.slots[si].stk.length?G.slots[si].stk[G.slots[si].stk.length-1]:null;}
+function cardEl(c){if(!c)return null;if(c.t===‘fd’)return c.el===‘void’?null:c.el;if(c.t===‘wd’)return c.dEl||(c.ult?null:c.el);return c.el;}
+function cardN(c){if(!c)return null;if(c.t===‘fd’)return null;if(c.t===‘wd’)return c.dN||null;return c.n;}
+const slEl=(si)=>cardEl(slotTop(si));
+const slN=(si)=>cardN(slotTop(si));
+const isUndecl=(si)=>{const t=slotTop(si);return t&&t.t===‘wd’&&!t.dEl&&!t.dN;};
+function reloadSlot(si){const c=drawCard();G.slots[si].stk=[c];G.slots[si].lock=false;}
+
+// PLACEMENT — FIX#4: correct wild placement rules
+function canPlace(card,si){
+const slot=G.slots[si];
+if(slot.lock&&slot.lockFor===‘player’&&G.pTurn)return false;
+if(slot.lock&&slot.lockFor===‘ai’&&!G.pTurn)return false;
+if(card.t===‘fd’)return true;
+const t=slotTop(si);
+if(!t)return true;
+if(t.t===‘wd’&&!t.dEl&&!t.dN)return true;
+const tEl=slEl(si),tN=slN(si);
+if(card.t===‘wd’&&card.ult)return true;
+if(card.t===‘wd’){if(tEl===card.el)return true;if(tN!==null)return true;return false;}
+if(tEl!==null&&tEl===card.el)return true;
+if(tN!==null&&tN===card.n)return true;
+return false;
+}
+const validSlots=(card)=>[0,1,2,3,4].filter(i=>canPlace(card,i));
+
+function placeCard(card,si){
+if(card.t===‘fd’&&card.el===‘void’){G.disc.push(…G.slots[si].stk);G.slots[si].stk=[];reloadSlot(si);return;}
+G.slots[si].stk.push({…card});
 }
 
-function shuffle(arr) {
-  const a=[...arr];
-  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
-  return a;
+// COMBO DETECTION — FIX#3: field cards excluded
+function sScEl(si){const t=slotTop(si);return(t&&t.t!==‘fd’)?cardEl(t):null;}
+function sScN(si){const t=slotTop(si);return(t&&t.t!==‘fd’)?cardN(t):null;}
+function isConsec(ns){const s=[…ns].sort((a,b)=>a-b);for(let i=1;i<s.length;i++)if(s[i]!==s[i-1]+1)return false;return true;}
+
+function detectAll(){
+const res=[];
+for(let si=0;si<5;si++){const stk=G.slots[si].stk.filter(c=>c.t!==‘fd’);res.push(…vertCombos(stk,si));}
+res.push(…horizCombos());
+return res;
+}
+function vertCombos(stk,si){
+const r=[];
+if(stk.filter(c=>c.t===‘wd’&&c.ult).length>=2)r.push({type:‘twin-ult’,pts:8,si,kind:‘element’,method:‘vertical’});
+for(let len=5;len>=3;len–){
+for(let s=0;s<=stk.length-len;s++){
+const w=stk.slice(s,s+len);
+const es=w.map(cardEl),ns=w.map(cardN);
+if(es.every(e=>e&&e===es[0]))r.push({type:‘el-chain’,len,pts:[0,0,0,3,4,5][len],si,s,kind:‘element’,method:‘vertical’});
+if(ns.every(n=>n!==null&&n===ns[0]))r.push({type:‘num-chain’,len,pts:[0,0,0,4,5,6][len],si,s,kind:‘number’,method:‘vertical’});
+const vn=ns.filter(n=>n!==null);if(vn.length===len&&isConsec(vn))r.push({type:‘run’,len,pts:[0,0,0,3,5,7][len],si,s,kind:‘run’,method:‘vertical’});
+}
+}
+return r;
+}
+function horizCombos(){
+const r=[];
+const es=[0,1,2,3,4].map(i=>sScEl(i));
+const ns=[0,1,2,3,4].map(i=>sScN(i));
+for(let len=5;len>=3;len–){
+for(let s=0;s<=5-len;s++){
+const idxs=Array.from({length:len},(_,i)=>s+i);
+const se=idxs.map(i=>es[i]),sn=idxs.map(i=>ns[i]);
+if(se.every(e=>e&&e===se[0]))r.push({type:‘el-row’,len,pts:[0,0,0,4,7,10][len],idxs,kind:‘element’,method:‘horizontal’});
+if(sn.every(n=>n!==null&&n===sn[0]))r.push({type:‘num-row’,len,pts:[0,0,0,5,8,12][len],idxs,kind:‘number’,method:‘horizontal’});
+const vn=sn.filter(n=>n!==null);if(vn.length===len&&isConsec(vn))r.push({type:‘num-run’,len,pts:[0,0,0,6,9,13][len],idxs,kind:‘run’,method:‘horizontal’});
+}
+}
+const elSet=new Set(es.filter(e=>e&&ELS.includes(e)));
+if(elSet.size===4){const idxs=ELS.map(e=>es.indexOf(e));r.push({type:‘el-set’,pts:8,idxs,kind:‘element’,method:‘horizontal’});}
+for(const el of ELS){
+const match=[0,1,2,3,4].filter(i=>es[i]===el);
+const ultI=[0,1,2,3,4].filter(i=>{const t=slotTop(i);return t&&t.t===‘wd’&&t.ult;});
+if(match.length>=4&&ultI.length>=1){const idxs=[…new Set([…match,…ultI])].slice(0,5);r.push({type:‘perf-harm’,pts:11,idxs,kind:‘element’,method:‘horizontal’});}
+}
+return r;
 }
 
-function drawCard() {
-  if(G.deck.length===0) reshuffleDeck();
-  return G.deck.pop();
+// SCORING — FIX#2: only called from endTurn
+function resolveAll(isPlayer){
+const combos=detectAll();if(!combos.length)return;
+const scored=[],used=new Set();
+for(const c of combos.sort((a,b)=>b.pts-a.pts)){
+const sl=c.idxs||[c.si];if(sl.some(s=>used.has(s)))continue;sl.forEach(s=>used.add(s));scored.push(c);
 }
-
-function reshuffleDeck() {
-  G.deck = shuffle([...G.discard]);
-  G.discard = [];
-  showMessage('Discard pile reshuffled into draw deck.','');
+let tot=0;
+scored.forEach(c=>{tot+=c.pts;updAtt(isPlayer,c.kind,c.method);updVQ(isPlayer,c);comboFlash(c);});
+if(isPlayer)G.pSc+=tot;else G.aiSc+=tot;
+for(const si of used)clearSlot(si,isPlayer);
+chkTitanLv(isPlayer);
 }
-
-// ============================================================
-// SLOT HELPERS
-// ============================================================
-function slotTop(slot) { return slot.stack.length ? slot.stack[slot.stack.length-1] : null; }
-function slotElement(slot) {
-  const t = slotTop(slot);
-  if(!t) return null;
-  if(t.type==='field') return t.element;
-  if(t.type==='wild') return t.declaredElement || null;
-  return t.element;
+function clearSlot(si,isPlayer){
+const cleared=[…G.slots[si].stk];G.disc.push(…cleared);G.slots[si].stk=[];
+if(isPlayer&&G.pM&&G.pM.id===‘earth’&&G.pTL>=1&&!G.pTU){
+const pool=G.pTL>=2?G.disc:cleared;
+const ec=pool.filter(c=>c.el===‘earth’&&c.t===‘sp’);
+if(ec.length){G.wSlot=si;showWolfModal(ec,si);return;}
 }
-function slotNumber(slot) {
-  const t = slotTop(slot);
-  if(!t) return null;
-  if(t.type==='field') return null;
-  if(t.type==='wild') return t.declaredNumber || null;
-  return t.number;
+reloadSlot(si);
 }
-function reloadSlot(idx) {
-  const c = drawCard();
-  c.declaredElement = null; c.declaredNumber = null;
-  G.slots[idx].stack = [c];
+function showWolfModal(cards,si){
+const o=document.getElementById(‘wolfopts’);o.innerHTML=’’;
+document.getElementById(‘wolfsub’).textContent=G.pTL>=2?‘Search full discard pile for Earth spell card’:“Search cleared slot’s cards for Earth spell card”;
+cards.forEach(card=>{const d=document.createElement(‘div’);d.className=‘mopt’;d.innerHTML=`<div class="moptt">${cardLbl(card)}</div>`;d.onclick=()=>{const ri=G.disc.lastIndexOf(card);if(ri>=0)G.disc.splice(ri,1);G.slots[si].stk=[{…card}];G.pTU=true;cm(‘wolfm’);render();};o.appendChild(d);});
+om(‘wolfm’);
 }
+function wolfSkip(){if(G.wSlot!==null){reloadSlot(G.wSlot);G.wSlot=null;}cm(‘wolfm’);render();}
 
-// ============================================================
-// PLACEMENT VALIDATION
-// ============================================================
-function canPlayCard(card, slotIdx) {
-  const slot = G.slots[slotIdx];
-  if(slot.lock && G.isPlayerTurn) return false; // locked by opponent
-  if(card.type==='field') return true;
-  if(card.type==='wild' && card.isUltimate) return true; // ultimate wild can go anywhere
-  const top = slotTop(slot);
-  if(!top) return true; // empty slot
-  const topEl = slotElement(slot);
-  const topNum = slotNumber(slot);
-  // Wild element card: can go if element matches
-  if(card.type==='wild') {
-    if(card.element==='void') return true;
-    if(topEl === card.element) return true;
-    if(topNum !== null) return true; // can match number by declaration
-    return false;
-  }
-  // Spell card: number match or element match
-  if(topEl === card.element) return true; // element switch
-  if(topNum !== null && topNum === card.number) return true; // number switch
-  return false;
+// ATTUNEMENT
+function updAtt(isP,kind,method){
+const att=isP?G.pAtt:G.aiAtt,toks=isP?G.pToks:G.aiToks;
+function tick(sk,kf,ks){if(att[kf]===sk)att[ks]++;else{att[ks]=1;att[kf]=sk;}if(att[ks]>=3){grantTok(isP,sk,toks);att[ks]=0;}}
+tick(kind,‘tk’,‘ts’);tick(method,‘mk’,‘ms’);
 }
-
-function getPlayableSlots(card) {
-  return G.slots.map((_,i)=>i).filter(i=>canPlayCard(card,i));
+function grantTok(isP,type,list){if(list.length>=2)list.shift();list.push(type);if(isP)setMsg(’✨ Attunement! Earned: ’+TOKS[type].name,‘ok’);}
+function updVQ(isP,c){
+const q=isP?G.pVQ:G.aiVQ;
+if([‘el-chain’,‘el-row’].includes(c.type)&&c.len===5)q.el=true;
+if([‘el-set’,‘perf-harm’].includes(c.type))q.el=true;
+if([‘num-chain’,‘num-row’].includes(c.type)&&c.len===5)q.num=true;
+if([‘run’,‘num-run’].includes(c.type)&&c.len===5)q.run=true;
 }
-
-// ============================================================
-// PLAYING A CARD
-// ============================================================
-function placeCard(card, slotIdx) {
-  const slot = G.slots[slotIdx];
-  // Void field card clears slot
-  if(card.type==='field' && card.element==='void') {
-    const cleared = slot.stack;
-    G.discard.push(...cleared);
-    reloadSlot(slotIdx);
-    return;
-  }
-  // Field card — changes element, removes number
-  if(card.type==='field') {
-    slot.stack.push({...card});
-    return;
-  }
-  slot.stack.push({...card});
+function chkTitanLv(isP){
+const sc=isP?G.pSc:G.aiSc,prev=isP?G.pTL:G.aiTL,lv=sc>=25?2:sc>=15?1:0;
+if(lv>prev){if(isP)G.pTL=lv;else G.aiTL=lv;const m=isP?G.pM:G.aiM;setMsg(‘⚡ ‘+m.titan+’ ‘+(lv===2?‘Enhanced’:‘Awakened’)+’!’,‘ok’);}
 }
-
-// ============================================================
-// COMBO DETECTION
-// ============================================================
-function detectCombos() {
-  const results = [];
-  // Vertical combos (within each slot)
-  for(let i=0;i<5;i++) {
-    if(G.slots[i].nulled) continue;
-    const combos = detectVerticalCombos(G.slots[i].stack, i);
-    results.push(...combos);
-  }
-  // Horizontal combos
-  const hCombos = detectHorizontalCombos();
-  results.push(...hCombos);
-  return results;
-}
-
-function getCardEl(card) {
-  if(!card) return null;
-  if(card.type==='field') return card.element==='void'?null:card.element;
-  if(card.type==='wild') return card.declaredElement || card.element;
-  return card.element;
-}
-function getCardNum(card) {
-  if(!card) return null;
-  if(card.type==='field') return null;
-  if(card.type==='wild') return card.declaredNumber||null;
-  return card.number;
-}
-
-function detectVerticalCombos(stack, slotIdx) {
-  const combos = [];
-  if(stack.length < 3) return combos;
-  // Check all windows of 3,4,5
-  for(let len=5;len>=3;len--) {
-    for(let start=stack.length-len;start>=0;start--) {
-      const window = stack.slice(start, start+len);
-      const els = window.map(getCardEl);
-      const nums = window.map(getCardNum);
-      // Twin Ultimates (len 2+ but check whole stack)
-      if(len===2) continue;
-      // Element Chain
-      if(els.every(e=>e&&e===els[0])) {
-        const pts = len===3?3:len===4?4:5;
-        combos.push({type:'element-chain',len,pts,slotIdx,start,kind:'element',method:'vertical'});
-      }
-      // Number Chain
-      if(nums.every(n=>n!==null&&n===nums[0])) {
-        const pts = len===3?4:len===4?5:6;
-        combos.push({type:'number-chain',len,pts,slotIdx,start,kind:'number',method:'vertical'});
-      }
-      // Run
-      const validNums = nums.filter(n=>n!==null);
-      if(validNums.length===len && isConsecutive(validNums)) {
-        const pts = len===3?3:len===4?5:7;
-        combos.push({type:'run',len,pts,slotIdx,start,kind:'run',method:'vertical'});
-      }
-    }
-  }
-  // Twin Ultimates — both in same stack
-  const ultimates = stack.filter(c=>c.type==='wild'&&c.isUltimate);
-  if(ultimates.length>=2) {
-    combos.push({type:'twin-ultimates',len:2,pts:8,slotIdx,start:0,kind:'element',method:'vertical'});
-  }
-  return combos;
-}
-
-function isConsecutive(nums) {
-  const sorted = [...nums].sort((a,b)=>a-b);
-  for(let i=1;i<sorted.length;i++) if(sorted[i]!==sorted[i-1]+1) return false;
-  return true;
-}
-
-function detectHorizontalCombos() {
-  const combos = [];
-  const tops = G.slots.map(s=>slotTop(s));
-  const els = G.slots.map(s=>slotElement(s));
-  const nums = G.slots.map(s=>slotNumber(s));
-  // Check nulled slots
-  const active = G.slots.map((s,i)=>!s.nulled);
-  // Element rows (3,4,5 adjacent)
-  for(let len=5;len>=3;len--) {
-    for(let start=0;start<=5-len;start++) {
-      const idxs = Array.from({length:len},(_,i)=>start+i);
-      if(idxs.some(i=>!active[i])) continue;
-      const slEls = idxs.map(i=>els[i]);
-      if(slEls.every(e=>e&&e===slEls[0])) {
-        const pts = len===3?4:len===4?7:10;
-        combos.push({type:'element-row',len,pts,slotIdxs:idxs,kind:'element',method:'horizontal'});
-      }
-      const slNums = idxs.map(i=>nums[i]);
-      if(slNums.every(n=>n!==null&&n===slNums[0])) {
-        const pts = len===3?5:len===4?8:12;
-        combos.push({type:'number-row',len,pts,slotIdxs:idxs,kind:'number',method:'horizontal'});
-      }
-      if(slNums.every(n=>n!==null) && isConsecutive(slNums)) {
-        const pts = len===3?6:len===4?9:13;
-        combos.push({type:'number-run',len,pts,slotIdxs:idxs,kind:'run',method:'horizontal'});
-      }
-    }
-  }
-  // Elemental Set (Fire+Water+Air+Earth anywhere in top 4 of 5 slots)
-  const uniqueEls = new Set(els.filter(e=>e&&ELEMENTS.includes(e)));
-  if(uniqueEls.size===4) {
-    const idxs = ELEMENTS.map(el=>els.indexOf(el)).filter(i=>i>=0);
-    combos.push({type:'elemental-set',pts:8,slotIdxs:idxs,kind:'element',method:'horizontal'});
-  }
-  // Perfect Harmony: 4 same + ultimate wild on top
-  for(let len=4;len<=4;len++) {
-    for(let start=0;start<=5-len;start++) {
-      const idxs = Array.from({length:len+1},(_,i)=>start+i).filter(i=>i<5);
-      if(idxs.length<5) continue;
-      const hasFourSame = (() => {
-        for(const el of ELEMENTS) {
-          const matching = idxs.filter(i=>els[i]===el);
-          if(matching.length>=4) {
-            const remaining = idxs.filter(i=>els[i]!==el);
-            if(remaining.length===1 && tops[remaining[0]] && tops[remaining[0]].type==='wild' && tops[remaining[0]].isUltimate) return true;
-          }
-        }
-        return false;
-      })();
-      if(hasFourSame) combos.push({type:'perfect-harmony',pts:11,slotIdxs:idxs,kind:'element',method:'horizontal'});
-    }
-  }
-  return combos;
-}
-
-// ============================================================
-// SCORING
-// ============================================================
-function scoreCombo(combo, isPlayer) {
-  let pts = combo.pts;
-  // Dragon enhanced ability fires from dragon passive not here
-  if(isPlayer && G.playerMage.id==='fire' && G.playerTitanLevel>=1 && combo.kind==='element' && combo.method==='horizontal') {
-    // Dragon doesn't add pts in this version — ability is active swap
-  }
-  if(isPlayer) G.playerScore += pts;
-  else G.aiScore += pts;
-
-  // Attunement tracking
-  updateAttunement(isPlayer, combo.kind, combo.method);
-  // Void qual tracking
-  updateVoidQual(isPlayer, combo);
-
-  // Clear scored slots
-  if(combo.slotIdxs) {
-    const uniqueSlots = [...new Set(combo.slotIdxs)];
-    uniqueSlots.forEach(i=>clearSlot(i, isPlayer));
-  } else if(combo.slotIdx !== undefined) {
-    clearSlot(combo.slotIdx, isPlayer);
-  }
-
-  // Check titan awakening
-  checkTitanLevel(isPlayer);
-  checkWin();
-}
-
-function clearSlot(idx, isPlayer) {
-  const slot = G.slots[idx];
-  G.discard.push(...slot.stack);
-  slot.stack = [];
-  slot.lock = null;
-  slot.nulled = false;
-  // Wolf ability
-  if(isPlayer && G.playerMage.id==='earth' && G.playerTitanLevel>=1 && !G.wolfBlessingUsed) {
-    triggerWolfBlessing(idx);
-    return;
-  }
-  reloadSlot(idx);
-}
-
-function triggerWolfBlessing(slotIdx) {
-  G.pendingWolfSlot = slotIdx;
-  // Find earth cards in discard
-  const pool = G.playerTitanLevel>=2 ? G.discard : G.discard; // both levels use discard (blessing uses cleared slot cards which are now in discard)
-  const earthCards = G.discard.filter(c=>getCardEl(c)==='earth');
-  if(earthCards.length===0) { reloadSlot(slotIdx); return; }
-  const opts = document.getElementById('wolf-modal-options');
-  opts.innerHTML = '';
-  earthCards.forEach((card,i)=>{
-    const div = document.createElement('div');
-    div.className = 'modal-option';
-    div.innerHTML = `<div class="modal-option-title">${cardLabel(card)}</div>`;
-    div.onclick = ()=>{
-      // Remove from discard
-      const realIdx = G.discard.lastIndexOf(card);
-      if(realIdx>=0) G.discard.splice(realIdx,1);
-      G.slots[slotIdx].stack = [{...card}];
-      G.wolfBlessingUsed = true;
-      closeModal('wolf-modal');
-      render();
-    };
-    opts.appendChild(div);
-  });
-  openModal('wolf-modal');
-}
-
-function updateAttunement(isPlayer, kind, method) {
-  const att = isPlayer ? G.playerAttunement : G.aiAttunement;
-  const tokenList = isPlayer ? G.playerTokens : G.aiTokens;
-
-  // Type streak
-  if(att.typeKind===kind) {
-    att.typeStreak++;
-  } else {
-    att.typeStreak = 1; att.typeKind = kind;
-  }
-  if(att.typeStreak>=3) {
-    awardToken(isPlayer, kind, tokenList);
-    att.typeStreak = 0;
-  }
-
-  // Method streak
-  if(att.methodKind===method) {
-    att.methodStreak++;
-  } else {
-    att.methodStreak = 1; att.methodKind = method;
-  }
-  if(att.methodStreak>=3) {
-    awardToken(isPlayer, method, tokenList);
-    att.methodStreak = 0;
-  }
-}
-
-function awardToken(isPlayer, tokenType, tokenList) {
-  if(tokenList.length>=2) {
-    tokenList.shift(); // discard oldest
-  }
-  tokenList.push(tokenType);
-  if(isPlayer) showMessage(`✨ Attunement! Earned: ${TOKENS[tokenType].name}`, 'success');
-}
-
-function updateVoidQual(isPlayer, combo) {
-  const qual = isPlayer ? G.playerVoidQual : G.aiVoidQual;
-  if(['element-chain','element-row','elemental-set','perfect-harmony'].includes(combo.type)) {
-    if(combo.len===5 || combo.type==='elemental-set' || combo.type==='perfect-harmony') qual.element = true;
-  }
-  if(['number-chain','number-row'].includes(combo.type) && combo.len===5) qual.number = true;
-  if(['run','number-run'].includes(combo.type) && combo.len===5) qual.run = true;
-}
-
-function checkTitanLevel(isPlayer) {
-  const score = isPlayer ? G.playerScore : G.aiScore;
-  const prev = isPlayer ? G.playerTitanLevel : G.aiTitanLevel;
-  let level = 0;
-  if(score>=25) level=2; else if(score>=15) level=1;
-  if(level>prev) {
-    if(isPlayer) G.playerTitanLevel=level;
-    else G.aiTitanLevel=level;
-    const mage = isPlayer ? G.playerMage : G.aiMage;
-    const msg = level===2 ? `🌟 ${mage.titan} enhanced! (${mage.ability25})` : `⚡ ${mage.titan} awakened! (${mage.ability15})`;
-    showMessage(msg, 'success');
-  }
-}
-
-function checkWin() {
-  if(G.playerScore>=50) { showWin(true); return true; }
-  if(G.aiScore>=50) { showWin(false); return true; }
-  return false;
-}
-
-// ============================================================
-// MAGE SELECT UI
-// ============================================================
-function renderMageSelect() {
-  const grid = document.getElementById('mage-grid');
-  grid.innerHTML = '';
-  MAGES.forEach(m=>{
-    const div = document.createElement('div');
-    div.className = `mage-card${G.aiMage&&G.aiMage.id===m.id?' disabled':''}`;
-    div.dataset.element = m.element;
-    div.dataset.id = m.id;
-    div.innerHTML = `
-      <div class="mage-icon">${m.icon}</div>
-      <div class="mage-name">${m.name}</div>
-      <div class="mage-titan">${m.titan}</div>
-      <div class="mage-ability" style="color:${m.color}">${m.ability15}</div>
-      <div class="mage-ability" style="color:var(--text3);margin-top:2px">${m.ability25}</div>
-    `;
-    div.onclick = ()=>{
-      document.querySelectorAll('.mage-card').forEach(c=>c.classList.remove('selected'));
-      div.classList.add('selected');
-      G.playerMage = m;
-      document.getElementById('start-game-btn').disabled = false;
-    };
-    grid.appendChild(div);
-  });
-}
-
-// ============================================================
-// GAME START
-// ============================================================
-function startGame() {
-  if(!G.playerMage) return;
-  // AI picks a different mage
-  const available = MAGES.filter(m=>m.id!==G.playerMage.id);
-  G.aiMage = available[Math.floor(Math.random()*available.length)];
-  // Build and deal
-  G.deck = buildDeck();
-  for(let i=0;i<5;i++) G.playerHand.push(drawCard());
-  for(let i=0;i<5;i++) G.aiHand.push(drawCard());
-  // Initial slot load
-  for(let i=0;i<5;i++) reloadSlot(i);
-  showScreen('game-screen');
-  G.isPlayerTurn = Math.random()<0.5;
-  if(G.isPlayerTurn) {
-    G.phase = 'action';
-    showMessage("Your turn! Play cards or end your turn.",'');
-  } else {
-    showMessage("AI goes first...",'');
-    setTimeout(()=>doAiTurn(), 1000);
-  }
-  render();
-}
-
-// ============================================================
-// RENDER
-// ============================================================
-function render() {
-  renderScores();
-  renderSlots();
-  renderPlayerHand();
-  renderAiHand();
-  renderAttunement();
-  renderTokens();
-  renderVoidMageBtn();
-  renderActionBar();
-  document.getElementById('turn-num').textContent = G.turn;
-  document.getElementById('current-turn-label').textContent = G.isPlayerTurn ? 'Your Turn' : "AI's Turn";
-  document.getElementById('phase-label').textContent = phaseLabel();
-  document.getElementById('cards-played-label').textContent = `${G.cardsPlayedThisTurn}/5 played`;
-}
-
-function phaseLabel() {
-  if(!G.isPlayerTurn) return 'AI Thinking...';
-  return G.phase==='action' ? 'Action Phase' : G.phase==='draw' ? 'Draw Phase' : 'Resolution';
-}
-
-function renderScores() {
-  document.getElementById('player-score').textContent = G.playerScore;
-  document.getElementById('ai-score').textContent = G.aiScore;
-  const pb = document.getElementById('player-titan-badge');
-  const ab = document.getElementById('ai-titan-badge');
-  const renderBadge = (el, mage, level) => {
-    if(!mage) return;
-    if(level===0) { el.textContent='🔒 Locked'; el.className='titan-badge'; }
-    else if(level===1) { el.textContent=`⚡ ${mage.icon} Awakened`; el.className='titan-badge awakened'; }
-    else { el.textContent=`🌟 ${mage.icon} Enhanced`; el.className='titan-badge enhanced'; }
-  };
-  if(G.playerMage) renderBadge(pb, G.playerMage, G.playerTitanLevel);
-  if(G.aiMage) renderBadge(ab, G.aiMage, G.aiTitanLevel);
-}
-
-function renderSlots() {
-  const row = document.getElementById('slots-row');
-  row.innerHTML = '';
-  G.slots.forEach((slot,i)=>{
-    const div = document.createElement('div');
-    div.className = 'spell-slot';
-    if(slot.lock) div.classList.add('locked');
-    if(slot.nulled) div.classList.add('nulled');
-    if(G.selectedSlotIdx===i) div.classList.add('selected-slot');
-
-    const top = slotTop(slot);
-    const el = slotElement(slot);
-    const num = slotNumber(slot);
-
-    if(top) {
-      if(top.type==='wild' && !top.declaredElement && !top.declaredNumber) {
-        div.innerHTML=`<div class="slot-element-display el-void">WILD</div><div class="slot-stack-count">Stack: ${slot.stack.length}</div>`;
-      } else if(top.type==='field') {
-        div.innerHTML=`<div style="font-size:20px">${ELEMENT_ICONS[top.element]}</div><div class="slot-element-display el-${el}">${ELEMENT_NAMES[el]||'—'}</div><div class="slot-stack-count">Field • ${slot.stack.length}</div>`;
-      } else {
-        div.innerHTML=`<div class="slot-number-display el-${el}">${num||'?'}</div><div style="font-size:14px">${ELEMENT_ICONS[el]||''}</div><div class="slot-element-display el-${el}">${ELEMENT_NAMES[el]||'—'}</div><div class="slot-stack-count">Stack: ${slot.stack.length}</div>`;
-      }
-    } else {
-      div.innerHTML=`<div class="slot-empty-label">Empty</div>`;
-    }
-    if(slot.lock) div.innerHTML+=`<div class="slot-lock-icon">🔒</div>`;
-    if(slot.nulled) div.innerHTML+=`<div class="slot-lock-icon">⚫</div>`;
-
-    div.onclick = ()=>handleSlotClick(i);
-    row.appendChild(div);
-  });
-}
-
-function renderPlayerHand() {
-  const hand = document.getElementById('player-hand');
-  hand.innerHTML = '';
-  G.playerHand.forEach((card,i)=>{
-    const div = document.createElement('div');
-    div.className = `card ${card.element}-card${card.type==='wild'?' wild-card':''}`;
-    if(G.selectedCardIdx===i) div.classList.add('selected');
-    div.innerHTML = cardInnerHTML(card);
-    div.onclick = ()=>handleCardClick(i);
-    hand.appendChild(div);
-  });
-}
-
-function cardInnerHTML(card) {
-  if(card.type==='field') {
-    return `<div class="card-icon">${ELEMENT_ICONS[card.element]}</div><div class="card-element el-${card.element}">Field</div><div class="card-type-label">${ELEMENT_NAMES[card.element]}</div>`;
-  }
-  if(card.type==='wild') {
-    const el = card.declaredElement||card.element;
-    const num = card.declaredNumber||'?';
-    const label = card.isUltimate ? 'Primal' : card.name||'Wild';
-    return `<div class="card-corner">${ELEMENT_ICONS[el]}</div><div class="card-number el-${el}">${num}</div><div class="card-element el-${el}">${card.isUltimate?'Primal':'Wild'}</div><div class="card-type-label">${label}</div>`;
-  }
-  return `<div class="card-corner">${ELEMENT_ICONS[card.element]}</div><div class="card-number el-${card.element}">${card.number}</div><div class="card-icon" style="font-size:14px">${ELEMENT_ICONS[card.element]}</div><div class="card-element el-${card.element}">${ELEMENT_NAMES[card.element]}</div>`;
-}
-
-function cardLabel(card) {
-  if(card.type==='field') return `${ELEMENT_ICONS[card.element]} ${ELEMENT_NAMES[card.element]} Field`;
-  if(card.type==='wild') return card.isUltimate ? `⬛ Primal Spirit (Wild)` : `${ELEMENT_ICONS[card.element]} ${card.name} (Wild)`;
-  return `${ELEMENT_ICONS[card.element]} ${ELEMENT_NAMES[card.element]} ${card.number}`;
-}
-
-function renderAiHand() {
-  const area = document.getElementById('ai-hand-display');
-  area.innerHTML = '';
-  for(let i=0;i<G.aiHand.length;i++) {
-    const div = document.createElement('div');
-    div.className = 'ai-card-back';
-    area.appendChild(div);
-  }
-  const str = document.getElementById('ai-streak-display');
-  str.textContent = `T:${G.aiAttunement.typeStreak} M:${G.aiAttunement.methodStreak}`;
-}
-
-function renderAttunement() {
-  const d = document.getElementById('attunement-display');
-  d.innerHTML = '';
-  const att = G.playerAttunement;
-  const makeStreak = (label, val, kind) => {
-    const span = document.createElement('span');
-    span.className = `streak-badge${val>=2?' active':''}${val>=3?' ready':''}`;
-    span.textContent = `${label}: ${val}/3`;
-    d.appendChild(span);
-  };
-  if(att.typeKind) makeStreak(att.typeKind.charAt(0).toUpperCase()+att.typeKind.slice(1), att.typeStreak, att.typeKind);
-  if(att.methodKind) makeStreak(att.methodKind.charAt(0).toUpperCase()+att.methodKind.slice(1), att.methodStreak, att.methodKind);
-  // Void qual
-  const qual = G.playerVoidQual;
-  if(qual.element||qual.number||qual.run) {
-    const span = document.createElement('span');
-    span.className = 'streak-badge';
-    span.style.color='var(--void-glow)';
-    span.textContent = `Void: ${qual.element?'El ':''}${qual.number?'Num ':''}${qual.run?'Run':''}`;
-    d.appendChild(span);
-  }
-}
-
-function renderTokens() {
-  const d = document.getElementById('player-tokens');
-  d.innerHTML = '';
-  G.playerTokens.forEach((tok,i)=>{
-    const btn = document.createElement('div');
-    btn.className = 'token-chip';
-    btn.title = TOKENS[tok].name;
-    btn.textContent = TOKENS[tok].icon;
-    btn.onclick = ()=>useToken(i);
-    d.appendChild(btn);
-  });
-}
-
-function renderVoidMageBtn() {
-  const c = document.getElementById('void-mage-btn-container');
-  c.innerHTML = '';
-  const qual = G.playerVoidQual;
-  if(!G.playerVoidUsed && qual.element && qual.number && qual.run) {
-    const btn = document.createElement('button');
-    btn.className = 'void-mage-btn';
-    btn.textContent = '⬛ Void Mage';
-    btn.onclick = ()=>activateVoidMage();
-    c.appendChild(btn);
-  }
-}
-
-function renderActionBar() {
-  const isPlayer = G.isPlayerTurn;
-  document.getElementById('btn-play').disabled = !isPlayer || G.selectedCardIdx===null || G.cardsPlayedThisTurn>=5 || G.phase!=='action';
-  document.getElementById('btn-discard').disabled = !isPlayer || G.phase!=='action';
-  document.getElementById('btn-end-turn').disabled = !isPlayer || G.phase!=='action';
-}
-
-// ============================================================
-// PLAYER INTERACTIONS
-// ============================================================
-function handleCardClick(idx) {
-  if(!G.isPlayerTurn || G.phase!=='action') return;
-  G.selectedCardIdx = G.selectedCardIdx===idx ? null : idx;
-  G.selectedSlotIdx = null;
-  render();
-  if(G.selectedCardIdx!==null) showMessage('Now tap a Spell Slot to play this card.','');
-  else showMessage('','');
-}
-
-function handleSlotClick(slotIdx) {
-  if(!G.isPlayerTurn || G.phase!=='action') return;
-  if(G.selectedCardIdx===null) {
-    showMessage('Select a card from your hand first.','error');
-    return;
-  }
-  const card = G.playerHand[G.selectedCardIdx];
-  if(!canPlayCard(card, slotIdx)) {
-    showMessage('Cannot play that card here. Check placement rules.','error');
-    return;
-  }
-  // Wild needs declaration?
-  if(card.type==='wild' && (!card.declaredElement || !card.declaredNumber)) {
-    G.wildPending = { cardIdx: G.selectedCardIdx, forSlot: slotIdx };
-    openWildModal(card);
-    return;
-  }
-  commitPlay(G.selectedCardIdx, slotIdx);
-}
-
-function commitPlay(cardIdx, slotIdx) {
-  const card = G.playerHand.splice(cardIdx,1)[0];
-  G.selectedCardIdx = null;
-  placeCard(card, slotIdx);
-  G.cardsPlayedThisTurn++;
-
-  // Check combos
-  const combos = detectCombos();
-  if(combos.length>0) {
-    combos.forEach(c=>{
-      showComboFlash(c);
-      scoreCombo(c, true);
-    });
-    if(checkWin()) return;
-  }
-
-  // Titan: Fire — Flame Claw (active ability, handled via titan btn, not auto)
-  // Eagle: Storm Talon — handled via button
-  render();
-  showMessage(`Card played. ${5-G.cardsPlayedThisTurn} plays remaining.`,'');
-}
-
-function playSelected() {
-  // Try Titan ability if applicable
-  if(G.selectedCardIdx===null && G.playerMage.id==='fire' && G.playerTitanLevel>=1 && !G.flameclawUsed) {
-    triggerFlameClawUI();
-    return;
-  }
-  if(G.selectedCardIdx===null) { showMessage('Select a card first.','error'); return; }
-  // Find valid slots
-  const card = G.playerHand[G.selectedCardIdx];
-  const validSlots = getPlayableSlots(card);
-  if(validSlots.length===0) { showMessage('No valid slots for this card.','error'); return; }
-  if(validSlots.length===1) { handleSlotClick(validSlots[0]); return; }
-  // Show slot picker if needed
-  showSlotPicker('Play Card', 'Choose a Spell Slot', validSlots, (si)=>{
-    closeModal('slot-modal');
-    handleSlotClick(si);
-  });
-}
-
-function discardSelected() {
-  if(!G.isPlayerTurn || G.phase!=='action') return;
-  // Show discard modal with hand
-  const opts = document.getElementById('discard-modal-hand');
-  opts.innerHTML = '';
-  let selected = [];
-  G.playerHand.forEach((card,i)=>{
-    const div = document.createElement('div');
-    div.className = 'modal-option';
-    div.innerHTML = `<div class="modal-option-title">${cardLabel(card)}</div>`;
-    div.onclick = ()=>{
-      if(selected.includes(i)) {
-        selected = selected.filter(x=>x!==i);
-        div.style.borderColor='var(--border2)';
-      } else if(selected.length<3) {
-        selected.push(i);
-        div.style.borderColor='var(--gold)';
-      }
-    };
-    opts.appendChild(div);
-  });
-  G._pendingDiscardSelected = ()=>selected;
-  openModal('discard-modal');
-}
-
-function confirmDiscard() {
-  const selected = G._pendingDiscardSelected ? G._pendingDiscardSelected() : [];
-  if(selected.length===0) { closeModal('discard-modal'); return; }
-  const sorted = [...selected].sort((a,b)=>b-a);
-  sorted.forEach(i=>{ G.discard.push(G.playerHand.splice(i,1)[0]); });
-  // Draw replacements
-  for(let i=0;i<sorted.length;i++) { if(G.deck.length||G.discard.length) G.playerHand.push(drawCard()); }
-  closeModal('discard-modal');
-  render();
-  showMessage(`Discarded ${sorted.length} card(s) and drew replacements.`,'');
-}
-
-// ============================================================
-// TITAN ABILITIES - PLAYER
-// ============================================================
-function triggerFlameClawUI() {
-  if(G.flameclawUsed) { showMessage('Flame Claw already used this turn.','error'); return; }
-  const fireSlots = G.slots.map((s,i)=>i).filter(i=>slotElement(G.slots[i])==='fire');
-  if(fireSlots.length===0) { showMessage('No Fire slots available.','error'); return; }
-  const maxSwaps = G.playerTitanLevel>=2 ? 3 : 1;
-  showSlotPicker('Flame Claw', `Swap a Fire slot card with a hand card (up to ${maxSwaps})`, fireSlots, (si)=>{
-    closeModal('slot-modal');
-    // Choose hand card to swap in
-    showHandPicker('Choose card from hand to place in slot', (hi)=>{
-      const slotCard = slotTop(G.slots[si]);
-      const handCard = G.playerHand.splice(hi,1)[0];
-      G.slots[si].stack[G.slots[si].stack.length-1] = handCard;
-      G.playerHand.push(slotCard);
-      G.flameclawUsed = true;
-      render();
-      showMessage('Flame Claw used! Card swapped.','success');
-    });
-  });
-}
-
-function triggerStormTalonUI() {
-  if(G.stormTalonUsed) { showMessage('Storm Talon already used this turn.','error'); return; }
-  const nonEmpty = G.slots.map((s,i)=>i).filter(i=>G.slots[i].stack.length>0);
-  if(nonEmpty.length<2) { showMessage('Need at least 2 non-empty slots.','error'); return; }
-  showSlotPicker('Storm Talon', 'Choose slot to move top card FROM', nonEmpty, (fromIdx)=>{
-    closeModal('slot-modal');
-    const maxDist = G.playerTitanLevel>=2 ? 4 : 1;
-    const valid = G.slots.map((_,i)=>i).filter(i=>i!==fromIdx && Math.abs(i-fromIdx)<=maxDist);
-    showSlotPicker('Storm Talon', 'Move top card TO this slot', valid, (toIdx)=>{
-      closeModal('slot-modal');
-      const card = G.slots[fromIdx].stack.pop();
-      G.slots[toIdx].stack.push(card);
-      if(G.slots[fromIdx].stack.length===0) reloadSlot(fromIdx);
-      G.stormTalonUsed = true;
-      render();
-      showMessage('Storm Talon used!','success');
-    });
-  });
-}
-
-function triggerFrostBiteUI() {
-  if(G.frostBiteUsed) { showMessage('Frost Bite already used this turn.','error'); return; }
-  const max = G.playerTitanLevel>=2 ? 2 : 1;
-  // Discard up to max cards and draw
-  const opts = document.getElementById('discard-modal-hand');
-  opts.innerHTML = '';
-  document.getElementById('discard-modal-title').textContent = `Frost Bite — Discard & Draw (up to ${max})`;
-  let selected = [];
-  G.playerHand.forEach((card,i)=>{
-    const div = document.createElement('div');
-    div.className = 'modal-option';
-    div.innerHTML = `<div class="modal-option-title">${cardLabel(card)}</div>`;
-    div.onclick = ()=>{
-      if(selected.includes(i)) {
-        selected = selected.filter(x=>x!==i);
-        div.style.borderColor='var(--border2)';
-      } else if(selected.length<max) {
-        selected.push(i);
-        div.style.borderColor='var(--gold)';
-      }
-    };
-    opts.appendChild(div);
-  });
-  G._pendingDiscardSelected = ()=>selected;
-  G._discardConfirmHook = ()=>{
-    const s = selected;
-    const sorted=[...s].sort((a,b)=>b-a);
-    sorted.forEach(i=>G.discard.push(G.playerHand.splice(i,1)[0]));
-    for(let i=0;i<sorted.length;i++) G.playerHand.push(drawCard());
-    G.frostBiteUsed = true;
-    closeModal('discard-modal');
-    document.getElementById('discard-modal-title').textContent='Discard Cards';
-    render();
-    showMessage('Frost Bite used!','success');
-  };
-  openModal('discard-modal');
-}
-
-function confirmDiscard() {
-  if(G._discardConfirmHook) { G._discardConfirmHook(); G._discardConfirmHook=null; return; }
-  const selected = G._pendingDiscardSelected ? G._pendingDiscardSelected() : [];
-  if(selected.length===0) { closeModal('discard-modal'); return; }
-  const sorted=[...selected].sort((a,b)=>b-a);
-  sorted.forEach(i=>G.discard.push(G.playerHand.splice(i,1)[0]));
-  for(let i=0;i<sorted.length;i++) if(G.deck.length||G.discard.length) G.playerHand.push(drawCard());
-  closeModal('discard-modal');
-  render();
-  showMessage(`Discarded ${sorted.length} card(s) and drew replacements.`,'');
-}
-
-// ============================================================
-// TOKEN USAGE
-// ============================================================
-function useToken(tokenIdx) {
-  if(!G.isPlayerTurn || G.phase!=='action') { showMessage('Can only use tokens on your turn.','error'); return; }
-  const tokenType = G.playerTokens[tokenIdx];
-  const tok = TOKENS[tokenType];
-  switch(tokenType) {
-    case 'element': // Arcane Lock
-      showSlotPicker('Arcane Lock', 'Lock this slot for opponent\'s next turn', G.slots.map((_,i)=>i), (si)=>{
-        G.slots[si].lock = true;
-        G.playerTokens.splice(tokenIdx,1);
-        closeModal('slot-modal');
-        render();
-        showMessage('🔒 Slot locked! Opponent cannot change it next turn.','success');
-      });
-      break;
-    case 'number': // Null Sigil — clears slot
-      showSlotPicker('Null Sigil', 'Clear this Spell Slot immediately', G.slots.map((_,i)=>i), (si)=>{
-        const cleared = G.slots[si].stack;
-        G.discard.push(...cleared);
-        G.slots[si].stack=[];
-        reloadSlot(si);
-        G.playerTokens.splice(tokenIdx,1);
-        closeModal('slot-modal');
-        render();
-        showMessage('⚫ Null Sigil — slot cleared!','success');
-      });
-      break;
-    case 'run': // Summon Stone
-      {
-        const earthCards = G.discard.filter(c=>true); // all discard
-        if(G.discard.length===0) { showMessage('Discard pile is empty.','error'); return; }
-        const opts = document.getElementById('summon-modal-options');
-        opts.innerHTML='';
-        // Show unique cards
-        const shown = G.discard.slice(-20);
-        shown.forEach((card,i)=>{
-          const div=document.createElement('div');
-          div.className='modal-option';
-          div.innerHTML=`<div class="modal-option-title">${cardLabel(card)}</div>`;
-          div.onclick=()=>{
-            const ri=G.discard.lastIndexOf(card);
-            if(ri>=0) G.discard.splice(ri,1);
-            G.playerHand.push({...card});
-            G.playerTokens.splice(tokenIdx,1);
-            closeModal('summon-modal');
-            render();
-            showMessage('💎 Summon Stone — card retrieved!','success');
-          };
-          opts.appendChild(div);
-        });
-        openModal('summon-modal');
-      }
-      break;
-    case 'vertical': // Crystal Ball
-      {
-        const top3=[];
-        for(let i=0;i<3&&(G.deck.length||G.discard.length);i++) top3.push(drawCard());
-        G.pendingCrystalCards = top3;
-        const opts = document.getElementById('summon-modal-options');
-        opts.innerHTML='';
-        document.querySelector('#summon-modal .modal-title').textContent='Crystal Ball';
-        document.querySelector('#summon-modal .modal-subtitle').textContent='Add one card to your hand, return the rest';
-        top3.forEach((card,i)=>{
-          const div=document.createElement('div');
-          div.className='modal-option';
-          div.innerHTML=`<div class="modal-option-title">${cardLabel(card)}</div>`;
-          div.onclick=()=>{
-            G.playerHand.push({...card});
-            const rest=top3.filter((_,j)=>j!==i);
-            // Return 2 in any order — just put back on deck bottom for simplicity
-            rest.reverse().forEach(c=>G.deck.unshift(c));
-            G.playerTokens.splice(tokenIdx,1);
-            closeModal('summon-modal');
-            document.querySelector('#summon-modal .modal-title').textContent='Summon Stone';
-            document.querySelector('#summon-modal .modal-subtitle').textContent='Choose a card from the discard pile';
-            render();
-            showMessage('🔮 Crystal Ball used!','success');
-          };
-          opts.appendChild(div);
-        });
-        openModal('summon-modal');
-      }
-      break;
-    case 'horizontal': // Chaos Rune
-      if(G.aiHand.length===0) { showMessage('AI has no cards.','error'); return; }
-      {
-        const randIdx=Math.floor(Math.random()*G.aiHand.length);
-        const discarded=G.aiHand.splice(randIdx,1)[0];
-        G.discard.push(discarded);
-        G.aiChaosCooldown=true;
-        G.playerTokens.splice(tokenIdx,1);
-        render();
-        showMessage(`🌀 Chaos Rune! Discarded AI\'s ${cardLabel(discarded)}. AI cannot replace until end of their turn.`,'success');
-      }
-      break;
-  }
-}
-
-// ============================================================
-// VOID MAGE
-// ============================================================
-function activateVoidMage() {
-  if(G.playerVoidUsed) return;
-  if(!G.isPlayerTurn || G.phase!=='action') { showMessage('Declare Void Mage at the start of your turn.','error'); return; }
-  // Board wipe + 25 pts
-  G.playerHand.forEach(c=>G.discard.push(c));
-  G.aiHand.forEach(c=>G.discard.push(c));
-  G.playerHand=[];
-  G.aiHand=[];
-  for(let i=0;i<5;i++) { G.discard.push(...G.slots[i].stack); G.slots[i].stack=[]; }
-  for(let i=0;i<5;i++) reloadSlot(i);
-  G.playerScore+=25;
-  G.playerVoidUsed=true;
-  // Reset attunement streaks
-  G.playerAttunement={typeStreak:0,typeKind:null,methodStreak:0,methodKind:null};
-  // Redraw hands
-  for(let i=0;i<5;i++) { if(G.deck.length||G.discard.length) G.playerHand.push(drawCard()); }
-  for(let i=0;i<5;i++) { if(G.deck.length||G.discard.length) G.aiHand.push(drawCard()); }
-  checkTitanLevel(true);
-  if(!checkWin()) {
-    showMessage('⬛ VOID MAGE ACTIVATED! Board cleared. +25 Points!','success');
-    render();
-  }
-}
-
-// ============================================================
-// WILD CARD MODAL
-// ============================================================
-function openWildModal(card) {
-  const elRow = document.getElementById('wild-el-row');
-  const numGrid = document.getElementById('wild-num-grid');
-  const subtitle = document.getElementById('wild-modal-subtitle');
-  elRow.innerHTML=''; numGrid.innerHTML='';
-  const els = card.isUltimate ? [...ELEMENTS] : [card.element];
-  subtitle.textContent = card.isUltimate ? 'Choose element and number' : `${card.name}: Choose number`;
-  G._wildChosenEl = card.isUltimate ? null : card.element;
-  G._wildChosenNum = null;
-
-  if(card.isUltimate) {
-    els.forEach(el=>{
-      const btn=document.createElement('div');
-      btn.className='declare-el';
-      btn.style.color=`var(--${el}-glow)`;
-      btn.innerHTML=`${ELEMENT_ICONS[el]}<br><span style="font-size:10px">${ELEMENT_NAMES[el]}</span>`;
-      btn.onclick=()=>{
-        document.querySelectorAll('.declare-el').forEach(b=>b.style.borderColor='var(--border2)');
-        btn.style.borderColor='var(--gold)';
-        G._wildChosenEl=el;
-      };
-      elRow.appendChild(btn);
-    });
-  }
-
-  for(let n=1;n<=5;n++) {
-    const btn=document.createElement('div');
-    btn.className='declare-btn';
-    btn.textContent=n;
-    btn.onclick=()=>{
-      document.querySelectorAll('.declare-btn').forEach(b=>b.style.borderColor='var(--border2)');
-      btn.style.borderColor='var(--gold)';
-      G._wildChosenNum=n;
-    };
-    numGrid.appendChild(btn);
-  }
-  openModal('wild-modal');
-}
-
-function confirmWild() {
-  if(!G._wildChosenEl || !G._wildChosenNum) { showMessage('Choose both element and number.','error'); return; }
-  const {cardIdx,forSlot}=G.wildPending;
-  G.playerHand[cardIdx].declaredElement=G._wildChosenEl;
-  G.playerHand[cardIdx].declaredNumber=G._wildChosenNum;
-  closeModal('wild-modal');
-  commitPlay(cardIdx, forSlot);
-}
-
-// ============================================================
-// END TURN
-// ============================================================
-function endPlayerTurn() {
-  if(!G.isPlayerTurn) return;
-  // Clear slot locks/nulls from this turn that were set by opponent (they lasted 1 opponent turn)
-  G.slots.forEach(s=>{ s.lock=false; s.nulled=false; });
-  G.isPlayerTurn=false;
-  G.turn++;
-  G.cardsPlayedThisTurn=0;
-  G.flameclawUsed=false; G.frostBiteUsed=false; G.stormTalonUsed=false; G.wolfBlessingUsed=false;
-  G.playerTitanAbilityUsed=false;
-  G.phase='action';
-  render();
-  showMessage("AI is thinking...",'');
-  setTimeout(()=>doAiTurn(), 800);
-}
-
-// ============================================================
-// AI TURN
-// ============================================================
-function doAiTurn() {
-  // Draw
-  while(G.aiHand.length<5 && !G.aiChaosCooldown) {
-    if(!G.deck.length && !G.discard.length) break;
-    G.aiHand.push(drawCard());
-  }
-  G.aiChaosCooldown=false;
-
-  // Frost Bite
-  if(G.aiMage.id==='water' && G.aiTitanLevel>=1) {
-    const max=G.aiTitanLevel>=2?2:1;
-    // discard worst cards (highest numbers if focusing on small runs, simplified)
-    const toDiscard=G.aiHand.filter(c=>c.type==='spell').slice(0,max);
-    toDiscard.forEach(c=>{G.discard.push(c);G.aiHand.splice(G.aiHand.indexOf(c),1);G.aiHand.push(drawCard());});
-  }
-
-  // Void Mage check
-  const avq=G.aiVoidQual;
-  if(!G.aiVoidUsed && avq.element && avq.number && avq.run && G.aiScore+25>=50) {
-    aiActivateVoidMage();
-    return;
-  }
-
-  // Simple AI: try to play cards that create combos, else play anything
-  let played=0;
-  const maxPlays=5;
-  while(played<maxPlays && G.aiHand.length>0) {
-    const move=findBestAiMove();
-    if(!move) break;
-    const {cardIdx,slotIdx}=move;
-    const card=G.aiHand.splice(cardIdx,1)[0];
-    // Auto-declare wilds
-    if(card.type==='wild') {
-      if(card.isUltimate) { card.declaredElement=ELEMENTS[Math.floor(Math.random()*4)]; card.declaredNumber=Math.ceil(Math.random()*5); }
-      else { card.declaredElement=card.element; card.declaredNumber=Math.ceil(Math.random()*5); }
-    }
-    placeCard(card,slotIdx);
-    played++;
-    const combos=detectCombos();
-    if(combos.length>0) {
-      combos.forEach(c=>{ showComboFlash(c); scoreCombo(c,false); });
-      if(checkWin()) return;
-    }
-    render();
-  }
-
-  // AI use token
-  if(G.aiTokens.length>0) {
-    const tok=G.aiTokens[0];
-    if(tok==='element') {
-      // Lock a slot the player might use
-      const si=Math.floor(Math.random()*5);
-      G.slots[si].lock=true;
-      G.aiTokens.shift();
-    } else if(tok==='number') {
-      // Null a slot
-      const si=Math.floor(Math.random()*5);
-      G.discard.push(...G.slots[si].stack);
-      G.slots[si].stack=[];
-      reloadSlot(si);
-      G.aiTokens.shift();
-    }
-  }
-
-  // Reset for player
-  G.slots.forEach(s=>{s.lock=false;s.nulled=false;});
-  G.isPlayerTurn=true;
-  G.cardsPlayedThisTurn=0;
-  G.flameclawUsed=false;G.frostBiteUsed=false;G.stormTalonUsed=false;G.wolfBlessingUsed=false;
-  G.phase='action';
-
-  // Player draws
-  while(G.playerHand.length<5) {
-    if(!G.deck.length && !G.discard.length) break;
-    G.playerHand.push(drawCard());
-  }
-
-  render();
-  showMessage('Your turn! Play up to 5 cards.','');
-}
-
-function findBestAiMove() {
-  // Try each card in each slot, score moves by potential
-  let best=null; let bestScore=-1;
-  G.aiHand.forEach((card,ci)=>{
-    for(let si=0;si<5;si++){
-      if(!canPlayCard(card,si)) continue;
-      // Simulate play
-      const simCard={...card};
-      if(simCard.type==='wild') {
-        if(simCard.isUltimate){ simCard.declaredElement=ELEMENTS[0]; simCard.declaredNumber=3; }
-        else { simCard.declaredElement=simCard.element; simCard.declaredNumber=3; }
-      }
-      const origStack=[...G.slots[si].stack];
-      G.slots[si].stack=[...origStack,simCard];
-      const combos=detectCombos();
-      const pts=combos.reduce((s,c)=>s+c.pts,0);
-      G.slots[si].stack=origStack;
-      if(pts>bestScore||(pts===0&&bestScore<0)) { bestScore=pts; best={cardIdx:ci,slotIdx:si}; }
-    }
-  });
-  return best;
-}
-
-function aiActivateVoidMage() {
-  G.playerHand.forEach(c=>G.discard.push(c)); G.aiHand.forEach(c=>G.discard.push(c));
-  G.playerHand=[]; G.aiHand=[];
-  for(let i=0;i<5;i++){G.discard.push(...G.slots[i].stack);G.slots[i].stack=[];}
-  for(let i=0;i<5;i++) reloadSlot(i);
-  G.aiScore+=25;
-  G.aiVoidUsed=true;
-  G.aiAttunement={typeStreak:0,typeKind:null,methodStreak:0,methodKind:null};
-  for(let i=0;i<5;i++){if(G.deck.length||G.discard.length)G.aiHand.push(drawCard());}
-  for(let i=0;i<5;i++){if(G.deck.length||G.discard.length)G.playerHand.push(drawCard());}
-  checkTitanLevel(false);
-  if(!checkWin()){
-    showMessage('⬛ AI activated Void Mage! Board cleared. AI +25 Points!','error');
-    G.isPlayerTurn=true; G.cardsPlayedThisTurn=0; G.phase='action';
-    render();
-  }
-}
-
-// ============================================================
-// TITAN ABILITY BUTTONS — accessible via hand-label tap
-// ============================================================
-document.querySelector('.hand-label')?.addEventListener('click', ()=>{
-  if(!G.isPlayerTurn || !G.playerMage) return;
-  const m=G.playerMage;
-  if(G.playerTitanLevel===0) { showMessage('Titan not yet awakened (need 15 pts).','error'); return; }
-  if(m.id==='fire') triggerFlameClawUI();
-  else if(m.id==='water') triggerFrostBiteUI();
-  else if(m.id==='air') triggerStormTalonUI();
-  else showMessage('Wolf ability triggers automatically on slot clear.','');
+function chkWin(){if(G.pSc>=50){showWin(true);return true;}if(G.aiSc>=50){showWin(false);return true;}return false;}
+
+// MAGE SELECT
+function goMageSelect(){initG();renderMageGrid();showScreen(‘ms’);document.getElementById(‘startbtn’).disabled=true;}
+function renderMageGrid(){
+const g=document.getElementById(‘mgrid’);g.innerHTML=’’;
+MAGES.forEach(m=>{
+const d=document.createElement(‘div’);d.className=‘mc’;d.dataset.el=m.el;
+d.innerHTML=’<div style="font-size:34px">’+m.icon+’</div><div style="font-family:\'Cinzel\',serif;font-size:13px">’+m.name+’</div><div style="font-size:11px;color:var(--tx2)">’+m.titan+’</div><div style="font-size:10px;color:'+m.clr+';line-height:1.4;text-align:center">’+m.a15+’</div><div style="font-size:9px;color:var(--tx3);line-height:1.3;text-align:center">’+m.a25+’</div>’;
+d.onclick=()=>{document.querySelectorAll(’.mc’).forEach(c=>c.classList.remove(‘sel’));d.classList.add(‘sel’);G.pM=m;document.getElementById(‘startbtn’).disabled=false;};
+g.appendChild(d);
 });
-
-// ============================================================
-// SHOW/HIDE HELPERS
-// ============================================================
-function showSlotPicker(title, subtitle, validSlots, cb) {
-  document.getElementById('slot-modal-title').textContent=title;
-  document.getElementById('slot-modal-subtitle').textContent=subtitle;
-  const opts=document.getElementById('slot-modal-options');
-  opts.innerHTML='';
-  validSlots.forEach(si=>{
-    const slot=G.slots[si];
-    const top=slotTop(slot);
-    const div=document.createElement('div');
-    div.className='modal-option';
-    div.innerHTML=`<div class="modal-option-title">Slot ${si+1}</div><div class="modal-option-desc">${top?cardLabel(top):'Empty'} (Stack: ${slot.stack.length})</div>`;
-    div.onclick=()=>cb(si);
-    opts.appendChild(div);
-  });
-  openModal('slot-modal');
 }
 
-function showHandPicker(subtitle, cb) {
-  document.getElementById('slot-modal-title').textContent='Choose from Hand';
-  document.getElementById('slot-modal-subtitle').textContent=subtitle;
-  const opts=document.getElementById('slot-modal-options');
-  opts.innerHTML='';
-  G.playerHand.forEach((card,i)=>{
-    const div=document.createElement('div');
-    div.className='modal-option';
-    div.innerHTML=`<div class="modal-option-title">${cardLabel(card)}</div>`;
-    div.onclick=()=>{ closeModal('slot-modal'); cb(i); };
-    opts.appendChild(div);
-  });
-  openModal('slot-modal');
+// GAME START
+function startGame(){
+if(!G.pM)return;
+const av=MAGES.filter(m=>m.id!==G.pM.id);G.aiM=av[0|Math.random()*av.length];
+G.deck=buildDeck();
+for(let i=0;i<5;i++){G.pH.push(drawCard());G.aiH.push(drawCard());}
+for(let i=0;i<5;i++)reloadSlot(i);
+G.pTurn=Math.random()<0.5;
+showScreen(‘gs’);render();
+if(G.pTurn)setMsg(‘Your turn! Play cards, then End Turn to score.’);
+else{setMsg(‘AI goes first…’);setTimeout(aiTurn,900);}
 }
 
-function openModal(id) { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-function showComboFlash(combo) {
-  const el=document.createElement('div');
-  el.className='combo-flash';
-  const name = comboName(combo);
-  el.innerHTML=`<div class="combo-flash-title">${name}</div><div class="combo-flash-pts">+${combo.pts} pts</div>`;
-  document.body.appendChild(el);
-  setTimeout(()=>el.remove(), 1600);
+// RENDER
+function render(){
+rScores();rSlots();rHand();rAiHand();rAtt();rToks();rVoidBtn();rTitanBtn();
+document.getElementById(‘tnum’).textContent=G.turn;
+document.getElementById(‘tlbl’).textContent=G.pTurn?‘Your Turn’:“AI’s Turn”;
+document.getElementById(‘plbl’).textContent=G.pTurn?‘Action Phase’:‘AI Thinking…’;
+document.getElementById(‘hmeta’).textContent=G.played+’/5 played’;
+document.getElementById(‘bplay’).disabled=!G.pTurn||G.selC===null||G.played>=5;
+document.getElementById(‘bend’).disabled=!G.pTurn;
+if(G.aiM){document.getElementById(‘ailbl’).textContent=G.aiM.icon+’ ‘+G.aiM.name;document.getElementById(‘aisl’).textContent=‘T:’+G.aiAtt.ts+’ M:’+G.aiAtt.ms;}
+}
+function rScores(){
+document.getElementById(‘psc’).textContent=G.pSc;document.getElementById(‘aisc’).textContent=G.aiSc;
+function rb(el,m,lv){if(!m)return;el.textContent=lv===0?‘🔒 Locked’:lv===1?‘⚡’+m.icon+’ Awakened’:‘🌟’+m.icon+’ Enhanced’;el.className=‘tbadge’+(lv===2?’ enh’:lv===1?’ awk’:’’);}
+if(G.pM)rb(document.getElementById(‘ptb’),G.pM,G.pTL);
+if(G.aiM)rb(document.getElementById(‘aitb’),G.aiM,G.aiTL);
+}
+function rSlots(){
+const row=document.getElementById(‘slrow’);row.innerHTML=’’;
+G.slots.forEach((slot,si)=>{
+const d=document.createElement(‘div’);d.className=‘slot’;
+const t=slotTop(si),ud=isUndecl(si);
+if(ud)d.classList.add(‘undecl’);if(slot.lock)d.classList.add(‘lkd’);
+if(!t)d.innerHTML=’<div style="font-size:9px;color:var(--tx3)">Empty</div>’;
+else if(ud){const wi=t.ult?‘⬛’:EI[t.el]||‘✦’;d.innerHTML=’<div class="slic">’+wi+’</div><div class="slel ev">WILD?</div><div class="slstk">Stack:’+slot.stk.length+’</div><div style="font-size:8px;color:var(--void-g)">Tap to declare</div>’;}
+else if(t.t===‘fd’){const el=t.el===‘void’?null:t.el;d.innerHTML=’<div class="slic">’+(el?EI[el]:‘⬛’)+’</div><div class="slel '+(el?'e'+el[0]:'ev')+'">’+(el?EN[el]:‘Void’)+’ Field</div><div class="slstk">Stack:’+slot.stk.length+’</div>’;}
+else{const el=slEl(si),n=slN(si),ec=el?‘e’+el[0]:‘ev’;d.innerHTML=’<div class="slnum '+ec+'">’+(n||’?’)+’</div><div class="slic" style="font-size:11px">’+(EI[el]||‘✦’)+’</div><div class="slel '+ec+'">’+(EN[el]||’—’)+’</div><div class="slstk">Stack:’+slot.stk.length+’</div>’;}
+if(slot.lock)d.innerHTML+=’<div class="slico">🔒</div>’;
+d.onclick=()=>tapSlot(si);row.appendChild(d);
+});
+}
+function elCls(el){if(el===‘fire’)return ‘ef’;if(el===‘water’)return ‘ew’;if(el===‘air’)return ‘ea’;if(el===‘earth’)return ‘ee’;return ‘ev’;}
+function rHand(){
+const h=document.getElementById(‘phand’);h.innerHTML=’’;
+G.pH.forEach((card,i)=>{
+const d=document.createElement(‘div’);
+const ec=card.el+’-card’[0];
+const cardCls={‘fire’:‘fc’,‘water’:‘wc’,‘air’:‘ac’,‘earth’:‘ec’,‘void’:‘vc’}[card.el]||‘vc’;
+d.className=‘card ‘+cardCls+(card.t===‘wd’?’ wld’:’’)+(G.selC===i?’ csel’:’’);
+d.innerHTML=cardHTML(card);d.onclick=()=>tapCard(i);h.appendChild(d);
+});
+}
+function cardHTML(c){
+if(c.t===‘fd’)return’<div class="cic">’+EI[c.el]+’</div><div class="cel '+elCls(c.el)+'">Field</div><div class="ctp">’+EN[c.el]+’</div>’;
+if(c.t===‘wd’){const el=c.dEl||c.el,n=c.dN||’?’;return’<div class="ccr">’+(EI[el]||‘✦’)+’</div><div class="cnum '+elCls(el)+'">’+n+’</div><div class="cel '+elCls(el)+'">’+(c.ult?‘Primal’:‘Wild’)+’</div><div class="ctp">’+(c.nm||’’)+’</div>’;}
+return’<div class="ccr">’+EI[c.el]+’</div><div class="cnum '+elCls(c.el)+'">’+c.n+’</div><div class="cic" style="font-size:11px">’+EI[c.el]+’</div><div class="cel '+elCls(c.el)+'">’+EN[c.el]+’</div>’;
+}
+function cardLbl(c){if(!c)return’—’;if(c.t===‘fd’)return EI[c.el]+’ ‘+EN[c.el]+’ Field’;if(c.t===‘wd’)return c.ult?‘⬛ Primal Spirit’:EI[c.el]+’ ‘+c.nm+’ (Wild)’;return EI[c.el]+’ ‘+EN[c.el]+’ ‘+c.n;}
+function rAiHand(){const a=document.getElementById(‘aihd’);a.innerHTML=’’;G.aiH.forEach(()=>{const d=document.createElement(‘div’);d.className=‘aicb’;a.appendChild(d);});}
+function rAtt(){
+const d=document.getElementById(‘attd’);d.innerHTML=’’;const a=G.pAtt;
+if(a.tk){const s=document.createElement(‘span’);s.className=‘sbadge’+(a.ts>=2?’ on’:’’);s.textContent=a.tk+’:’+a.ts+’/3’;d.appendChild(s);}
+if(a.mk){const s=document.createElement(‘span’);s.className=‘sbadge’+(a.ms>=2?’ on’:’’);s.textContent=a.mk+’:’+a.ms+’/3’;d.appendChild(s);}
+const q=G.pVQ;if(q.el||q.num||q.run){const s=document.createElement(‘span’);s.className=‘sbadge’;s.style.color=‘var(–void-g)’;s.textContent=‘Void:’+(q.el?’ El’:’’)+(q.num?’ Num’:’’)+(q.run?’ Run’:’’);d.appendChild(s);}
+}
+function rToks(){
+const d=document.getElementById(‘ptoks’);d.innerHTML=’’;
+G.pToks.forEach((t,i)=>{const b=document.createElement(‘div’);b.className=‘tokchip’;b.title=TOKS[t].name;b.textContent=TOKS[t].icon;b.onclick=()=>useTok(i);d.appendChild(b);});
+}
+function rVoidBtn(){
+const c=document.getElementById(‘vba’);c.innerHTML=’’;const q=G.pVQ;
+if(!G.pVU&&q.el&&q.num&&q.run&&G.pTurn){const b=document.createElement(‘button’);b.className=‘vmbtn’;b.textContent=‘⬛ Void Mage’;b.onclick=activateVoidMage;c.appendChild(b);}
+}
+function rTitanBtn(){
+const btn=document.getElementById(‘btitan’);
+if(!G.pM||G.pTL===0||!G.pTurn||G.pTU){btn.disabled=true;btn.textContent=‘⚡ Titan’;btn.className=‘ba ti’;return;}
+btn.disabled=false;btn.className=’ba ti ’+G.pM.id;
+btn.textContent=G.pTL>=2?’🌟 ’+G.pM.titan:’⚡ ’+G.pM.titan;
 }
 
-function comboName(c) {
-  const names={
-    'element-chain':`Element Chain (${c.len})`,
-    'number-chain':`Number Chain (${c.len})`,
-    'run':`Run of ${c.len}`,
-    'element-row':`Element Row (${c.len})`,
-    'number-row':`Number Row (${c.len})`,
-    'number-run':`Number Run (${c.len})`,
-    'twin-ultimates':'Twin Ultimates!',
-    'elemental-set':'Elemental Set!',
-    'perfect-harmony':'Perfect Harmony!'
-  };
-  return names[c.type]||c.type;
+// INTERACTIONS
+function tapCard(i){if(!G.pTurn)return;G.selC=G.selC===i?null:i;render();setMsg(G.selC!==null?‘Tap a Spell Slot to play.’:‘Card deselected.’);}
+function tapSlot(si){
+if(!G.pTurn)return;
+// FIX#7: declare undeclared wild in slot
+if(isUndecl(si)&&G.selC===null){openDeclSlot(si);return;}
+if(G.selC===null){setMsg(‘Select a card first.’,‘err’);return;}
+const card=G.pH[G.selC];
+if(!canPlace(card,si)){setMsg(‘Cannot play there. Check placement rules.’,‘err’);return;}
+if(card.t===‘wd’&&(!card.dEl||!card.dN)){G.pw={ci:G.selC,si,isSlot:false,ssi:null};openWildModal(card);return;}
+commitPlay(G.selC,si);
+}
+function commitPlay(ci,si){const card=G.pH.splice(ci,1)[0];G.selC=null;placeCard(card,si);G.played++;render();setMsg(‘Card played. ‘+(5-G.played)+’ remaining. Hit End Turn to score.’);}
+function playSelected(){
+if(G.selC===null){setMsg(‘Select a card first.’,‘err’);return;}
+const card=G.pH[G.selC],vs=validSlots(card);
+if(!vs.length){setMsg(‘No valid slots for this card.’,‘err’);return;}
+if(vs.length===1){tapSlot(vs[0]);return;}
+pickSlot(‘Play Card’,‘Choose a Spell Slot’,vs,si=>{cm(‘slotm’);tapSlot(si);});
 }
 
-function showMessage(msg, type='') {
-  const el=document.getElementById('game-message');
-  el.textContent=msg;
-  el.className=`game-message${type?' '+type:''}`;
+// FIX#6: Titan ability button
+function useTitan(){
+if(!G.pM||G.pTL===0||G.pTU){setMsg(‘Titan not available this turn.’,‘err’);return;}
+if(G.pM.id===‘fire’)tFire();
+else if(G.pM.id===‘water’)tWater();
+else if(G.pM.id===‘air’)tAir();
+else setMsg(‘Stone Wolf triggers automatically on slot clear.’);
+}
+function tFire(){
+const max=G.pTL>=2?3:1;
+const fs=[0,1,2,3,4].filter(i=>slEl(i)===‘fire’);
+if(!fs.length){setMsg(‘No active Fire slots.’,‘err’);return;}
+let done=0;
+function doSwap(){
+if(done>=max||!fs.length){G.pTU=true;render();setMsg(‘Flame Claw: ‘+done+’ swap(s).’,‘ok’);return;}
+pickSlot(‘Flame Claw’,‘Choose Fire slot (’+(done+1)+’/’+max+’)’,fs,si=>{
+cm(‘slotm’);pickHand(‘Choose hand card to place in slot’,hi=>{
+cm(‘handm’);const st=G.slots[si].stk[G.slots[si].stk.length-1];const hc=G.pH.splice(hi,1)[0];
+G.slots[si].stk[G.slots[si].stk.length-1]={…hc};G.pH.push({…st});done++;fs.splice(fs.indexOf(si),1);render();
+if(done<max&&fs.length)setTimeout(doSwap,150);else{G.pTU=true;render();setMsg(‘Flame Claw: ‘+done+’ swap(s).’,‘ok’);}
+});
+});
+}doSwap();
+}
+function tWater(){
+const max=G.pTL>=2?2:1;
+pickHand(‘Frost Bite — choose card to discard (up to ‘+max+’)’,hi=>{
+cm(‘handm’);G.disc.push(…G.pH.splice(hi,1));if(G.deck.length||G.disc.length)G.pH.push(drawCard());
+G.pTU=true;render();setMsg(‘Frost Bite used!’,‘ok’);
+});
+}
+function tAir(){
+const ne=[0,1,2,3,4].filter(i=>G.slots[i].stk.length>0);
+if(ne.length<2){setMsg(‘Need 2+ non-empty slots.’,‘err’);return;}
+pickSlot(‘Storm Talon’,‘Move top card FROM’,ne,fromSi=>{
+cm(‘slotm’);const maxD=G.pTL>=2?4:1;const td=[0,1,2,3,4].filter(i=>i!==fromSi&&Math.abs(i-fromSi)<=maxD);
+pickSlot(‘Storm Talon’,‘Move top card TO’+(G.pTL>=2?’ (any)’:’ (adjacent)’),td,toSi=>{
+cm(‘slotm’);const c=G.slots[fromSi].stk.pop();G.slots[toSi].stk.push({…c});
+if(!G.slots[fromSi].stk.length)reloadSlot(fromSi);
+G.pTU=true;render();setMsg(‘Storm Talon used!’,‘ok’);
+});
+});
 }
 
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  if(id==='title-screen') { initState(); }
-  if(id==='mage-screen') { initState(); G.playerMage=null; renderMageSelect(); }
+// FIX#2: Scoring only on End Turn
+function endTurn(){
+if(!G.pTurn)return;
+resolveAll(true);if(chkWin())return;
+G.slots.forEach(s=>{if(s.lockFor===‘player’)s.lock=false;});
+G.pCB=false;G.pTurn=false;G.turn++;G.played=0;G.pTU=false;G.selC=null;
+render();setMsg(‘AI is thinking…’);setTimeout(aiTurn,700);
 }
 
-function showWin(playerWon) {
-  document.getElementById('win-emblem').textContent = playerWon ? '🏆' : '💀';
-  document.getElementById('win-title').textContent = playerWon ? 'Victory!' : 'Defeat';
-  document.getElementById('win-subtitle').textContent = playerWon ? 'The elements bow to your mastery.' : 'The AI mage prevails... for now.';
-  document.getElementById('final-player-score').textContent = G.playerScore;
-  document.getElementById('final-ai-score').textContent = G.aiScore;
-  setTimeout(()=>showScreen('win-screen'), 800);
+// WILD MODALS
+function openWildModal(card){
+const er=document.getElementById(‘wmels’),ng=document.getElementById(‘wmnums’);
+er.innerHTML=’’;ng.innerHTML=’’;G.wEl=card.ult?null:card.el;G.wN=null;
+document.getElementById(‘wmsub’).textContent=card.ult?‘Choose element and number’:‘Choose number’;
+if(card.ult){ELS.forEach(el=>{const b=document.createElement(‘div’);b.className=‘del’;b.style.color=‘var(–’+el+’-g)’;b.innerHTML=EI[el]+’<br><span style="font-size:9px">’+EN[el]+’</span>’;b.onclick=()=>{document.querySelectorAll(’#wmels .del’).forEach(x=>x.classList.remove(‘ds’));b.classList.add(‘ds’);G.wEl=el;};er.appendChild(b);});}
+else{const b=document.createElement(‘div’);b.className=‘del ds’;b.style.color=‘var(–’+card.el+’-g)’;b.textContent=EI[card.el]+’ ‘+EN[card.el];er.appendChild(b);}
+for(let n=1;n<=5;n++){const b=document.createElement(‘div’);b.className=‘dbtn’;b.textContent=n;b.onclick=()=>{document.querySelectorAll(’#wmnums .dbtn’).forEach(x=>x.classList.remove(‘ds’));b.classList.add(‘ds’);G.wN=n;};ng.appendChild(b);}
+om(‘wm’);
+}
+// FIX#7: declare undeclared wild in slot
+function openDeclSlot(si){
+const t=slotTop(si);if(!t||t.t!==‘wd’)return;
+G.pw={isSlot:true,ssi:si};G.wEl=t.ult?null:t.el;G.wN=null;
+const er=document.getElementById(‘wmels’),ng=document.getElementById(‘wmnums’);er.innerHTML=’’;ng.innerHTML=’’;
+document.getElementById(‘wmsub’).textContent=t.ult?‘Declare Primal Spirit element and number’:‘Declare wild number for this slot’;
+if(t.ult){ELS.forEach(el=>{const b=document.createElement(‘div’);b.className=‘del’;b.style.color=‘var(–’+el+’-g)’;b.innerHTML=EI[el]+’<br><span style="font-size:9px">’+EN[el]+’</span>’;b.onclick=()=>{document.querySelectorAll(’#wmels .del’).forEach(x=>x.classList.remove(‘ds’));b.classList.add(‘ds’);G.wEl=el;};er.appendChild(b);});}
+else{const b=document.createElement(‘div’);b.className=‘del ds’;b.style.color=‘var(–’+t.el+’-g)’;b.textContent=EI[t.el]+’ ‘+EN[t.el];er.appendChild(b);}
+for(let n=1;n<=5;n++){const b=document.createElement(‘div’);b.className=‘dbtn’;b.textContent=n;b.onclick=()=>{document.querySelectorAll(’#wmnums .dbtn’).forEach(x=>x.classList.remove(‘ds’));b.classList.add(‘ds’);G.wN=n;};ng.appendChild(b);}
+om(‘wm’);
+}
+function confirmWild(){
+if(!G.wEl){setMsg(‘Choose an element.’,‘err’);return;}
+if(!G.wN){setMsg(‘Choose a number.’,‘err’);return;}
+const pw=G.pw;
+if(pw.isSlot){const t=G.slots[pw.ssi].stk[G.slots[pw.ssi].stk.length-1];t.dEl=G.wEl;t.dN=G.wN;cm(‘wm’);render();setMsg(‘Wild declared as ‘+EN[G.wEl]+’ ‘+G.wN+’.’,‘ok’);return;}
+const card=G.pH[pw.ci];card.dEl=G.wEl;card.dN=G.wN;cm(‘wm’);commitPlay(pw.ci,pw.si);
 }
 
-function showRules() {
-  const rc=document.getElementById('rules-content');
-  rc.innerHTML=`
-    <div class="rules-section"><div class="rules-section-title">Objective</div><div class="rules-text">Be the first to reach 50 Points.</div></div>
-    <div class="rules-section"><div class="rules-section-title">Placement Rules</div><div class="rules-text"><ul><li><b>Number Switch:</b> Match top card's number → change slot's element to yours.</li><li><b>Element Switch:</b> Match top card's element → change slot's number to yours.</li><li><b>Field Card:</b> Play anywhere. Changes slot's element. Removes number.</li><li><b>Void Field:</b> Clears the entire slot stack immediately.</li><li><b>Wild Card:</b> Declare as any number 1–5 (same element). Primal Spirit: any element + number.</li></ul></div></div>
-    <div class="rules-section"><div class="rules-section-title">Vertical Combos (in one slot)</div><div class="rules-text"><ul><li>Element Chain 3/4/5: 3/4/5 pts</li><li>Number Chain 3/4/5: 4/5/6 pts</li><li>Run 3/4/5: 3/5/7 pts</li><li>Twin Ultimates: 8 pts</li></ul></div></div>
-    <div class="rules-section"><div class="rules-section-title">Horizontal Combos (across slots)</div><div class="rules-text"><ul><li>Element Row 3/4/5: 4/7/10 pts</li><li>Number Row 3/4/5: 5/8/12 pts</li><li>Number Run 3/4/5: 6/9/13 pts</li><li>Elemental Set (all 4 elements): 8 pts</li><li>Perfect Harmony (4 same + Ultimate): 11 pts</li></ul></div></div>
-    <div class="rules-section"><div class="rules-section-title">Attunement (Streaks)</div><div class="rules-text">Score the same combo Type (Element/Number/Run) or Method (Vertical/Horizontal) 3 turns in a row to earn an Item Token.<br><br><b>Arcane Lock 🔒</b> — Lock a slot for opponent's next turn.<br><b>Null Sigil ⚫</b> — Clear a slot immediately.<br><b>Summon Stone 💎</b> — Take any card from discard pile.<br><b>Crystal Ball 🔮</b> — Peek top 3 deck cards, keep 1.<br><b>Chaos Rune 🌀</b> — Opponent discards a random card, can't replace next turn.</div></div>
-    <div class="rules-section"><div class="rules-section-title">Titan Abilities</div><div class="rules-text">Awaken at 15 pts, enhance at 25 pts.<br><b>Ash Dragon:</b> Tap "YOUR HAND" label to swap Fire slot cards with hand cards.<br><b>Frost Leviathan:</b> Tap "YOUR HAND" to discard & draw.<br><b>Thunder Eagle:</b> Tap "YOUR HAND" to move top card between slots.<br><b>Stone Wolf:</b> Auto-triggers on slot clear — search discard for Earth card.</div></div>
-    <div class="rules-section"><div class="rules-section-title">Void Mage</div><div class="rules-text">Score Element Chain/Row (5) + Number Chain/Row (5) + Run of Five/Number Run (5). Then the ⬛ Void Mage button appears. Activating it: clears the board, resets both hands, grants +25 Points. Once per game.</div></div>
-  `;
-  openModal('rules-modal');
+// TOKENS
+function useTok(ti){
+if(!G.pTurn){setMsg(‘Use tokens on your turn.’,‘err’);return;}
+const type=G.pToks[ti];
+if(type===‘element’){
+pickSlot(‘Arcane Lock’,‘Lock this slot for opponent next turn’,[0,1,2,3,4],si=>{G.slots[si].lock=true;G.slots[si].lockFor=‘ai’;G.pToks.splice(ti,1);cm(‘slotm’);render();setMsg(‘🔒 Slot locked!’,‘ok’);});
+}else if(type===‘number’){
+pickSlot(‘Null Sigil’,‘Clear this slot immediately’,[0,1,2,3,4],si=>{G.disc.push(…G.slots[si].stk);G.slots[si].stk=[];reloadSlot(si);G.pToks.splice(ti,1);cm(‘slotm’);render();setMsg(‘⚫ Null Sigil!’,‘ok’);});
+}else if(type===‘run’){
+if(!G.disc.length){setMsg(‘Discard pile is empty.’,‘err’);return;}
+document.getElementById(‘pickt’).textContent=‘Summon Stone’;document.getElementById(‘picks’).textContent=‘Take any card from discard pile’;
+const o=document.getElementById(‘picko’);o.innerHTML=’’;
+G.disc.slice(-20).forEach(card=>{const d=document.createElement(‘div’);d.className=‘mopt’;d.innerHTML=’<div class="moptt">’+cardLbl(card)+’</div>’;d.onclick=()=>{const ri=G.disc.lastIndexOf(card);if(ri>=0)G.disc.splice(ri,1);G.pH.push({…card});G.pToks.splice(ti,1);cm(‘pickm’);render();setMsg(‘💎 Summon Stone!’,‘ok’);};o.appendChild(d);});
+om(‘pickm’);
+}else if(type===‘vertical’){
+const top3=[];for(let i=0;i<3&&(G.deck.length||G.disc.length);i++)top3.push(drawCard());
+document.getElementById(‘pickt’).textContent=‘Crystal Ball’;document.getElementById(‘picks’).textContent=‘Keep 1, return 2 to deck’;
+const o=document.getElementById(‘picko’);o.innerHTML=’’;
+top3.forEach((card,ci)=>{const d=document.createElement(‘div’);d.className=‘mopt’;d.innerHTML=’<div class="moptt">’+cardLbl(card)+’</div>’;d.onclick=()=>{G.pH.push({…card});top3.filter((_,j)=>j!==ci).reverse().forEach(c=>G.deck.unshift(c));G.pToks.splice(ti,1);cm(‘pickm’);render();setMsg(‘🔮 Crystal Ball!’,‘ok’);};o.appendChild(d);});
+om(‘pickm’);
+}else if(type===‘horizontal’){
+if(!G.aiH.length){setMsg(‘AI has no cards.’,‘err’);return;}
+const ri=0|Math.random()*G.aiH.length;G.disc.push(G.aiH.splice(ri,1)[0]);G.aiCB=true;G.pToks.splice(ti,1);render();setMsg(‘🌀 Chaos Rune! AI card discarded.’,‘ok’);
+}
 }
 
-// ============================================================
-// INIT
-// ============================================================
-initState();
+// VOID MAGE
+function activateVoidMage(){
+if(G.pVU||!G.pTurn)return;
+G.pH.forEach(c=>G.disc.push(c));G.aiH.forEach(c=>G.disc.push(c));G.pH=[];G.aiH=[];
+for(let i=0;i<5;i++){G.disc.push(…G.slots[i].stk);G.slots[i].stk=[];}
+for(let i=0;i<5;i++)reloadSlot(i);
+G.pSc+=25;G.pVU=true;G.pAtt={ts:0,tk:null,ms:0,mk:null};
+for(let i=0;i<5;i++)if(G.deck.length||G.disc.length)G.pH.push(drawCard());
+for(let i=0;i<5;i++)if(G.deck.length||G.disc.length)G.aiH.push(drawCard());
+chkTitanLv(true);if(!chkWin()){setMsg(‘⬛ VOID MAGE! Board cleared. +25 Points!’,‘ok’);render();}
+}
+
+// AI TURN
+function aiTurn(){
+while(G.aiH.length<5&&!G.aiCB){if(!G.deck.length&&!G.disc.length)break;G.aiH.push(drawCard());}
+G.aiCB=false;
+if(!G.aiVU&&G.aiVQ.el&&G.aiVQ.num&&G.aiVQ.run){aiVoidMage();return;}
+if(G.aiM.id===‘water’&&G.aiTL>=1){const mx=G.aiTL>=2?2:1;for(let i=0;i<mx&&G.aiH.length;i++){G.disc.push(G.aiH.splice(0,1)[0]);if(G.deck.length||G.disc.length)G.aiH.push(drawCard());}}
+for(let p=0;p<5;p++){const mv=bestAiMove();if(!mv)break;const card=G.aiH.splice(mv.ci,1)[0];if(card.t===‘wd’){if(card.ult){card.dEl=ELS[0|Math.random()*4];card.dN=1+(0|Math.random()*5);}else{card.dEl=card.el;card.dN=1+(0|Math.random()*5);}}placeCard(card,mv.si);}
+if(G.aiM.id===‘air’&&G.aiTL>=1){const ne=[0,1,2,3,4].filter(i=>G.slots[i].stk.length>0);if(ne.length>=2){const f=ne[0|Math.random()*ne.length];const td=[0,1,2,3,4].filter(i=>i!==f);const t2=td[0|Math.random()*td.length];const c=G.slots[f].stk.pop();G.slots[t2].stk.push(c);if(!G.slots[f].stk.length)reloadSlot(f);}}
+if(G.aiToks.length){const t=G.aiToks[0];if(t===‘element’){const si=0|Math.random()*5;G.slots[si].lock=true;G.slots[si].lockFor=‘player’;G.aiToks.shift();}else if(t===‘number’){const si=0|Math.random()*5;G.disc.push(…G.slots[si].stk);G.slots[si].stk=[];reloadSlot(si);G.aiToks.shift();}else G.aiToks.shift();}
+resolveAll(false);if(chkWin())return;
+G.slots.forEach(s=>{if(s.lockFor===‘ai’)s.lock=false;});
+G.pTurn=true;G.played=0;G.pTU=false;G.selC=null;
+while(G.pH.length<5&&!G.pCB){if(!G.deck.length&&!G.disc.length)break;G.pH.push(drawCard());}
+G.pCB=false;render();setMsg(‘Your turn! Play cards, then End Turn to score.’);
+}
+function bestAiMove(){
+let best=null,bs=-99;
+G.aiH.forEach((card,ci)=>{
+for(let si=0;si<5;si++){
+if(!canPlace(card,si))continue;
+const sim={…card};if(sim.t===‘wd’){sim.dEl=sim.ult?ELS[0]:sim.el;sim.dN=3;}
+const orig=[…G.slots[si].stk];G.slots[si].stk=[…orig,sim];
+const sc=detectAll().reduce((s,c)=>s+c.pts,0);
+G.slots[si].stk=orig;
+if(sc>bs||(bs<0)){bs=sc;best={ci,si};}
+}
+});
+return best;
+}
+function aiVoidMage(){
+G.pH.forEach(c=>G.disc.push(c));G.aiH.forEach(c=>G.disc.push(c));G.pH=[];G.aiH=[];
+for(let i=0;i<5;i++){G.disc.push(…G.slots[i].stk);G.slots[i].stk=[];}
+for(let i=0;i<5;i++)reloadSlot(i);G.aiSc+=25;G.aiVU=true;G.aiAtt={ts:0,tk:null,ms:0,mk:null};
+for(let i=0;i<5;i++)if(G.deck.length||G.disc.length)G.aiH.push(drawCard());
+for(let i=0;i<5;i++)if(G.deck.length||G.disc.length)G.pH.push(drawCard());
+chkTitanLv(false);if(!chkWin()){G.pTurn=true;G.played=0;G.pTU=false;G.selC=null;render();setMsg(‘⬛ AI Void Mage! Board cleared. AI +25 pts.’,‘err’);}
+}
+
+// COMBO FLASH
+const CN={‘el-chain’:‘Element Chain’,‘num-chain’:‘Number Chain’,‘run’:‘Run’,‘el-row’:‘Element Row’,‘num-row’:‘Number Row’,‘num-run’:‘Number Run’,‘twin-ult’:‘Twin Ultimates!’,‘el-set’:‘Elemental Set!’,‘perf-harm’:‘Perfect Harmony!’};
+function comboFlash(c){const e=document.createElement(‘div’);e.className=‘cflash’;const n=CN[c.type]||c.type;e.innerHTML=’<div class="cft">’+(c.len?n+’ (’+c.len+’)’:n)+’</div><div class="cfp">+’+c.pts+’ pts</div>’;document.body.appendChild(e);setTimeout(()=>e.remove(),1700);}
+
+// UTIL MODALS
+function pickSlot(title,sub,idxs,cb){
+document.getElementById(‘slmt’).textContent=title;document.getElementById(‘slms’).textContent=sub;
+const o=document.getElementById(‘slmo’);o.innerHTML=’’;
+idxs.forEach(si=>{const s=G.slots[si],t=slotTop(si);const d=document.createElement(‘div’);d.className=‘mopt’;d.innerHTML=’<div class="moptt">Slot ‘+(si+1)+’</div><div class="moptd">’+(t?cardLbl(t):‘Empty’)+’ — Stack:’+s.stk.length+’</div>’;d.onclick=()=>cb(si);o.appendChild(d);});
+om(‘slotm’);
+}
+function pickHand(sub,cb){
+document.getElementById(‘hmt’).textContent=‘Your Hand’;document.getElementById(‘hms’).textContent=sub;
+const o=document.getElementById(‘hmo’);o.innerHTML=’’;
+G.pH.forEach((card,i)=>{const d=document.createElement(‘div’);d.className=‘mopt’;d.innerHTML=’<div class="moptt">’+cardLbl(card)+’</div>’;d.onclick=()=>cb(i);o.appendChild(d);});
+om(‘handm’);
+}
+function om(id){document.getElementById(id).classList.add(‘active’);}
+function cm(id){document.getElementById(id).classList.remove(‘active’);}
+function setMsg(m,t){const e=document.getElementById(‘gmsg’);e.textContent=m;e.className=‘gmsg’+(t?’ ‘+t:’’);}
+function showScreen(id){document.querySelectorAll(’.screen’).forEach(s=>s.classList.remove(‘active’));document.getElementById(id).classList.add(‘active’);}
+function showWin(pw){document.getElementById(‘wemb’).textContent=pw?‘🏆’:‘💀’;document.getElementById(‘wtit’).textContent=pw?‘Victory!’:‘Defeat’;document.getElementById(‘wsub’).textContent=pw?‘The elements bow to your mastery.’:‘The AI mage prevails… for now.’;document.getElementById(‘wps’).textContent=G.pSc;document.getElementById(‘wais’).textContent=G.aiSc;setTimeout(()=>showScreen(‘ws’),900);}
+function openRules(){
+document.getElementById(‘rcon’).innerHTML=’<div style="margin-bottom:12px"><div style="font-family:\'Cinzel\',serif;font-size:13px;color:var(--goldl);border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:5px">Core Rules</div><div style="font-size:12px;color:var(--tx2);line-height:1.7">First to 50 Points wins. Play up to 5 cards per turn, then tap End Turn to score all combos at once.</div></div><div style="margin-bottom:12px"><div style="font-family:\'Cinzel\',serif;font-size:13px;color:var(--goldl);border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:5px">Placement</div><div style="font-size:12px;color:var(--tx2);line-height:1.7"><b>Number Switch:</b> Match top card number → your element becomes active.<br><b>Element Switch:</b> Match top card element → your number becomes active.<br><b>Field Card:</b> Play anywhere → changes element, removes number. Cannot score.<br><b>Void Field:</b> Clears slot entirely, reloads from deck.<br><b>Element Wild:</b> Must match slot element OR declare number matching slot number.<br><b>Primal Spirit:</b> Plays anywhere — declare any element and number.</div></div><div style="margin-bottom:12px"><div style="font-family:\'Cinzel\',serif;font-size:13px;color:var(--goldl);border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:5px">Undeclared Wilds in Slots</div><div style="font-size:12px;color:var(--tx2);line-height:1.7">When a Wild loads from the deck into a slot it shows WILD? with a glowing border. Tap it (with no card selected) to declare its identity before using it in a combo.</div></div><div style="margin-bottom:12px"><div style="font-family:\'Cinzel\',serif;font-size:13px;color:var(--goldl);border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:5px">Vertical Combos</div><div style="font-size:12px;color:var(--tx2);line-height:1.6">El Chain 3/4/5: 3/4/5 pts   Num Chain 3/4/5: 4/5/6 pts   Run 3/4/5: 3/5/7 pts   Twin Ultimates: 8 pts</div></div><div style="margin-bottom:12px"><div style="font-family:\'Cinzel\',serif;font-size:13px;color:var(--goldl);border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:5px">Horizontal Combos</div><div style="font-size:12px;color:var(--tx2);line-height:1.6">El Row 3/4/5: 4/7/10 pts   Num Row 3/4/5: 5/8/12 pts   Num Run 3/4/5: 6/9/13 pts   Elemental Set: 8 pts   Perfect Harmony: 11 pts</div></div><div style="margin-bottom:12px"><div style="font-family:\'Cinzel\',serif;font-size:13px;color:var(--goldl);border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:5px">Attunement</div><div style="font-size:12px;color:var(--tx2);line-height:1.6">Score same combo Type (Element/Number/Run) or Method (Vertical/Horizontal) 3 turns in a row to earn an Item Token. Max 2 held. Tap token to use.<br>🔒 Arcane Lock   ⚫ Null Sigil   💎 Summon Stone   🔮 Crystal Ball   🌀 Chaos Rune</div></div><div style="margin-bottom:12px"><div style="font-family:\'Cinzel\',serif;font-size:13px;color:var(--goldl);border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:5px">Titans (⚡ Titan button)</div><div style="font-size:12px;color:var(--tx2);line-height:1.6">Awaken at 15 pts, enhance at 25 pts. Use once per turn via ⚡ Titan button.<br>🐉 Dragon: swap Fire slot card(s) with hand cards.<br>🐋 Leviathan: discard and draw card(s).<br>🦅 Eagle: move top card between slots.<br>🐺 Wolf: auto-triggers on slot clear — search for Earth card.</div></div><div style="margin-bottom:12px"><div style="font-family:\'Cinzel\',serif;font-size:13px;color:var(--goldl);border-bottom:1px solid var(--bd);padding-bottom:3px;margin-bottom:5px">Void Mage</div><div style="font-size:12px;color:var(--tx2);line-height:1.6">Score El Chain/Row(5) + Num Chain/Row(5) + Run/Num Run(5). Button appears when qualified. Activates: clears board, resets hands, +25 Points. Once per game.</div></div>’;
+om(‘rulesm’);
+}
+initG();
 </script>
+
 </body>
 </html>
