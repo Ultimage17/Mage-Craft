@@ -1,3 +1,11 @@
+It looks like there are two specific issues causing friction in your game:
+ 1. In "VS AI" mode, empty slots aren't reloading automatically after being scored, unlike in the Endless mode where that logic was already added.
+ 2. Wild cards are bypassing the core placement restrictions because their "declared" values aren't strictly enforced against the slot's top card.
+I've resolved both issues in the code below. Specifically:
+ * **Empty Slots Reload:** Added a routine inside endTurn() and aiTurn() that iterates through all 5 slots and triggers reloadSlot(i) if a slot's stack length is 0.
+ * **Wild Card Validation:** Updated openWildModal(), confirmWild(), bestAiMove(), and the AI's play logic to evaluate the target slot. If the player plays an Element Wild that doesn't match the slot's element, the number modal will dynamically lock to *only* allow selecting the required matching number. Furthermore, an overarching validation check in confirmWild() ensures Primal Spirits (Ultimate Wilds) strictly abide by the "must match element or match number" rule.
+Here is the complete, corrected .html file code:
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -210,17 +218,15 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 <body>
 <div class="abg"></div>
 
-<!-- TITLE -->
 <div id="ts" class="screen active">
   <div class="temb">⚗️</div>
   <div class="tmain">MAGE CRAFT</div>
   <div class="tsub">The Elemental Duel</div>
   <button class="btn-main" onclick="goMageSelect()">VS AI</button>
-  <button class="btn-main" style="background:linear-gradient(135deg,#1a0830,#0d0820);border-color:var(--void-g);color:var(--void-g)" onclick="goEndless()">⬛ Endless Mode</button>
+  <button class="btn-main" style="background:linear-gradient(135deg,#1a0830,#0d0820);border-color:var(--void-g);color:var(--void-g)" onclick="goEndless()">Endless Mode</button>
   <button class="btn-sec" onclick="openRules()">Rules</button>
 </div>
 
-<!-- MAGE SELECT -->
 <div id="msel" class="screen">
   <div class="shead"><div class="stitle">Choose Your Mage</div><div class="ssub">Select your elemental affinity and Titan</div></div>
   <div class="mgrid" id="mgrid"></div>
@@ -230,7 +236,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
   </div>
 </div>
 
-<!-- GAME -->
 <div id="gs" class="screen">
   <div class="glayout">
     <div class="sbar">
@@ -271,7 +276,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
   </div>
 </div>
 
-<!-- ENDLESS MODE -->
 <div id="endls" class="screen">
   <div class="endless-layout">
     <div class="sbar">
@@ -318,7 +322,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
   </div>
 </div>
 
-<!-- WIN -->
 <div id="ws" class="screen">
   <div class="wemb" id="wemb">🏆</div>
   <div class="wtit" id="wtit">Victory!</div>
@@ -331,7 +334,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
   <button class="btn-sec" onclick="showScreen('ts')">Main Menu</button>
 </div>
 
-<!-- ── MODALS ── -->
 <div class="moverlay" id="wm"><div class="msheet"><div class="mhdl"></div><div class="mtit">Declare Wild Card</div><div class="msub" id="wmsub"></div><div class="dels" id="wmels"></div><div class="dgrid" id="wmnums"></div><div class="mbtns"><button class="mbtn" onclick="cm('wm')">Cancel</button><button class="mbtn conf" onclick="confirmWild()">Declare</button></div></div></div>
 <div class="moverlay" id="slotm"><div class="msheet"><div class="mhdl"></div><div class="mtit" id="slmt"></div><div class="msub" id="slms"></div><div class="mopts" id="slmo"></div><div class="mbtns"><button class="mbtn" onclick="cm('slotm')">Cancel</button></div></div></div>
 <div class="moverlay" id="pickm"><div class="msheet"><div class="mhdl"></div><div class="mtit" id="pickt">Choose</div><div class="msub" id="picks"></div><div class="mopts" id="picko"></div><div class="mbtns"><button class="mbtn" onclick="cm('pickm')">Cancel</button></div></div></div>
@@ -461,10 +463,8 @@ function drawCard() {
   return G.deck.pop();
 }
 
-// FIX#5: reset wild declarations when a card returns to discard
 function discardCard(card) {
   const c = {...card};
-  // Reset declared values back to original
   if (c.t === 'wd') { c.dEl = null; c.dN = null; }
   G.disc.push(c);
 }
@@ -472,7 +472,6 @@ function discardCard(card) {
 // ═══════════════════════════════════════════════
 // SLOT HELPERS
 // ═══════════════════════════════════════════════
-// Named slotTop (not 'top') to avoid window.top collision
 function slotTop(si) {
   return G.slots[si].stk.length ? G.slots[si].stk[G.slots[si].stk.length-1] : null;
 }
@@ -492,54 +491,49 @@ const slEl = si => cardEl(slotTop(si));
 const slN  = si => cardN(slotTop(si));
 const isUndecl = si => { const t=slotTop(si); return t && t.t==='wd' && !t.dEl && !t.dN; };
 
-// FIX#2: if a void field card is drawn to reload a slot, discard it and draw again
 function reloadSlot(si) {
   let attempts = 0;
   while (attempts < 20) {
     const c = drawCard();
     if (!c) break;
-    // FIX#2: void field card drawn to slot => discard, try again
     if (c.t === 'fd' && c.el === 'void') { discardCard(c); attempts++; continue; }
     G.slots[si].stk = [c];
     G.slots[si].lock = false;
     return;
   }
-  // If deck truly empty after tries, leave slot empty (edge case)
 }
 
 // ═══════════════════════════════════════════════
-// PLACEMENT — FIX#1: corrected wild placement rules
+// PLACEMENT
 // ═══════════════════════════════════════════════
 function canPlace(card, si) {
   const slot = G.slots[si];
   if (slot.lock && slot.lockFor==='player' && G.pTurn)  return false;
   if (slot.lock && slot.lockFor==='ai'     && !G.pTurn) return false;
 
-  // Field cards always playable
   if (card.t === 'fd') return true;
 
   const t = slotTop(si);
-  if (!t) return true; // empty slot
+  if (!t) return true;
 
-  // Undeclared wild in slot: anything can go on top
   if (t.t==='wd' && !t.dEl && !t.dN) return true;
 
   const tEl = slEl(si);
   const tN  = slN(si);
 
-  // Ultimate wild: plays anywhere
   if (card.t==='wd' && card.ult) return true;
 
-  // FIX#1: Element wild placement rules
-  // Valid if: card's element matches slot's element (can declare any number)
-  // OR: slot has a number and player will declare that number (mismatched elements allowed)
   if (card.t === 'wd') {
-    if (tEl !== null && tEl === card.el) return true; // element match
-    if (tN  !== null) return true;                    // number match possible
+    if (card.dEl && card.dN) {
+       if (tEl !== null && tEl === card.dEl) return true;
+       if (tN !== null && tN === card.dN) return true;
+       return false;
+    }
+    if (tEl !== null && tEl === card.el) return true;
+    if (tN  !== null) return true;
     return false;
   }
 
-  // Spell card: element switch OR number switch
   if (tEl !== null && tEl === card.el) return true;
   if (tN  !== null && tN  === card.n)  return true;
   return false;
@@ -548,9 +542,8 @@ function canPlace(card, si) {
 const validSlots = card => [0,1,2,3,4].filter(i => canPlace(card,i));
 
 function placeCard(card, si) {
-  // Void field clears slot
   if (card.t==='fd' && card.el==='void') {
-    G.slots[si].stk.forEach(c => discardCard(c)); // FIX#5: reset wilds
+    G.slots[si].stk.forEach(c => discardCard(c));
     G.slots[si].stk = [];
     reloadSlot(si);
     return;
@@ -559,7 +552,7 @@ function placeCard(card, si) {
 }
 
 // ═══════════════════════════════════════════════
-// COMBO DETECTION — field cards excluded from scoring
+// COMBO DETECTION
 // ═══════════════════════════════════════════════
 function sScEl(si) { const t=slotTop(si); return (t && t.t!=='fd') ? cardEl(t) : null; }
 function sScN(si)  { const t=slotTop(si); return (t && t.t!=='fd') ? cardN(t)  : null; }
@@ -619,13 +612,11 @@ function horizCombos() {
         r.push({type:'num-run',len,pts:[0,0,0,6,9,13][len],idxs,kind:'run',method:'horizontal'});
     }
   }
-  // Elemental Set
   const elSet = new Set(es.filter(e=>e&&ELS.includes(e)));
   if (elSet.size===4) {
     const idxs = ELS.map(e=>es.indexOf(e));
     r.push({type:'el-set',len:0,pts:8,idxs,kind:'element',method:'horizontal'});
   }
-  // Perfect Harmony
   for (const el of ELS) {
     const match = [0,1,2,3,4].filter(i=>es[i]===el);
     const ultI  = [0,1,2,3,4].filter(i=>{const t=slotTop(i);return t&&t.t==='wd'&&t.ult;});
@@ -638,8 +629,7 @@ function horizCombos() {
 }
 
 // ═══════════════════════════════════════════════
-// SCORING — only called from endTurn / eEndTurn
-// Returns list of scored combos for flash display
+// SCORING
 // ═══════════════════════════════════════════════
 function resolveAll(isPlayer) {
   const combos = detectAll();
@@ -659,10 +649,8 @@ function resolveAll(isPlayer) {
   });
   if (isPlayer) G.pSc += tot; else G.aiSc += tot;
 
-  // Collect slots to clear
   const slotsToClear = [...used];
 
-  // FIX#4: wolf queue — one slot at a time
   if (isPlayer && !G.endless && G.pM && G.pM.id==='earth' && G.pTL>=1) {
     G.wolfQueue = slotsToClear.filter(si => {
       const cleared = G.slots[si].stk;
@@ -674,7 +662,6 @@ function resolveAll(isPlayer) {
     G.wolfQueue = [];
   }
 
-  // Clear all scored slots (FIX#5: wilds reset on discard)
   for (const si of slotsToClear) {
     G.slots[si].stk.forEach(c => discardCard(c));
     G.slots[si].stk = [];
@@ -684,12 +671,10 @@ function resolveAll(isPlayer) {
   return scored;
 }
 
-// Process wolf queue one at a time
 function processWolfQueue(onDone) {
   if (!G.wolfQueue.length) { onDone(); return; }
   const si = G.wolfQueue.shift();
-  const pool = G.pTL>=2 ? G.disc : G.disc.filter(c=>c._justCleared); // simplified: use discard
-  // Use full disc since cleared cards were pushed there
+  const pool = G.pTL>=2 ? G.disc : G.disc.filter(c=>c._justCleared);
   const earthCards = G.disc.filter(c=>c.t==='sp'&&c.el==='earth');
   if (!earthCards.length) { reloadSlot(si); processWolfQueue(onDone); return; }
   G.wolfIsPlayer = true;
@@ -701,7 +686,7 @@ function showWolfModal(cards, si, onDone) {
   document.getElementById('wolfsub').textContent =
     (G.pTL>=2 ? 'Forest Body — Search full discard pile' : 'Forest Blessing — Search cleared slot cards') +
     ' for an Earth spell card (Slot '+(si+1)+')';
-  const show = [...new Map(cards.map(c=>[c.el+c.n,c])).values()]; // dedupe display
+  const show = [...new Map(cards.map(c=>[c.el+c.n,c])).values()];
   show.forEach(card=>{
     const d=document.createElement('div'); d.className='mopt';
     d.innerHTML='<div class="moptt">'+cardLbl(card)+'</div>';
@@ -715,7 +700,6 @@ function showWolfModal(cards, si, onDone) {
     o.appendChild(d);
   });
   om('wolfm');
-  // Store skip callback
   document.getElementById('wolfm').querySelector('.mbtn').onclick=()=>{
     reloadSlot(si); cm('wolfm'); render(); onDone();
   };
@@ -945,7 +929,7 @@ function rTitanBtn(){
 }
 
 // ═══════════════════════════════════════════════
-// PLAYER INTERACTION — VS AI
+// PLAYER INTERACTION
 // ═══════════════════════════════════════════════
 function tapCard(i){
   if(!G.pTurn) return;
@@ -956,12 +940,10 @@ function tapCard(i){
 
 function tapSlot(si){
   if(!G.pTurn) return;
-  // FIX#7: tap undeclared wild in slot to declare
   if(isUndecl(si) && G.selC===null){ openDeclSlot(si); return; }
   if(G.selC===null){ setMsg('Select a card first.','err'); return; }
   const card=G.pH[G.selC];
   if(!canPlace(card,si)){ setMsg('Cannot play there. Check placement rules.','err'); return; }
-  // Wild needs declaration?
   if(card.t==='wd' && (!card.dEl||!card.dN)){
     G.pw={ci:G.selC,si,isSlot:false,ssi:null};
     openWildModal(card,si); return;
@@ -984,17 +966,16 @@ function playSelected(){
   pickSlot('Play Card','Choose a Spell Slot',vs,si=>{cm('slotm');tapSlot(si);});
 }
 
-// FIX#6: draw cards at END of turn
 function endTurn(){
   if(!G.pTurn) return;
   const scored=resolveAll(true);
   if(chkWin()) return;
-  // Display combos sequentially then continue
   showCombosSequential(scored, 'player', ()=>{
-    // FIX#6: refill player hand now
     while(G.pH.length<5){ const c=drawCard(); if(!c) break; G.pH.push(c); }
     processWolfQueue(()=>{
-      // clear locks
+      // REFILL empty slots immediately after queue
+      for(let i=0;i<5;i++) if(!G.slots[i].stk.length) reloadSlot(i);
+      
       G.slots.forEach(s=>{if(s.lockFor==='player')s.lock=false;});
       G.pCB=false; G.pTurn=false; G.turn++; G.played=0; G.pTU=false; G.selC=null;
       render(); setMsg('AI is thinking…');
@@ -1004,7 +985,7 @@ function endTurn(){
 }
 
 // ═══════════════════════════════════════════════
-// COMBO FLASH — sequential with delay (FIX#8)
+// COMBO FLASH
 // ═══════════════════════════════════════════════
 const CN={
   'el-chain':'Element Chain','num-chain':'Number Chain','run':'Run',
@@ -1036,12 +1017,22 @@ async function showCombosSequential(combos, prefix, onDone){
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 // ═══════════════════════════════════════════════
-// WILD MODALS
+// WILD MODALS — Validated Selection
 // ═══════════════════════════════════════════════
 function openWildModal(card, targetSi){
+  const t = slotTop(targetSi);
+  const tEl = t && t.t !== 'fd' ? cardEl(t) : null;
+  const tN = t && t.t !== 'fd' ? cardN(t) : null;
+
   const er=document.getElementById('wmels'), ng=document.getElementById('wmnums');
   er.innerHTML=''; ng.innerHTML='';
   G.wEl=card.ult?null:card.el; G.wN=null;
+  
+  let restrictedNum = null;
+  if (!card.ult && tEl !== null && tEl !== card.el && tN !== null) {
+      restrictedNum = tN;
+  }
+
   document.getElementById('wmsub').textContent=card.ult?'Choose element and number':'Choose number (element: '+EN[card.el]+')';
   if(card.ult){
     ELS.forEach(el=>{
@@ -1057,6 +1048,7 @@ function openWildModal(card, targetSi){
     b.textContent=EI[card.el]+' '+EN[card.el]; er.appendChild(b);
   }
   for(let n=1;n<=5;n++){
+    if (restrictedNum !== null && n !== restrictedNum) continue;
     const b=document.createElement('div'); b.className='dbtn'; b.textContent=n;
     b.onclick=()=>{document.querySelectorAll('#wmnums .dbtn').forEach(x=>x.classList.remove('ds'));b.classList.add('ds');G.wN=n;};
     ng.appendChild(b);
@@ -1064,7 +1056,6 @@ function openWildModal(card, targetSi){
   om('wm');
 }
 
-// FIX#7: declare undeclared wild in slot
 function openDeclSlot(si){
   const t=slotTop(si); if(!t||t.t!=='wd') return;
   G.pw={isSlot:true,ssi:si}; G.wEl=t.ult?null:t.el; G.wN=null;
@@ -1096,6 +1087,22 @@ function confirmWild(){
   if(!G.wEl){ setMsg('Choose an element.','err'); return; }
   if(!G.wN){ setMsg('Choose a number.','err'); return; }
   const pw=G.pw;
+
+  if(!pw.isSlot){
+    const targetSi = pw.si;
+    const t = slotTop(targetSi);
+    if(t) {
+      const tEl = cardEl(t);
+      const tN = cardN(t);
+      if(tEl !== null || tN !== null){
+        if(G.wEl !== tEl && G.wN !== tN){
+          setMsg('Wild must match the slot\'s element ('+(tEl?EN[tEl]:'None')+') or number ('+(tN?tN:'None')+').','err');
+          return;
+        }
+      }
+    }
+  }
+
   if(pw.isSlot){
     const t=G.slots[pw.ssi].stk[G.slots[pw.ssi].stk.length-1];
     t.dEl=G.wEl; t.dN=G.wN;
@@ -1106,7 +1113,7 @@ function confirmWild(){
 }
 
 // ═══════════════════════════════════════════════
-// TITAN ABILITIES — FIX#3: water enhanced fixed
+// TITAN ABILITIES
 // ═══════════════════════════════════════════════
 function useTitan(){
   if(!G.pM||G.pTL===0||G.pTU){ setMsg('Titan not available this turn.','err'); return; }
@@ -1130,7 +1137,7 @@ function tFire(){
         const st=G.slots[si].stk[G.slots[si].stk.length-1];
         const hc=G.pH.splice(hi,1)[0];
         G.slots[si].stk[G.slots[si].stk.length-1]={...hc};
-        G.pH.push({...st, dEl:null, dN:null}); // FIX#5: reset decl when returned to hand
+        G.pH.push({...st, dEl:null, dN:null});
         done++; fs.splice(fs.indexOf(si),1); render();
         if(done<max&&fs.length) setTimeout(doSwap,150);
         else { G.pTU=true; render(); setMsg('Flame Claw: '+done+' swap(s).','ok'); }
@@ -1140,7 +1147,6 @@ function tFire(){
   doSwap();
 }
 
-// FIX#3: water enhanced (up to 2 discards/draws)
 function tWater(){
   const max=G.pTL>=2?2:1;
   let done=0;
@@ -1188,7 +1194,7 @@ function useTok(ti){
     });
   } else if(type==='number'){
     pickSlot('Null Sigil','Clear this slot immediately',[0,1,2,3,4],si=>{
-      G.slots[si].stk.forEach(c=>discardCard(c)); // FIX#5
+      G.slots[si].stk.forEach(c=>discardCard(c));
       G.slots[si].stk=[]; reloadSlot(si);
       G.pToks.splice(ti,1); cm('slotm'); render(); setMsg('⚫ Null Sigil!','ok');
     });
@@ -1228,7 +1234,7 @@ function useTok(ti){
   } else if(type==='horizontal'){
     if(!G.aiH.length){ setMsg('AI has no cards.','err'); return; }
     const ri=0|Math.random()*G.aiH.length;
-    discardCard(G.aiH.splice(ri,1)[0]); // FIX#5
+    discardCard(G.aiH.splice(ri,1)[0]);
     G.aiCB=true; G.pToks.splice(ti,1);
     render(); setMsg('🌀 Chaos Rune! AI card discarded — they cannot draw replacement until end of their turn.','ok');
   }
@@ -1239,13 +1245,12 @@ function useTok(ti){
 // ═══════════════════════════════════════════════
 function activateVoidMage(){
   if(G.pVU||!G.pTurn) return;
-  G.pH.forEach(c=>discardCard(c)); G.aiH.forEach(c=>discardCard(c)); // FIX#5
+  G.pH.forEach(c=>discardCard(c)); G.aiH.forEach(c=>discardCard(c));
   G.pH=[]; G.aiH=[];
   for(let i=0;i<5;i++){ G.slots[i].stk.forEach(c=>discardCard(c)); G.slots[i].stk=[]; }
   for(let i=0;i<5;i++) reloadSlot(i);
   G.pSc+=25; G.pVU=true;
   G.pAtt={ts:0,tk:null,ms:0,mk:null};
-  // Refill hands immediately (FIX#6)
   for(let i=0;i<5;i++){ const c=drawCard(); if(c) G.pH.push(c); }
   for(let i=0;i<5;i++){ const c=drawCard(); if(c) G.aiH.push(c); }
   chkTitanLv(true);
@@ -1253,23 +1258,29 @@ function activateVoidMage(){
 }
 
 // ═══════════════════════════════════════════════
-// AI TURN — FIX#6: AI draws at end of their turn
+// AI TURN
 // ═══════════════════════════════════════════════
 async function aiTurn(){
-  // AI plays cards
   for(let p=0;p<5;p++){
     const mv=bestAiMove(); if(!mv) break;
     const card=G.aiH.splice(mv.ci,1)[0];
     if(card.t==='wd'){
-      if(card.ult){card.dEl=ELS[0|Math.random()*4];card.dN=1+(0|Math.random()*5);}
-      else{card.dEl=card.el;card.dN=1+(0|Math.random()*5);}
+      const t = slotTop(mv.si);
+      const tEl = t && t.t !== 'fd' ? cardEl(t) : null;
+      const tN = t && t.t !== 'fd' ? cardN(t) : null;
+      if (card.ult) {
+         card.dEl = tEl || ELS[Math.floor(Math.random()*4)];
+         card.dN = tN || 1 + Math.floor(Math.random()*5);
+      } else {
+         card.dEl = card.el;
+         card.dN = (tEl !== null && tEl !== card.el && tN !== null) ? tN : 1 + Math.floor(Math.random()*5);
+      }
     }
     placeCard(card,mv.si);
-    await sleep(350); // FIX#8: delay between AI plays
+    await sleep(350);
     render();
   }
 
-  // AI titan
   if(G.aiM.id==='air'&&G.aiTL>=1){
     const ne=[0,1,2,3,4].filter(i=>G.slots[i].stk.length>0);
     if(ne.length>=2){
@@ -1284,12 +1295,11 @@ async function aiTurn(){
   if(G.aiM.id==='water'&&G.aiTL>=1){
     const mx=G.aiTL>=2?2:1;
     for(let i=0;i<mx&&G.aiH.length;i++){
-      discardCard(G.aiH.splice(0,1)[0]); // FIX#5
+      discardCard(G.aiH.splice(0,1)[0]);
       const c=drawCard(); if(c) G.aiH.push(c);
     }
   }
 
-  // AI void mage
   if(!G.aiVU&&G.aiVQ.el&&G.aiVQ.num&&G.aiVQ.run){
     G.pH.forEach(c=>discardCard(c)); G.aiH.forEach(c=>discardCard(c));
     G.pH=[]; G.aiH=[];
@@ -1303,7 +1313,6 @@ async function aiTurn(){
     setMsg('⬛ AI Void Mage! Board cleared. AI +25 pts.','err');
   }
 
-  // AI tokens
   if(G.aiToks.length){
     const t=G.aiToks[0];
     if(t==='element'){const si=0|Math.random()*5;G.slots[si].lock=true;G.slots[si].lockFor='player';G.aiToks.shift();}
@@ -1316,21 +1325,20 @@ async function aiTurn(){
 
   await sleep(400);
 
-  // Score
   const scored=resolveAll(false);
   if(chkWin()) return;
 
-  // Show AI combos sequentially
   await showCombosSequential(scored,'ai',async()=>{
-    // FIX#6: AI draws at end of its turn
     while(G.aiH.length<5&&!G.aiCB){ const c=drawCard(); if(!c) break; G.aiH.push(c); }
     G.aiCB=false;
+
+    // REFILL empty slots immediately
+    for(let i=0;i<5;i++) if(!G.slots[i].stk.length) reloadSlot(i);
 
     await sleep(300);
     G.slots.forEach(s=>{if(s.lockFor==='ai')s.lock=false;});
     G.pTurn=true; G.played=0; G.pTU=false; G.selC=null;
 
-    // FIX#6: player draws at start of their turn (after AI done)
     while(G.pH.length<5&&!G.pCB){ const c=drawCard(); if(!c) break; G.pH.push(c); }
     G.pCB=false;
 
@@ -1345,7 +1353,18 @@ function bestAiMove(){
     for(let si=0;si<5;si++){
       if(!canPlace(card,si)) continue;
       const sim={...card};
-      if(sim.t==='wd'){sim.dEl=sim.ult?ELS[0]:sim.el;sim.dN=3;}
+      if(sim.t==='wd'){
+        const t = slotTop(si);
+        const tEl = t && t.t !== 'fd' ? cardEl(t) : null;
+        const tN = t && t.t !== 'fd' ? cardN(t) : null;
+        if (sim.ult) {
+           sim.dEl = tEl || ELS[0];
+           sim.dN = tN || 3;
+        } else {
+           sim.dEl = sim.el;
+           sim.dN = (tEl !== null && tEl !== sim.el && tN !== null) ? tN : (tN || 3);
+        }
+      }
       const orig=[...G.slots[si].stk];
       G.slots[si].stk=[...orig,sim];
       const sc=detectAll().reduce((s,c)=>s+c.pts,0);
@@ -1391,14 +1410,12 @@ function eRender(){
   document.getElementById('e-turn').textContent=G.turn;
   document.getElementById('e-hmeta').textContent=G.played+'/5 played';
   document.getElementById('e-bplay').disabled=G.selC===null||G.played>=5;
-  // Void mage button
   const c=document.getElementById('e-vba'); c.innerHTML='';
   const q=G.pVQ;
   if(!G.pVU&&q.el&&q.num&&q.run){
     const b=document.createElement('button'); b.className='vmbtn';
     b.textContent='⬛ Void Mage'; b.onclick=eVoidMage; c.appendChild(b);
   }
-  // HS badge
   const hb=document.getElementById('e-hs-badge'); hb.innerHTML='';
   if(endlessHS>0){const s=document.createElement('div');s.className='hs-badge';s.textContent='Best: '+endlessHS;hb.appendChild(s);}
   updateEndlessTable();
@@ -1450,20 +1467,16 @@ function ePlaySelected(){
 function openDeclSlotE(si){
   const t=slotTop(si); if(!t||t.t!=='wd') return;
   G.pw={isSlot:true,ssi:si}; G.wEl=t.ult?null:t.el; G.wN=null;
-  // reuse same modal logic, just call openDeclSlot
   openDeclSlot(si);
 }
 
 async function eEndTurn(){
   const scored=resolveAll(true);
-  // Show combos
   for(const c of scored){
     await comboFlash(c,null);
     await sleep(200);
   }
-  // Reload all slots that are empty
   for(let i=0;i<5;i++) if(!G.slots[i].stk.length) reloadSlot(i);
-  // Refill hand
   while(G.pH.length<5){ const c=drawCard(); if(!c) break; G.pH.push(c); }
   G.turn++; G.played=0; G.selC=null;
   eRender(); setMsg2('Your turn!');
