@@ -34,9 +34,11 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 @keyframes vp{0%,100%{box-shadow:0 0 8px #c44dff40}50%{box-shadow:0 0 20px #c44dff80}}
 @keyframes cfa{0%{opacity:0;transform:translate(-50%,-60%) scale(0.7)}25%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}80%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-42%) scale(0.95)}}
 
+/* ── TITLE ── */
+#ts{align-items:center;justify-content:flex-start;padding:8vh 20px 40px;gap:24px;position:relative;z-index:1;overflow-y:auto;}
 .temb{font-size:96px;filter:drop-shadow(0 0 24px var(--void-g));animation:pulse 3s ease-in-out infinite;}
 .tmain{font-family:'Cinzel Decorative',serif;font-size:clamp(32px,9vw,52px);font-weight:900;color:var(--goldl);text-align:center;text-shadow:0 0 32px var(--gold),0 0 64px var(--void-g);letter-spacing:5px;}
-.tsub{font-family:'Cinzel',serif;font-size:15px;letter-spacing:7px;color:var(--tx2);text-transform:uppercase;}
+.tsub{font-family:'Cinzel',serif;font-size:15px;letter-spacing:7px;color:var(--tx2);text-transform:uppercase;text-align:center;}
 .btn-main{background:linear-gradient(135deg,#3d2870,#1e1440);border:1px solid var(--gold);color:var(--goldl);font-family:'Cinzel',serif;font-size:18px;letter-spacing:2px;padding:18px 48px;border-radius:6px;cursor:pointer;width:100%;max-width:300px;box-shadow:0 0 24px #00000090;}
 .btn-main:active{transform:scale(0.97);}
 .btn-sec{background:transparent;border:1px solid var(--bd2);color:var(--tx2);font-family:'Cinzel',serif;font-size:15px;padding:13px 36px;border-radius:6px;cursor:pointer;width:100%;max-width:300px;}
@@ -199,14 +201,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
   <div class="temb">⚗️</div>
   <div class="tmain">MAGE CRAFT</div>
   <div class="tsub">The Elemental Duel</div>
-  <div style="display:flex; flex-direction:column; gap:12px; width:100%; align-items:center; padding:0 20px; max-width:400px; margin:0 auto; z-index:1">
+  <div style="display:flex; flex-direction:column; gap:16px; width:100%; align-items:center; max-width:300px; margin:20px auto 0; z-index:1">
       <button class="btn-main" onclick="goMageSelect(false)">VS AI</button>
       <button class="btn-main" style="background:linear-gradient(135deg,#1a0830,#0d0820);border-color:var(--void-g);color:var(--void-g)" onclick="goMageSelect(true)">⬛ Endless Mode</button>
-      <div style="display:flex; gap:12px; width:100%;">
-          <button class="btn-sec" onclick="openChallenges()">Challenges</button>
-          <button class="btn-sec" onclick="openGallery()">Gallery</button>
-      </div>
-      <button class="btn-sec" onclick="openRules()">Rules</button>
+      <button class="btn-main" onclick="openChallenges()">Challenges</button>
+      <button class="btn-main" onclick="openGallery()">Gallery</button>
+      <button class="btn-sec" style="margin-top:8px" onclick="openRules()">Rules</button>
   </div>
 </div>
 
