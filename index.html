@@ -202,11 +202,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
   <div class="tmain">MAGE CRAFT</div>
   <div class="tsub">The Elemental Duel</div>
   <div style="display:flex; flex-direction:column; gap:16px; width:100%; align-items:center; max-width:300px; margin:20px auto 0; z-index:1">
-      <button class="btn-main" onclick="goMageSelect('pvp')">VS PLAYER</button>
-      <button class="btn-main" onclick="goMageSelect('vsai')">VS AI</button>
-      <button class="btn-main" onclick="goMageSelect('endless')">ENDLESS MODE</button>
-      <button class="btn-main" onclick="openChallenges()">CHALLENGES</button>
-      <button class="btn-main" onclick="openGallery()">GALLERY</button>
+      <button class="btn-main" onclick="goMageSelect(false)">VS AI</button>
+      <button class="btn-main" style="background:linear-gradient(135deg,#1a0830,#0d0820);border-color:var(--void-g);color:var(--void-g)" onclick="goMageSelect(true)">⬛ Endless Mode</button>
+      <button class="btn-main" onclick="openChallenges()">Challenges</button>
+      <button class="btn-main" onclick="openGallery()">Gallery</button>
       <button class="btn-sec" style="margin-top:8px" onclick="openRules()">Rules</button>
   </div>
 </div>
@@ -235,13 +234,13 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 <div id="gs" class="screen">
   <div style="display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;">
     <div class="sbar">
-      <div class="psc"><div class="plbl" id="plbl-you">YOU</div><div class="scnum" id="psc">0</div><div class="sctgt">/100</div><div class="tbadge" id="ptb">🔒 Locked</div></div>
+      <div class="psc"><div class="plbl">YOU</div><div class="scnum" id="psc">0</div><div class="sctgt">/100</div><div class="tbadge" id="ptb">🔒 Locked</div></div>
       <div style="display:flex;flex-direction:column;align-items:center;gap:3px">
         <div style="font-family:'Cinzel Decorative',serif;font-size:18px;color:var(--bd2)">⚔</div>
         <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--tx2)">Turn <span id="tnum">1</span></div>
         <div id="vba"></div>
       </div>
-      <div class="psc"><div class="plbl" id="plbl-ai">AI</div><div class="scnum" id="aisc">0</div><div class="sctgt">/100</div><div class="tbadge" id="aitb">🔒 Locked</div></div>
+      <div class="psc"><div class="plbl">AI</div><div class="scnum" id="aisc">0</div><div class="sctgt">/100</div><div class="tbadge" id="aitb">🔒 Locked</div></div>
     </div>
     <div class="stbar">
       <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--tx2)"><span id="tlbl">Your Turn</span></div>
@@ -323,10 +322,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
   <div class="wtit" id="wtit">Victory!</div>
   <div class="wsub" id="wsub"></div>
   <div class="wscores">
-    <div class="wsb"><div class="wsl" id="wsl-you">YOU</div><div class="wsn" id="wps">0</div></div>
-    <div class="wsb" id="wai-block"><div class="wsl" id="wsl-ai">AI</div><div class="wsn" id="wais">0</div></div>
+    <div class="wsb"><div class="wsl">YOU</div><div class="wsn" id="wps">0</div></div>
+    <div class="wsb" id="wai-block"><div class="wsl">AI</div><div class="wsn" id="wais">0</div></div>
   </div>
-  <button class="btn-main" onclick="goMageSelect(G.gameMode)">Play Again</button>
+  <button class="btn-main" onclick="goMageSelect(isEndlessMode)">Play Again</button>
   <button class="btn-sec" onclick="showScreen('ts')">Main Menu</button>
 </div>
 
@@ -338,8 +337,6 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 <div class="moverlay" id="rulesm"><div class="msheet"><div class="mhdl"></div><div class="mtit">Mage Craft — Rules</div><div id="rcon" style="font-size:13px;color:var(--tx2);line-height:1.7"></div><div class="mbtns"><button class="mbtn conf" onclick="cm('rulesm')">Close</button></div></div></div>
 <div class="moverlay" id="titanm"><div class="msheet"><div class="mhdl"></div><div class="mtit">Activate Titan Ability?</div><div class="msub" id="titan-desc"></div><div class="mbtns"><button class="mbtn" onclick="cm('titanm')">Cancel</button><button class="mbtn conf" onclick="confirmTitan()">Activate</button></div></div></div>
 <div class="moverlay" id="galfs"><div class="msheet"><div class="mhdl"></div><div class="mtit" id="gf-tit"></div><div style="font-size:64px; text-align:center; margin:20px 0" id="gf-ic"></div><div style="text-align:center" id="gf-btn"></div><div class="mbtns"><button class="mbtn conf" onclick="cm('galfs')">Close</button></div></div></div>
-
-<div class="moverlay" id="passm"><div class="msheet"><div class="mhdl"></div><div class="mtit" id="pass-tit">Pass Device</div><div class="msub" id="pass-sub"></div><div class="mbtns"><button class="mbtn conf" onclick="startPvpTurn()">Ready</button></div></div></div>
 
 <script>
 const ELS = ['fire','water','air','earth'];
@@ -395,7 +392,6 @@ let G = {};
 let isEndlessMode = false;
 let endlessHS = 0;
 let actionContext = 'play'; // 'play', 'chal', 'gal'
-let pvpP1Mage = null;
 
 // PROGRESS
 let PROG = JSON.parse(localStorage.getItem('mc_prog')) || defProg();
@@ -411,17 +407,16 @@ function saveP(){ localStorage.setItem('mc_prog', JSON.stringify(PROG)); }
 
 function initG() {
   G = {
-    gameMode: 'vsai', // 'vsai', 'endless', 'pvp', 'void'
-    activePlayerIndex: 1, // 1 or 2 for PVP mode
     deck:[], disc:[],
     slots: Array(5).fill(0).map(()=>({stk:[],lock:false,lockFor:'none'})),
     pH:[], aiH:[], pSc:0, aiSc:0, pM:null, aiM:null,
     pToks:[], aiToks:[], pAtt:{ts:0,tk:null,ms:0,mk:null}, aiAtt:{ts:0,tk:null,ms:0,mk:null},
     pVQ:{el:false,num:false,run:false}, aiVQ:{el:false,num:false,run:false},
-    pVU:false, aiVU:false, pTL:0, aiTL:0, pTU:false, aiTU:false,
-    pAscStack:0, aiAscStack:0, pTurn:true, turn:1,
+    pVU:false, aiVU:false, pTL:0, aiTL:0, pTU:false,
+    pAscStack:0, aiAscStack:0, aiCB:false, pCB:false, pTurn:true, turn:1,
     selC:null, played:0, pw:{ci:null,si:null,isSlot:false,ssi:null}, wEl:null, wN:null,
-    endless:false, eComboCount:{}, pWolfActive:false, turnProg:{fD:0, wD:0, aAdj:false, eW:0}
+    endless:false, eComboCount:{}, pWolfActive:false, turnProg:{fD:0, wD:0, aAdj:false, eW:0},
+    vsVoid: false
   };
 }
 
@@ -560,7 +555,7 @@ function detectAll() {
 }
 
 function trackComboChals(c, isP) {
-  if(!isP || G.gameMode !== 'vsai') return;
+  if(!isP || isEndlessMode || G.vsVoid) return;
   const pM = G.pM.id;
   if(c.type==='el-chain'||c.type==='el-row') {
     if(c.els && c.els.every(e=>e===pM)) {
@@ -639,8 +634,8 @@ function resolveAll(isPlayer) {
       } else G.pAscStack = 0;
     }
   } else {
-    if (G.aiTL >= 3 || G.gameMode === 'void') {
-      if (conditionMet || G.gameMode === 'void') {
+    if (G.aiTL >= 3 || G.vsVoid) {
+      if (conditionMet || G.vsVoid) {
         G.aiAscStack = Math.min(3, (G.aiAscStack || 0) + 1);
         ascPts = G.aiAscStack;
       } else G.aiAscStack = 0;
@@ -650,7 +645,7 @@ function resolveAll(isPlayer) {
   if (ascPts > 0) {
     tot += ascPts;
     scored.push({type:'ascension', pts: ascPts, len: 0});
-    if(isPlayer && G.gameMode === 'vsai' && ascPts===3) {
+    if(isPlayer && !isEndlessMode && !G.vsVoid && ascPts===3) {
       const el = G.pM.id;
       PROG[el].l[0] = Math.min(20, PROG[el].l[0]+1);
       saveP();
@@ -694,7 +689,7 @@ function showWolfModal(cards, onDone) {
       const ri=G.disc.findIndex(c=>c.el===card.el && c.n===card.n && c.t===card.t);
       if(ri>=0) G.disc.splice(ri,1);
       G.pH.push({...card,dEl:null,dN:null});
-      if(card.t==='wd' && card.el==='earth') { G.turnProg.eW++; if(G.turnProg.eW>=2 && G.gameMode === 'vsai' && G.pM.id==='earth') PROG.earth.s[1] = Math.min(10, PROG.earth.s[1]+1); saveP(); }
+      if(card.t==='wd' && card.el==='earth') { G.turnProg.eW++; if(G.turnProg.eW>=2 && !isEndlessMode && G.pM.id==='earth') PROG.earth.s[1] = Math.min(10, PROG.earth.s[1]+1); saveP(); }
       cm('wolfm'); doRender(); onDone();
     };
     o.appendChild(d);
@@ -788,47 +783,24 @@ function openGalFs(i) {
 
 function startVoidMode() {
   cm('galfs');
-  goMageSelect('void');
+  G.endless = false; G.vsVoid = true; G.pM = MAGES[3]; // Any player mage
+  goMageSelect(false);
+  document.getElementById('msel-sub').textContent = 'Select your Mage (VS The Void)';
 }
 
-function goMageSelect(mode){
-  pvpP1Mage = null; // Clear dangling state
+function goMageSelect(endless){
   actionContext = 'play';
-  G.gameMode = mode; // 'vsai', 'endless', 'pvp', 'void'
-  isEndlessMode = (mode === 'endless');
-  
-  if (mode === 'pvp') {
-      document.getElementById('msel-sub').textContent = 'Player 1: Select your elemental affinity and Titan';
-      document.getElementById('startbtn').textContent = 'Next Player';
-  } else if (mode === 'void') {
-      document.getElementById('msel-sub').textContent = 'Select your Mage (VS The Void)';
-      document.getElementById('startbtn').textContent = 'Summon the Arena';
-  } else {
-      document.getElementById('msel-sub').textContent = 'Select your elemental affinity and Titan';
-      document.getElementById('startbtn').textContent = 'Summon the Arena';
-  }
+  isEndlessMode = endless;
+  document.getElementById('msel-sub').textContent = endless ? 'Select your elemental affinity and Titan' : 'Select your elemental affinity and Titan';
   document.getElementById('startbtn').disabled = true;
-  initG(); renderMageGrid(); showScreen('msel');
+  document.getElementById('startbtn').textContent = 'Summon the Arena';
+  initG(); G.vsVoid = false; renderMageGrid(); showScreen('msel');
 }
 
 function handleMageAction() {
-  if (actionContext === 'chal') {
+  if(actionContext === 'chal') {
     renderChalView(G.pM.id);
     showScreen('cview');
-  } else if (G.gameMode === 'pvp') {
-    if (!pvpP1Mage) {
-        pvpP1Mage = G.pM;
-        G.pM = null;
-        document.getElementById('msel-sub').textContent = 'Player 2: Select your elemental affinity and Titan';
-        document.getElementById('startbtn').textContent = 'Summon the Arena';
-        document.getElementById('startbtn').disabled = true;
-        renderMageGrid(pvpP1Mage.id); 
-    } else {
-        G.aiM = G.pM;
-        G.pM = pvpP1Mage;
-        pvpP1Mage = null;
-        startGame();
-    }
   } else {
     startGame();
   }
@@ -885,10 +857,9 @@ function getChalText(el, set, idx) {
   return texts[el][set.charAt(0).toLowerCase()][idx];
 }
 
-function renderMageGrid(excludeId = null){
+function renderMageGrid(){
   const g=document.getElementById('mgrid'); g.innerHTML='';
   MAGES.forEach(m=>{
-    if (m.id === excludeId) return; // For PVP, prevent mirror matches to avoid confusion
     const d=document.createElement('div'); d.className='mc'; d.dataset.el=m.el;
     d.innerHTML=`<div style="font-size:38px">${m.icon}</div>
       <div style="font-family:'Cinzel',serif;font-size:14px">${m.name}</div>
@@ -908,9 +879,9 @@ function startGame(){
   if(!G.pM) return;
   if(isEndlessMode){ goEndless(); return; }
   
-  if(G.gameMode === 'void') {
+  if(G.vsVoid) {
      G.aiM = {id:'void', el:'void', name:'Void Mage', titan:'Void Beast', icon:'⬛', clr:'var(--void-g)'};
-  } else if (G.gameMode !== 'pvp') {
+  } else {
      const av=MAGES.filter(m=>m.id!==G.pM.id);
      G.aiM=av[0|Math.random()*av.length];
   }
@@ -918,30 +889,22 @@ function startGame(){
   G.deck=buildDeck();
   for(let i=0;i<5;i++){G.pH.push(drawCard());G.aiH.push(drawCard());}
   for(let i=0;i<5;i++) reloadSlot(i);
-  
-  if (G.gameMode === 'pvp') {
-      G.pTurn = true;
-      G.activePlayerIndex = 1;
-      showScreen('gs'); render();
-      setMsg('Player 1 goes first. Play cards, then End Turn.');
-  } else {
-      G.pTurn=Math.random()<0.5;
-      showScreen('gs'); render();
-      if(G.pTurn) setMsg('Your turn! Play cards, then End Turn to score.');
-      else { setMsg('AI goes first…'); setTimeout(aiTurn,1200); }
-  }
+  G.pTurn=Math.random()<0.5;
+  showScreen('gs'); render();
+  if(G.pTurn) setMsg('Your turn! Play cards, then End Turn to score.');
+  else { setMsg('AI goes first…'); setTimeout(aiTurn,1200); }
 }
 
 function render(){
   rScores(); rSlots('slrow',false); rHand('phand',G.pH); rAiHand(); rAtt(); rToks(); rVoidBtn(); rTitanBtn();
   document.getElementById('tnum').textContent=G.turn;
-  document.getElementById('tlbl').textContent=G.pTurn?'Your Turn':(G.gameMode === 'pvp' ? "Opponent's Turn" : "AI's Turn");
-  document.getElementById('plbl').textContent=G.pTurn?'Action Phase':(G.gameMode === 'pvp' ? "Waiting..." : "AI Thinking…");
+  document.getElementById('tlbl').textContent=G.pTurn?'Your Turn':"AI's Turn";
+  document.getElementById('plbl').textContent=G.pTurn?'Action Phase':'AI Thinking…';
   document.getElementById('hmeta').textContent=G.played+'/5 played';
   document.getElementById('bplay').disabled=!G.pTurn||G.selC===null||G.played>=5;
   document.getElementById('bend').disabled=!G.pTurn;
   if(G.aiM){
-    document.getElementById('ailbl').textContent= (G.gameMode === 'pvp' ? 'Player ' + (G.activePlayerIndex === 1 ? 2 : 1) + ' ' : '') + G.aiM.icon + ' ' + G.aiM.name;
+    document.getElementById('ailbl').textContent=G.aiM.icon+' '+G.aiM.name;
     document.getElementById('aisl').textContent='T:'+G.aiAtt.ts+' M:'+G.aiAtt.ms;
   }
 }
@@ -949,15 +912,6 @@ function render(){
 function rScores(){
   document.getElementById('psc').textContent=G.pSc;
   document.getElementById('aisc').textContent=G.aiSc;
-  
-  if (G.gameMode === 'pvp') {
-      document.getElementById('plbl-you').textContent = 'PLAYER ' + G.activePlayerIndex;
-      document.getElementById('plbl-ai').textContent = 'PLAYER ' + (G.activePlayerIndex === 1 ? 2 : 1);
-  } else {
-      document.getElementById('plbl-you').textContent = 'YOU';
-      document.getElementById('plbl-ai').textContent = 'AI';
-  }
-
   function rb(el,m,lv){
     if(!m)return;
     el.textContent=lv===0?'🔒 Locked':lv===1?'⚡'+m.icon+' Awakened':lv===2?'🌟'+m.icon+' Enhanced':'✨'+m.icon+' Ascended';
@@ -965,7 +919,7 @@ function rScores(){
   }
   if(G.pM) rb(document.getElementById('ptb'),G.pM,G.pTL);
   if(G.aiM) {
-     if(G.gameMode === 'void') { document.getElementById('aitb').className='tbadge asc'; document.getElementById('aitb').textContent='✨⬛ Awakened'; }
+     if(G.vsVoid) { document.getElementById('aitb').className='tbadge asc'; document.getElementById('aitb').textContent='✨⬛ Awakened'; }
      else rb(document.getElementById('aitb'),G.aiM,G.aiTL);
   }
 }
@@ -1084,7 +1038,7 @@ function tapSlot(si){
 function commitPlay(ci,si){
   const card=G.pH.splice(ci,1)[0];
   G.selC=null; placeCard(card,si); G.played++;
-  if(G.gameMode === 'vsai') {
+  if(!isEndlessMode && !G.vsVoid) {
      if(card.el==='fire') PROG.fire.s[2] = Math.min(100, PROG.fire.s[2]+1);
      if(card.el==='water') PROG.water.s[2] = Math.min(100, PROG.water.s[2]+1);
      if(card.el==='air') PROG.air.s[2] = Math.min(100, PROG.air.s[2]+1);
@@ -1102,33 +1056,6 @@ function playSelected(){
   pickSlot('Play Card','Choose a Spell Slot',vs,si=>{cm('slotm');tapSlot(si);});
 }
 
-function swapActivePlayer() {
-    const tempH = G.pH, tempSc = G.pSc, tempM = G.pM, tempToks = G.pToks, tempAtt = G.pAtt;
-    const tempVQ = G.pVQ, tempVU = G.pVU, tempTL = G.pTL, tempTU = G.pTU, tempAsc = G.pAscStack;
-
-    G.pH = G.aiH; G.pSc = G.aiSc; G.pM = G.aiM; G.pToks = G.aiToks; G.pAtt = G.aiAtt;
-    G.pVQ = G.aiVQ; G.pVU = G.aiVU; G.pTL = G.aiTL; G.pTU = G.aiTU; G.pAscStack = G.aiAscStack;
-
-    G.aiH = tempH; G.aiSc = tempSc; G.aiM = tempM; G.aiToks = tempToks; G.aiAtt = tempAtt;
-    G.aiVQ = tempVQ; G.aiVU = tempVU; G.aiTL = tempTL; G.aiTU = tempTU; G.aiAscStack = tempAsc;
-
-    G.slots.forEach(s => {
-        if (s.lockFor === 'player') s.lockFor = 'ai';
-        else if (s.lockFor === 'ai') s.lockFor = 'player';
-    });
-
-    G.activePlayerIndex = G.activePlayerIndex === 1 ? 2 : 1;
-    G.pTurn = true; 
-}
-
-function startPvpTurn() {
-    cm('passm');
-    if (G.activePlayerIndex === 2) G.turn++;
-    swapActivePlayer();
-    render();
-    setMsg('Player ' + G.activePlayerIndex + '\'s turn! Play cards, then End Turn.');
-}
-
 function endTurn(){
   if(!G.pTurn) return;
   const scored=resolveAll(true);
@@ -1136,20 +1063,10 @@ function endTurn(){
   showCombosSequential(scored, 'player', ()=>{
     processWolfQueue(()=>{
       for(let i=0;i<5;i++) if(!G.slots[i].stk.length) reloadSlot(i);
-      
-      // Always draw up to 5 at the end of the turn (satisfies Chaos Rune limitation inherently)
       while(G.pH.length<5){ const c=drawCard(); if(!c) break; G.pH.push(c); }
-      
       G.slots.forEach(s=>{if(s.lockFor==='player')s.lock=false;});
-      G.pTurn=false; G.played=0; G.pTU=false; G.selC=null; G.pWolfActive=false; G.turnProg={fD:0,wD:0,aAdj:false,eW:0};
-      
-      if (G.gameMode === 'pvp') {
-          document.getElementById('pass-sub').textContent = "It is now Player " + (G.activePlayerIndex === 1 ? 2 : 1) + "'s turn.";
-          om('passm');
-      } else {
-          G.turn++; 
-          render(); setMsg('AI is thinking…'); setTimeout(aiTurn, 600);
-      }
+      G.pCB=false; G.pTurn=false; G.turn++; G.played=0; G.pTU=false; G.selC=null; G.pWolfActive=false; G.turnProg={fD:0,wD:0,aAdj:false,eW:0};
+      render(); setMsg('AI is thinking…'); setTimeout(aiTurn, 600);
     });
   });
 }
@@ -1165,7 +1082,7 @@ function comboFlash(c, prefix){
 }
 
 async function showCombosSequential(combos, prefix, onDone){
-  for(const c of combos){ await comboFlash(c, prefix==='player'?null:(G.gameMode === 'pvp' ? 'Player scored' : 'AI scored')); await sleep(200); }
+  for(const c of combos){ await comboFlash(c, prefix==='player'?null:'AI scored'); await sleep(200); }
   if(!combos.length) await sleep(100); onDone();
 }
 function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
@@ -1222,7 +1139,7 @@ function useTitanBtn() {
 
 function confirmTitan() {
   cm('titanm');
-  if(G.gameMode === 'vsai') {
+  if(!isEndlessMode && !G.vsVoid) {
      const id = G.pM.id;
      if(G.pTL>=2) PROG[id].m[0] = Math.min(10, PROG[id].m[0]+1);
      else PROG[id].a[0] = Math.min(5, PROG[id].a[0]+1);
@@ -1246,7 +1163,7 @@ function tFire(){
       pickHand('Choose hand card to place in slot',hi=>{
         cm('handm');
         const st=G.slots[si].stk[G.slots[si].stk.length-1]; const hc=G.pH.splice(hi,1)[0];
-        if(hc.t==='wd'&&hc.el==='fire') { G.turnProg.fD++; if(G.turnProg.fD>=2 && G.gameMode === 'vsai') PROG.fire.s[1] = Math.min(10, PROG.fire.s[1]+1); saveP(); }
+        if(hc.t==='wd'&&hc.el==='fire') { G.turnProg.fD++; if(G.turnProg.fD>=2 && !isEndlessMode) PROG.fire.s[1] = Math.min(10, PROG.fire.s[1]+1); saveP(); }
         G.slots[si].stk[G.slots[si].stk.length-1]={...hc};
         G.pH.push({...st, dEl:null, dN:null});
         done++; fs.splice(fs.indexOf(si),1); doRender();
@@ -1263,7 +1180,7 @@ function tWater(){
     if(done>=max||!G.pH.length){ G.pTU=true; doRender(); doSetMsg(`Frost Bite: ${done} card(s) replaced.`,'ok'); return; }
     pickHand(`Frost Bite — choose card to discard (${done+1}/${max})`,hi=>{
       cm('handm'); discardCard(G.pH.splice(hi,1)[0]);
-      const c=drawCard(); if(c) { G.pH.push(c); if(c.el==='water') G.turnProg.wD++; if(G.turnProg.wD>=2 && G.gameMode === 'vsai') PROG.water.s[1]=Math.min(10, PROG.water.s[1]+1); saveP(); }
+      const c=drawCard(); if(c) { G.pH.push(c); if(c.el==='water') G.turnProg.wD++; if(G.turnProg.wD>=2 && !isEndlessMode) PROG.water.s[1]=Math.min(10, PROG.water.s[1]+1); saveP(); }
       done++; doRender();
       if(done<max && G.pH.length) setTimeout(doOne,150);
       else { G.pTU=true; doRender(); doSetMsg(`Frost Bite: ${done} card(s) replaced.`,'ok'); }
@@ -1280,8 +1197,9 @@ function tAir(){
       cm('slotm'); const c=G.slots[fromSi].stk.pop(); G.slots[toSi].stk.push({...c});
       if(!G.slots[fromSi].stk.length) reloadSlot(fromSi);
       if(c.t==='wd' && c.el==='air') {
+         // Check neighbors
          if((toSi>0 && slotTop(toSi-1)?.t==='wd' && slotTop(toSi-1)?.el==='air') || (toSi<4 && slotTop(toSi+1)?.t==='wd' && slotTop(toSi+1)?.el==='air')) {
-            if(G.gameMode === 'vsai') PROG.air.s[1] = Math.min(10, PROG.air.s[1]+1); saveP();
+            if(!isEndlessMode) PROG.air.s[1] = Math.min(10, PROG.air.s[1]+1); saveP();
          }
       }
       G.pTU=true; doRender(); doSetMsg('Storm Talon used!','ok');
@@ -1292,7 +1210,7 @@ function tAir(){
 function useTok(ti){
   if(!G.pTurn){ setMsg('Use tokens on your turn.','err'); return; }
   const type=G.pToks[ti];
-  if(G.gameMode === 'vsai') {
+  if(!isEndlessMode && !G.vsVoid) {
      if(type==='vertical'||type==='horizontal') PROG.earth.a[2] = Math.min(10, PROG.earth.a[2]+1);
      if(type==='element'||type==='number') PROG.earth.m[2] = Math.min(10, PROG.earth.m[2]+1);
      if(type==='run') PROG.earth.l[2] = Math.min(10, PROG.earth.l[2]+1);
@@ -1313,15 +1231,15 @@ function useTok(ti){
     top3.forEach((card,ci)=>{ const d=document.createElement('div'); d.className='mopt'; d.innerHTML=`<div class="moptt">${cardLbl(card)}</div>`;
       d.onclick=()=>{ G.pH.push({...card}); top3.filter((_,j)=>j!==ci).reverse().forEach(c=>G.deck.unshift(c)); G.pToks.splice(ti,1); cm('pickm'); render(); setMsg('🔮 Crystal Ball!','ok'); }; o.appendChild(d); }); om('pickm');
   } else if(type==='horizontal'){
-    if(!G.aiH.length){ setMsg('Opponent has no cards.','err'); return; }
-    const ri=0|Math.random()*G.aiH.length; discardCard(G.aiH.splice(ri,1)[0]); G.pToks.splice(ti,1);
-    render(); setMsg('🌀 Chaos Rune! Opponent card discarded — they cannot draw replacement until end of their turn.','ok');
+    if(!G.aiH.length){ setMsg('AI has no cards.','err'); return; }
+    const ri=0|Math.random()*G.aiH.length; discardCard(G.aiH.splice(ri,1)[0]); G.aiCB=true; G.pToks.splice(ti,1);
+    render(); setMsg('🌀 Chaos Rune! AI card discarded — they cannot draw replacement until end of their turn.','ok');
   }
 }
 
 function activateVoidMage(){
   if(G.pVU||!G.pTurn) return;
-  if(G.gameMode === 'vsai') {
+  if(!isEndlessMode && !G.vsVoid) {
      let allEl = G.pH.concat(...G.slots.map(s=>s.stk)).filter(c=>c.t!=='fd');
      if(allEl.length>0 && allEl.every(c=>c.el===G.pM.id)) { PROG[G.pM.id].s[0] = Math.min(5, PROG[G.pM.id].s[0]+1); saveP(); }
   }
@@ -1334,7 +1252,7 @@ function activateVoidMage(){
 }
 
 async function aiTurn(){
-  if(G.gameMode === 'void') {
+  if(G.vsVoid) {
      G.aiAscStack = 3; 
      if(G.aiTL >= 1 && !G.aiTU && G.aiH.length>0) {
         G.aiH[0] = mkUlt();
@@ -1376,7 +1294,7 @@ async function aiTurn(){
     const t=G.aiToks[0];
     if(t==='element'){const si=0|Math.random()*5;G.slots[si].lock=true;G.slots[si].lockFor='player';G.aiToks.shift();}
     else if(t==='number'){const si=0|Math.random()*5;G.slots[si].stk.forEach(c=>discardCard(c));G.slots[si].stk=[];reloadSlot(si);G.aiToks.shift();}
-    else if(t==='horizontal'){ if(G.pH.length){const ri=0|Math.random()*G.pH.length;discardCard(G.pH.splice(ri,1)[0]);} G.aiToks.shift(); } 
+    else if(t==='horizontal'){ if(G.pH.length){const ri=0|Math.random()*G.pH.length;discardCard(G.pH.splice(ri,1)[0]);G.pCB=true;} G.aiToks.shift(); } 
     else G.aiToks.shift();
   }
 
@@ -1386,13 +1304,10 @@ async function aiTurn(){
 
   await showCombosSequential(scored,'ai',async()=>{
     for(let i=0;i<5;i++) if(!G.slots[i].stk.length) reloadSlot(i);
-    while(G.aiH.length<5){ const c=drawCard(); if(!c) break; G.aiH.push(c); } 
+    while(G.aiH.length<5&&!G.aiCB){ const c=drawCard(); if(!c) break; G.aiH.push(c); } G.aiCB=false;
     await sleep(300); G.slots.forEach(s=>{if(s.lockFor==='ai')s.lock=false;});
     G.pTurn=true; G.played=0; G.pTU=false; G.selC=null; G.pWolfActive=false; G.turnProg={fD:0,wD:0,aAdj:false,eW:0};
-    
-    // Player draws manually if chaos runed, but AI logic usually gives player full hand here:
-    // With simplified Chaos Rune, the player just draws up to 5 at the END of their turn, so we don't draw for them here.
-    
+    while(G.pH.length<5&&!G.pCB){ const c=drawCard(); if(!c) break; G.pH.push(c); } G.pCB=false;
     render(); setMsg('Your turn! Play cards, then End Turn to score.');
   });
 }
@@ -1410,7 +1325,7 @@ function bestAiMove(){
       }
       const orig=[...G.slots[si].stk]; G.slots[si].stk=[...orig,sim];
       let sc=detectAll().reduce((s,c)=>s+c.pts,0);
-      if(G.gameMode === 'void') {
+      if(G.vsVoid) {
          let pMax = 0;
          G.pH.forEach((pc) => {
             for(let psi=0; psi<5; psi++){
@@ -1431,29 +1346,16 @@ function bestAiMove(){
 }
 
 function showWin(playerWon){
-  if(playerWon && G.gameMode === 'vsai' && G.pM) {
+  if(playerWon && !isEndlessMode && !G.vsVoid && G.pM) {
      const id = G.pM.id;
      PROG[id].a[1] = Math.min(5, PROG[id].a[1]+1);
      PROG[id].m[1] = Math.min(10, PROG[id].m[1]+1);
      PROG[id].l[1] = Math.min(20, PROG[id].l[1]+1);
      saveP();
   }
-  
-  if (G.gameMode === 'pvp') {
-      document.getElementById('wemb').textContent = '🏆';
-      const winner = playerWon ? G.activePlayerIndex : (G.activePlayerIndex === 1 ? 2 : 1);
-      document.getElementById('wtit').textContent = 'Player ' + winner + ' Wins!';
-      document.getElementById('wsub').textContent = 'A legendary elemental duel.';
-      document.getElementById('wsl-you').textContent = 'PLAYER ' + G.activePlayerIndex;
-      document.getElementById('wsl-ai').textContent = 'PLAYER ' + (G.activePlayerIndex === 1 ? 2 : 1);
-  } else {
-      document.getElementById('wemb').textContent = playerWon ? '🏆' : '💀';
-      document.getElementById('wtit').textContent = playerWon ? 'Victory!' : 'Defeat';
-      document.getElementById('wsub').textContent = playerWon ? 'The elements bow to your mastery.' : 'The AI mage prevails... for now.';
-      document.getElementById('wsl-you').textContent = 'YOU';
-      document.getElementById('wsl-ai').textContent = 'AI';
-  }
-  
+  document.getElementById('wemb').textContent=playerWon?'🏆':'💀';
+  document.getElementById('wtit').textContent=playerWon?'Victory!':'Defeat';
+  document.getElementById('wsub').textContent=playerWon?'The elements bow to your mastery.':'The AI mage prevails... for now.';
   document.getElementById('wps').textContent=G.pSc;
   document.getElementById('wais').textContent=G.aiSc;
   document.getElementById('wai-block').style.display='';
@@ -1558,7 +1460,7 @@ function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.class
 
 function openRules(){
   document.getElementById('rcon').innerHTML=
-    '<b style="color:var(--goldl)">Game Mode</b><br><b>VS AI:</b> First to 100 points wins.<br><b>VS PLAYER:</b> Local Hotseat Multiplayer. First to 100 points wins.<br><br>'
+    '<b style="color:var(--goldl)">Game Mode</b><br><b>VS AI:</b> First to 100 points wins.<br><br>'
     +'<b style="color:var(--goldl)">Placement Rules</b><br><b>Number Switch:</b> Match top card\'s number.<br><b>Element Switch:</b> Match top card\'s element.<br><b>Field Card:</b> Play anywhere.<br><b>Void Field:</b> Clears slot, reloads from deck.<br><b>Element Wild:</b> Match element OR number.<br><b>Primal Spirit:</b> Plays anywhere.<br><br>'
     +'<b style="color:var(--goldl)">Scoring (End Turn)</b><br>Multiple combinations of different types can be scored in the same turn.<br>'
     +'El Chain 3/4/5: 3/4/5 pts | Num Chain 3/4/5: 4/5/6 pts | Run 3/4/5: 3/5/7 pts<br>'
