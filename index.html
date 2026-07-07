@@ -155,7 +155,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
 .del.ds{border-color:var(--gold);}
 
 /* win */
-#ws{align-items:center;justify-content:center;gap:24px;position:relative;z-index:1;}
+#ws, #ty-screen {align-items:center;justify-content:center;gap:24px;position:relative;z-index:1;}
 .wemb{font-size:80px;animation:pulse 2s ease-in-out infinite;}
 .wtit{font-family:'Cinzel Decorative',serif;font-size:32px;color:var(--goldl);text-shadow:0 0 32px var(--gold);text-align:center;}
 .wsub{font-family:'Cinzel',serif;font-size:15px;color:var(--tx2);letter-spacing:2px;text-align:center;}
@@ -203,7 +203,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
   <div class="tsub">The Elemental Duel</div>
   <div style="display:flex; flex-direction:column; gap:16px; width:100%; align-items:center; max-width:300px; margin:20px auto 0; z-index:1">
       <button class="btn-main" onclick="goMageSelect(false)">VS AI</button>
-      <button class="btn-main" style="background:linear-gradient(135deg,#1a0830,#0d0820);border-color:var(--void-g);color:var(--void-g)" onclick="goMageSelect(true)">⬛ Endless Mode</button>
+      <button class="btn-main" onclick="goMageSelect(true)">Endless Mode</button>
       <button class="btn-main" onclick="openChallenges()">Challenges</button>
       <button class="btn-main" onclick="openGallery()">Gallery</button>
       <button class="btn-sec" style="margin-top:8px" onclick="openRules()">Rules</button>
@@ -329,12 +329,22 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
   <button class="btn-sec" onclick="showScreen('ts')">Main Menu</button>
 </div>
 
+<div id="ty-screen" class="screen">
+  <div class="shead"><div class="stitle">Thank You For Playing!</div></div>
+  <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; text-align:center;">
+      <div style="font-size:80px; margin-bottom:20px;">🏆</div>
+      <div style="font-family:'Cinzel Decorative',serif;font-size:32px;color:var(--goldl);text-shadow:0 0 32px var(--gold); margin-bottom:10px;">Void Vanquished</div>
+      <div style="font-size:16px;color:var(--tx2);max-width:80%;">You have successfully defeated the harder AI in the Void Mage special mode. Thank you for playing!</div>
+  </div>
+  <div class="crow"><button class="btn-main" onclick="showScreen('ts')">Main Menu</button></div>
+</div>
+
 <div class="moverlay" id="wm"><div class="msheet"><div class="mhdl"></div><div class="mtit">Declare Wild Card</div><div class="msub" id="wmsub"></div><div class="dels" id="wmels"></div><div class="dgrid" id="wmnums"></div><div class="mbtns"><button class="mbtn" onclick="cm('wm')">Cancel</button><button class="mbtn conf" onclick="confirmWild()">Declare</button></div></div></div>
 <div class="moverlay" id="slotm"><div class="msheet"><div class="mhdl"></div><div class="mtit" id="slmt"></div><div class="msub" id="slms"></div><div class="mopts" id="slmo"></div><div class="mbtns"><button class="mbtn" onclick="cm('slotm')">Cancel</button></div></div></div>
 <div class="moverlay" id="pickm"><div class="msheet"><div class="mhdl"></div><div class="mtit" id="pickt">Choose</div><div class="msub" id="picks"></div><div class="mopts" id="picko"></div><div class="mbtns"><button class="mbtn" onclick="cm('pickm')">Cancel</button></div></div></div>
 <div class="moverlay" id="wolfm"><div class="msheet"><div class="mhdl"></div><div class="mtit">Stone Wolf</div><div class="msub" id="wolfsub"></div><div class="mopts" id="wolfopts"></div><div class="mbtns"><button class="mbtn" onclick="wolfSkip()">Skip (use deck card)</button></div></div></div>
 <div class="moverlay" id="handm"><div class="msheet"><div class="mhdl"></div><div class="mtit" id="hmt">Your Hand</div><div class="msub" id="hms"></div><div class="mopts" id="hmo"></div><div class="mbtns"><button class="mbtn" onclick="cm('handm')">Cancel</button></div></div></div>
-<div class="moverlay" id="rulesm"><div class="msheet"><div class="mhdl"></div><div class="mtit">Mage Craft — Rules</div><div id="rcon" style="font-size:13px;color:var(--tx2);line-height:1.7"></div><div class="mbtns"><button class="mbtn conf" onclick="cm('rulesm')">Close</button></div></div></div>
+<div class="moverlay" id="rulesm"><div class="msheet"><div class="mhdl"></div><div class="mtit">Mage Craft — Rules</div><div id="rcon" style="font-size:13px;color:var(--tx2);line-height:1.7">Match elements or numbers to score.<br>Clear challenges to unlock gallery images.<br>Play against AI or try Endless Mode!</div><div class="mbtns"><button class="mbtn conf" onclick="cm('rulesm')">Close</button></div></div></div>
 <div class="moverlay" id="titanm"><div class="msheet"><div class="mhdl"></div><div class="mtit">Activate Titan Ability?</div><div class="msub" id="titan-desc"></div><div class="mbtns"><button class="mbtn" onclick="cm('titanm')">Cancel</button><button class="mbtn conf" onclick="confirmTitan()">Activate</button></div></div></div>
 <div class="moverlay" id="galfs"><div class="msheet"><div class="mhdl"></div><div class="mtit" id="gf-tit"></div><div style="font-size:64px; text-align:center; margin:20px 0" id="gf-ic"></div><div style="text-align:center" id="gf-btn"></div><div class="mbtns"><button class="mbtn conf" onclick="cm('galfs')">Close</button></div></div></div>
 
@@ -387,20 +397,19 @@ const COMBO_DEFS = [
   {type:'num-run',   len:5, pts:13, label:'Number Run (5)',    method:'Horizontal'}
 ];
 
-// STATE
 let G = {};
 let isEndlessMode = false;
 let endlessHS = 0;
-let actionContext = 'play'; // 'play', 'chal', 'gal'
+let actionContext = 'play';
 
-// PROGRESS
 let PROG = JSON.parse(localStorage.getItem('mc_prog')) || defProg();
 function defProg(){
   return {
     fire: {a:[0,0,0],m:[0,0,0],l:[0,0,0],s:[0,0,0]},
     water:{a:[0,0,0],m:[0,0,0],l:[0,0,0],s:[0,0,0]},
     air:  {a:[0,0,0],m:[0,0,0],l:[0,0,0],s:[0,0,0]},
-    earth:{a:[0,0,0],m:[0,0,0],l:[0,0,0],s:[0,0,0]}
+    earth:{a:[0,0,0],m:[0,0,0],l:[0,0,0],s:[0,0,0]},
+    voidWinHard: false
   };
 }
 function saveP(){ localStorage.setItem('mc_prog', JSON.stringify(PROG)); }
@@ -412,10 +421,10 @@ function initG() {
     pH:[], aiH:[], pSc:0, aiSc:0, pM:null, aiM:null,
     pToks:[], aiToks:[], pAtt:{ts:0,tk:null,ms:0,mk:null}, aiAtt:{ts:0,tk:null,ms:0,mk:null},
     pVQ:{el:false,num:false,run:false}, aiVQ:{el:false,num:false,run:false},
-    pVU:false, aiVU:false, pTL:0, aiTL:0, pTU:false,
+    pVU:false, aiVU:false, pTL:0, aiTL:0, pTU:false, aiTU:false,
     pAscStack:0, aiAscStack:0, aiCB:false, pCB:false, pTurn:true, turn:1,
     selC:null, played:0, pw:{ci:null,si:null,isSlot:false,ssi:null}, wEl:null, wN:null,
-    endless:false, eComboCount:{}, pWolfActive:false, turnProg:{fD:0, wD:0, aAdj:false, eW:0},
+    endless:false, eComboCount:{}, pWolfActive:false, aiWolfActive:false, turnProg:{fD:0, wD:0, aAdj:false, eW:0},
     vsVoid: false
   };
 }
@@ -555,38 +564,27 @@ function detectAll() {
 }
 
 function trackComboChals(c, isP) {
-  if(!isP || isEndlessMode || G.vsVoid) return;
+  if(!isP || G.endless || G.vsVoid) return;
   const pM = G.pM.id;
-  if(c.type==='el-chain'||c.type==='el-row') {
-    if(c.els && c.els.every(e=>e===pM)) {
-       if(pM==='fire') {
-         if(c.len===3) PROG.fire.a[2] = Math.min(5, PROG.fire.a[2]+1);
-         if(c.len===4) PROG.fire.m[2] = Math.min(10, PROG.fire.m[2]+1);
-         if(c.len===5) PROG.fire.l[2] = Math.min(20, PROG.fire.l[2]+1);
-       }
-    }
+  if(pM==='fire' && (c.type==='el-chain'||c.type==='el-row')) {
+     if(c.len===3) PROG.fire.a[2] = Math.min(5, PROG.fire.a[2]+1);
+     if(c.len===4) PROG.fire.m[2] = Math.min(10, PROG.fire.m[2]+1);
+     if(c.len===5) PROG.fire.l[2] = Math.min(20, PROG.fire.l[2]+1);
   }
-  if((c.type==='num-chain'||c.type==='num-row') && pM==='water') {
-    let allEl = true;
-    (c.idxs || [c.si]).forEach(s => {
-      for(let cc of G.slots[s].stk) { if(c.idxs && cc!==slotTop(s)) continue; if(cardEl(cc)!=='water') allEl=false; }
-    });
-    if(allEl) {
-      if(c.len===3) PROG.water.a[2] = Math.min(5, PROG.water.a[2]+1);
-      if(c.len===4) PROG.water.m[2] = Math.min(10, PROG.water.m[2]+1);
-      if(c.len===5) PROG.water.l[2] = Math.min(20, PROG.water.l[2]+1);
-    }
+  if(pM==='water' && (c.type==='num-chain'||c.type==='num-row')) {
+     if(c.len===3) PROG.water.a[2] = Math.min(5, PROG.water.a[2]+1);
+     if(c.len===4) PROG.water.m[2] = Math.min(10, PROG.water.m[2]+1);
+     if(c.len===5) PROG.water.l[2] = Math.min(20, PROG.water.l[2]+1);
   }
-  if((c.type==='run'||c.type==='num-run') && pM==='air') {
-    let allEl = true;
-    (c.idxs || [c.si]).forEach(s => {
-      for(let cc of G.slots[s].stk) { if(c.idxs && cc!==slotTop(s)) continue; if(cardEl(cc)!=='air') allEl=false; }
-    });
-    if(allEl) {
-      if(c.len===3) PROG.air.a[2] = Math.min(5, PROG.air.a[2]+1);
-      if(c.len===4) PROG.air.m[2] = Math.min(10, PROG.air.m[2]+1);
-      if(c.len===5) PROG.air.l[2] = Math.min(20, PROG.air.l[2]+1);
-    }
+  if(pM==='air' && (c.type==='run'||c.type==='num-run')) {
+     if(c.len===3) PROG.air.a[2] = Math.min(5, PROG.air.a[2]+1);
+     if(c.len===4) PROG.air.m[2] = Math.min(10, PROG.air.m[2]+1);
+     if(c.len===5) PROG.air.l[2] = Math.min(20, PROG.air.l[2]+1);
+  }
+  if (pM === 'earth') {
+     if(c.len===3) PROG.earth.a[2] = Math.min(5, PROG.earth.a[2]+1);
+     if(c.len===4) PROG.earth.m[2] = Math.min(10, PROG.earth.m[2]+1);
+     if(c.len===5) PROG.earth.l[2] = Math.min(20, PROG.earth.l[2]+1);
   }
 }
 
@@ -645,7 +643,7 @@ function resolveAll(isPlayer) {
   if (ascPts > 0) {
     tot += ascPts;
     scored.push({type:'ascension', pts: ascPts, len: 0});
-    if(isPlayer && !isEndlessMode && !G.vsVoid && ascPts===3) {
+    if(isPlayer && !G.endless && !G.vsVoid && ascPts===3) {
       const el = G.pM.id;
       PROG[el].l[0] = Math.min(20, PROG[el].l[0]+1);
       saveP();
@@ -655,7 +653,7 @@ function resolveAll(isPlayer) {
   if (isPlayer) G.pSc += tot; else G.aiSc += tot;
   const slotsToClear = [...used.keys()];
   
-  if (isPlayer && !G.endless && G.pWolfActive) {
+  if (isPlayer && G.pWolfActive) {
       let pool = [];
       if(G.pTL >= 2) pool = G.disc.filter(c => c.el==='earth' || (c.t==='wd'&&c.el==='earth'));
       else {
@@ -673,7 +671,7 @@ function resolveAll(isPlayer) {
 }
 
 function processWolfQueue(onDone) {
-  if (!G.wolfQueue.length) { onDone(); return; }
+  if (!G.wolfQueue || !G.wolfQueue.length) { onDone(); return; }
   const q = G.wolfQueue.shift();
   showWolfModal(q.cards, ()=>processWolfQueue(onDone));
 }
@@ -689,7 +687,7 @@ function showWolfModal(cards, onDone) {
       const ri=G.disc.findIndex(c=>c.el===card.el && c.n===card.n && c.t===card.t);
       if(ri>=0) G.disc.splice(ri,1);
       G.pH.push({...card,dEl:null,dN:null});
-      if(card.t==='wd' && card.el==='earth') { G.turnProg.eW++; if(G.turnProg.eW>=2 && !isEndlessMode && G.pM.id==='earth') PROG.earth.s[1] = Math.min(10, PROG.earth.s[1]+1); saveP(); }
+      if(card.t==='wd' && card.el==='earth') { G.turnProg.eW++; if(G.turnProg.eW>=2 && !G.endless && G.pM.id==='earth') PROG.earth.s[1] = Math.min(10, PROG.earth.s[1]+1); saveP(); }
       cm('wolfm'); doRender(); onDone();
     };
     o.appendChild(d);
@@ -711,6 +709,21 @@ function grantTok(isP,type,list){
   list.push(type);
   if(isP) doSetMsg('✨ Attunement! Earned: '+TOKS[type].name,'ok');
 }
+
+function useTok(i) {
+   const type = G.pToks.splice(i, 1)[0];
+   if (!isEndlessMode && !G.vsVoid && G.pM) {
+       if (G.pM.id === 'fire' && type === 'element') PROG.fire.s[1] = Math.min(10, PROG.fire.s[1]+1);
+       if (G.pM.id === 'water' && type === 'number') PROG.water.s[1] = Math.min(10, PROG.water.s[1]+1);
+       if (G.pM.id === 'air' && type === 'run') PROG.air.s[1] = Math.min(10, PROG.air.s[1]+1);
+       if (G.pM.id === 'earth' && (type === 'vertical' || type === 'horizontal')) PROG.earth.s[1] = Math.min(10, PROG.earth.s[1]+1);
+       saveP();
+   }
+   G.pSc += 5;
+   doSetMsg(`Used ${TOKS[type].name}! +5 points.`, 'ok');
+   doRender();
+}
+
 function updVQ(isP,c){
   const q=isP?G.pVQ:G.aiVQ;
   if(['el-chain','el-row'].includes(c.type)&&c.len===5) q.el=true;
@@ -719,7 +732,7 @@ function updVQ(isP,c){
 }
 function chkTitanLv(isP){
   const sc=isP?G.pSc:G.aiSc, prev=isP?G.pTL:G.aiTL;
-  const lv=sc>=50?3:sc>=25?2:sc>=15?1:0;
+  const lv=sc>=50?3:sc>=30?2:sc>=10?1:0;
   if(lv>prev){
     if(isP) G.pTL=lv; else G.aiTL=lv;
     const m=isP?G.pM:G.aiM;
@@ -736,10 +749,18 @@ function trackEndlessCombo(c){
   const key = c.type+(c.len?'_'+c.len:'');
   G.eComboCount[key]=(G.eComboCount[key]||0)+1;
 }
-function getComboKey(def){ return def.type+(def.len?'_'+def.len:''); }
 
 function doRender() { if(G.endless) eRender(); else render(); }
 function doSetMsg(m, t) { if(G.endless) setMsg2(m, t); else setMsg(m, t); }
+function setMsg(m, t) { const e = document.getElementById('gmsg'); e.textContent = m; e.className = 'gmsg ' + (t || ''); }
+function setMsg2(m, t) { const e = document.getElementById('e-msg'); if(e){ e.textContent = m; e.className = 'gmsg ' + (t || ''); } }
+
+function showScreen(id) {
+   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+   document.getElementById(id).classList.add('active');
+}
+function om(id) { document.getElementById(id).classList.add('active'); }
+function cm(id) { document.getElementById(id).classList.remove('active'); }
 
 function openChallenges() {
   actionContext = 'chal';
@@ -752,7 +773,7 @@ function openChallenges() {
 function openGallery() {
   actionContext = 'gal';
   const g = document.getElementById('gal-grid'); g.innerHTML='';
-  for(let i=0; i<14; i++) {
+  for(let i=0; i<15; i++) {
     const d=document.createElement('div'); d.className='gal-item';
     const unlocked = checkGalUnlock(i);
     if(unlocked) d.classList.add('unlocked');
@@ -771,6 +792,7 @@ function checkGalUnlock(i) {
   }
   if(i===12) return ELS.every(e => PROG[e].s[0]>=5 && PROG[e].s[1]>=10 && PROG[e].s[2]>=100);
   if(i===13) return ELS.every(e => checkGalUnlock(ELS.indexOf(e)*3+0) && checkGalUnlock(ELS.indexOf(e)*3+1) && checkGalUnlock(ELS.indexOf(e)*3+2) && checkGalUnlock(12));
+  if(i===14) return PROG.voidWinHard === true;
 }
 
 function openGalFs(i) {
@@ -783,7 +805,7 @@ function openGalFs(i) {
 
 function startVoidMode() {
   cm('galfs');
-  G.endless = false; G.vsVoid = true; G.pM = MAGES[3]; // Any player mage
+  G.endless = false; G.vsVoid = true; G.pM = MAGES[3];
   goMageSelect(false);
   document.getElementById('msel-sub').textContent = 'Select your Mage (VS The Void)';
 }
@@ -791,7 +813,7 @@ function startVoidMode() {
 function goMageSelect(endless){
   actionContext = 'play';
   isEndlessMode = endless;
-  document.getElementById('msel-sub').textContent = endless ? 'Select your elemental affinity and Titan' : 'Select your elemental affinity and Titan';
+  document.getElementById('msel-sub').textContent = 'Select your elemental affinity and Titan';
   document.getElementById('startbtn').disabled = true;
   document.getElementById('startbtn').textContent = 'Summon the Arena';
   initG(); G.vsVoid = false; renderMageGrid(); showScreen('msel');
@@ -830,28 +852,28 @@ function renderChalView(el) {
 function getChalText(el, set, idx) {
   const texts = {
     fire: {
-      a: ['Use Ash Dragon ability','Win games','El Chain/Row (3) Fire only'],
-      m: ['Use Enhanced Ash Dragon','Win games','El Chain/Row (4) Fire only'],
-      l: ['+3 Ascension score','Win games','El Chain/Row (5) Fire only'],
-      s: ['Void Mage Fire only','2 Fire Wilds from Ash Dragon in turn','Play Fire Element cards']
+      a: ['Use Ash Dragon ability','Win games','El Chain/Row (3)'],
+      m: ['Use Enhanced Ash Dragon','Win games','El Chain/Row (4)'],
+      l: ['+3 Ascension score','Win games','El Chain/Row (5)'],
+      s: ['Void Mage','Use Arcane Lock 10 times','Play Fire Element cards']
     },
     water: {
-      a: ['Use Frost Leviathan ability','Win games','Num Chain/Row (3) Water only'],
-      m: ['Use Enhanced Frost Leviathan','Win games','Num Chain/Row (4) Water only'],
-      l: ['+3 Ascension score','Win games','Num Chain/Row (5) Water only'],
-      s: ['Void Mage Water only','2 Water cards from Frost Leviathan in turn','Play Water Element cards']
+      a: ['Use Frost Leviathan ability','Win games','Num Chain/Row (3)'],
+      m: ['Use Enhanced Frost Leviathan','Win games','Num Chain/Row (4)'],
+      l: ['+3 Ascension score','Win games','Num Chain/Row (5)'],
+      s: ['Void Mage','Use Null Sigil 10 times','Play Water Element cards']
     },
     air: {
-      a: ['Use Thunder Eagle ability','Win games','Run/Num Run (3) Air only'],
-      m: ['Use Enhanced Thunder Eagle','Win games','Run/Num Run (4) Air only'],
-      l: ['+3 Ascension score','Win games','Run/Num Run (5) Air only'],
-      s: ['Void Mage Air only','2 Wild Air cards adjacent using Titan','Play Air Element cards']
+      a: ['Use Thunder Eagle ability','Win games','Run/Num Run (3)'],
+      m: ['Use Enhanced Thunder Eagle','Win games','Run/Num Run (4)'],
+      l: ['+3 Ascension score','Win games','Run/Num Run (5)'],
+      s: ['Void Mage','Use Summon Stone 10 times','Play Air Element cards']
     },
     earth: {
-      a: ['Use Stone Wolf ability','Win games','Use Crystal Ball/Chaos Rune token'],
-      m: ['Use Enhanced Stone Wolf','Win games','Use Arcane Lock/Null Sigil token'],
-      l: ['+3 Ascension score','Win games','Use Summon Stone token'],
-      s: ['Void Mage Earth only','Retrieve Earth Wild from Stone Wolf in turn','Play Earth Element cards']
+      a: ['Use Stone Wolf ability','Win games','Any Horizontal/Vertical Combo (3)'],
+      m: ['Use Enhanced Stone Wolf','Win games','Any Horizontal/Vertical Combo (4)'],
+      l: ['+3 Ascension score','Win games','Any Horizontal/Vertical Combo (5)'],
+      s: ['Void Mage','Use Crystal Ball or Chaos Rune 10 times','Play Earth Element cards']
     }
   };
   return texts[el][set.charAt(0).toLowerCase()][idx];
@@ -1038,11 +1060,11 @@ function tapSlot(si){
 function commitPlay(ci,si){
   const card=G.pH.splice(ci,1)[0];
   G.selC=null; placeCard(card,si); G.played++;
-  if(!isEndlessMode && !G.vsVoid) {
-     if(card.el==='fire') PROG.fire.s[2] = Math.min(100, PROG.fire.s[2]+1);
-     if(card.el==='water') PROG.water.s[2] = Math.min(100, PROG.water.s[2]+1);
-     if(card.el==='air') PROG.air.s[2] = Math.min(100, PROG.air.s[2]+1);
-     if(card.el==='earth') PROG.earth.s[2] = Math.min(100, PROG.earth.s[2]+1);
+  if(!isEndlessMode && !G.vsVoid && G.pM) {
+     if(card.el==='fire' && G.pM.id==='fire') PROG.fire.s[2] = Math.min(100, PROG.fire.s[2]+1);
+     if(card.el==='water' && G.pM.id==='water') PROG.water.s[2] = Math.min(100, PROG.water.s[2]+1);
+     if(card.el==='air' && G.pM.id==='air') PROG.air.s[2] = Math.min(100, PROG.air.s[2]+1);
+     if(card.el==='earth' && G.pM.id==='earth') PROG.earth.s[2] = Math.min(100, PROG.earth.s[2]+1);
      saveP();
   }
   render(); setMsg('Card played. '+(5-G.played)+' remaining. Hit End Turn to score.');
@@ -1139,6 +1161,9 @@ function useTitanBtn() {
 
 function confirmTitan() {
   cm('titanm');
+  G.pTU = true; 
+  doRender();
+
   if(!isEndlessMode && !G.vsVoid) {
      const id = G.pM.id;
      if(G.pTL>=2) PROG[id].m[0] = Math.min(10, PROG[id].m[0]+1);
@@ -1148,335 +1173,325 @@ function confirmTitan() {
   if(G.pM.id==='fire') tFire();
   else if(G.pM.id==='water') tWater();
   else if(G.pM.id==='air') tAir();
-  else { G.pTU = true; G.pWolfActive = true; doRender(); doSetMsg('Stone Wolf activated! After you score, you may take 1 Earth card.'); }
+  else { G.pWolfActive = true; doSetMsg('Stone Wolf activated! After you score, you may take 1 Earth card.'); }
 }
 
-function tFire(){
-  const max=G.pTL>=2?2:1;
-  const fs=[0,1,2,3,4].filter(i=>slEl(i)==='fire');
-  if(!fs.length){ doSetMsg('No active Fire slots.','err'); return; }
-  let done=0;
-  function doSwap(){
-    if(done>=max||!fs.length){ G.pTU=true; doRender(); doSetMsg(`Flame Claw: ${done} swap(s).`,'ok'); return; }
-    pickSlot('Flame Claw',`Choose Fire slot to swap (${done+1}/${max})`,fs,si=>{
+function pickSlot(title, sub, slots, cb) {
+   document.getElementById('slmt').textContent = title;
+   document.getElementById('slms').textContent = sub;
+   const o = document.getElementById('slmo'); o.innerHTML = '';
+   slots.forEach(si => {
+      const d = document.createElement('div'); d.className = 'mopt';
+      d.innerHTML = `<div class="moptt">Slot ${si+1}</div>`;
+      d.onclick = () => cb(si);
+      o.appendChild(d);
+   });
+   om('slotm');
+}
+
+function pickHand(title, sub, cb) {
+   document.getElementById('hmt').textContent = title;
+   document.getElementById('hms').textContent = sub;
+   const o = document.getElementById('hmo'); o.innerHTML = '';
+   G.pH.forEach((c, ci) => {
+      const d = document.createElement('div'); d.className = 'mopt';
+      d.innerHTML = `<div class="moptt">${cardLbl(c)}</div>`;
+      d.onclick = () => cb(ci);
+      o.appendChild(d);
+   });
+   om('handm');
+}
+
+function pickHandMulti(title, sub, max, cb) {
+   document.getElementById('hmt').textContent = title;
+   document.getElementById('hms').textContent = sub;
+   const o = document.getElementById('hmo'); o.innerHTML = '';
+   let selected = [];
+   G.pH.forEach((c, ci) => {
+      const d = document.createElement('div'); d.className = 'mopt';
+      d.innerHTML = `<div class="moptt">${cardLbl(c)}</div>`;
+      d.onclick = () => {
+         if (selected.includes(ci)) {
+            selected = selected.filter(x => x !== ci);
+            d.style.borderColor = 'var(--bd2)';
+         } else {
+            if (selected.length < max) {
+               selected.push(ci);
+               d.style.borderColor = 'var(--gold)';
+            }
+         }
+      };
+      o.appendChild(d);
+   });
+   const btn = document.createElement('button'); btn.className = 'mbtn conf'; btn.textContent = 'Confirm';
+   btn.style.marginTop = '10px';
+   btn.onclick = () => cb(selected);
+   o.appendChild(btn);
+   om('handm');
+}
+
+function tFire() {
+  const max = G.pTL >= 2 ? 2 : 1;
+  let swaps = 0;
+  function doSwap() {
+    if (swaps >= max) { doRender(); return; }
+    const fs = [0,1,2,3,4].filter(i => G.slots[i].stk.length > 0 && (slEl(i) === 'fire' || G.pM.id !== 'fire'));
+    if (!fs.length) { doRender(); return; }
+    pickSlot('Ash Dragon', `Swap slot (Swaps left: ${max - swaps})`, fs, si => {
       cm('slotm');
-      pickHand('Choose hand card to place in slot',hi=>{
+      pickHand('Ash Dragon', 'Select card from hand to swap', (ci) => {
         cm('handm');
-        const st=G.slots[si].stk[G.slots[si].stk.length-1]; const hc=G.pH.splice(hi,1)[0];
-        if(hc.t==='wd'&&hc.el==='fire') { G.turnProg.fD++; if(G.turnProg.fD>=2 && !isEndlessMode) PROG.fire.s[1] = Math.min(10, PROG.fire.s[1]+1); saveP(); }
-        G.slots[si].stk[G.slots[si].stk.length-1]={...hc};
-        G.pH.push({...st, dEl:null, dN:null});
-        done++; fs.splice(fs.indexOf(si),1); doRender();
-        if(done<max&&fs.length) setTimeout(doSwap,150);
-        else { G.pTU=true; doRender(); doSetMsg(`Flame Claw: ${done} swap(s).`,'ok'); }
+        const sc = G.slots[si].stk.pop();
+        const hc = G.pH.splice(ci, 1)[0];
+        G.pH.push(sc);
+        if (hc.t === 'fd' && hc.el === 'void') {
+            G.slots[si].stk.forEach(c => discardCard(c));
+            G.slots[si].stk = [];
+            reloadSlot(si);
+            doSetMsg('Void Field destroyed the slot!', 'ok');
+        } else {
+            G.slots[si].stk.push(hc);
+        }
+        swaps++;
+        doSwap();
       });
     });
-  } doSwap();
+  }
+  doSwap();
 }
 
-function tWater(){
-  const max=G.pTL>=2?2:1; let done=0;
-  function doOne(){
-    if(done>=max||!G.pH.length){ G.pTU=true; doRender(); doSetMsg(`Frost Bite: ${done} card(s) replaced.`,'ok'); return; }
-    pickHand(`Frost Bite — choose card to discard (${done+1}/${max})`,hi=>{
-      cm('handm'); discardCard(G.pH.splice(hi,1)[0]);
-      const c=drawCard(); if(c) { G.pH.push(c); if(c.el==='water') G.turnProg.wD++; if(G.turnProg.wD>=2 && !isEndlessMode) PROG.water.s[1]=Math.min(10, PROG.water.s[1]+1); saveP(); }
-      done++; doRender();
-      if(done<max && G.pH.length) setTimeout(doOne,150);
-      else { G.pTU=true; doRender(); doSetMsg(`Frost Bite: ${done} card(s) replaced.`,'ok'); }
-    });
-  } doOne();
+function tWater() {
+  const max = G.pTL >= 2 ? 2 : 1;
+  pickHandMulti('Frost Leviathan', `Discard up to ${max} cards`, max, (cis) => {
+     cm('handm');
+     cis.sort((a,b)=>b-a).forEach(ci => { discardCard(G.pH.splice(ci, 1)[0]); });
+     for(let i=0; i<cis.length; i++) {
+        const c = drawCard();
+        if(c) G.pH.push(c);
+     }
+     doRender();
+  });
 }
 
-function tAir(){
-  const ne=[0,1,2,3,4].filter(i=>G.slots[i].stk.length>0);
-  if(ne.length<2){ doSetMsg('Need 2+ non-empty slots.','err'); return; }
-  pickSlot('Storm Talon','Move top card FROM this slot',ne,fromSi=>{
-    cm('slotm'); const maxD=G.pTL>=2?4:1; const td=[0,1,2,3,4].filter(i=>i!==fromSi&&Math.abs(i-fromSi)<=maxD);
-    pickSlot('Storm Talon','Move top card TO'+(G.pTL>=2?' (any slot)':' (adjacent slot)'),td,toSi=>{
-      cm('slotm'); const c=G.slots[fromSi].stk.pop(); G.slots[toSi].stk.push({...c});
-      if(!G.slots[fromSi].stk.length) reloadSlot(fromSi);
-      if(c.t==='wd' && c.el==='air') {
-         // Check neighbors
-         if((toSi>0 && slotTop(toSi-1)?.t==='wd' && slotTop(toSi-1)?.el==='air') || (toSi<4 && slotTop(toSi+1)?.t==='wd' && slotTop(toSi+1)?.el==='air')) {
-            if(!isEndlessMode) PROG.air.s[1] = Math.min(10, PROG.air.s[1]+1); saveP();
+function tAir() {
+  const fs = [0,1,2,3,4].filter(i => G.slots[i].stk.length > 0);
+  if(!fs.length) return;
+  pickSlot('Thunder Eagle', 'Select slot to move FROM', fs, fromSi => {
+     cm('slotm');
+     const validTo = G.pTL >= 2 ? [0,1,2,3,4].filter(i => i !== fromSi) : [fromSi-1, fromSi+1].filter(i => i>=0 && i<=4);
+     pickSlot('Thunder Eagle', 'Select slot to move TO', validTo, toSi => {
+        cm('slotm');
+        const c = G.slots[fromSi].stk.pop();
+        if (c.t === 'fd' && c.el === 'void') {
+            G.slots[toSi].stk.forEach(x => discardCard(x));
+            G.slots[toSi].stk = [];
+            reloadSlot(toSi);
+        } else {
+            G.slots[toSi].stk.push(c);
+        }
+        doRender();
+     });
+  });
+}
+
+function aiTurn() {
+  if (G.pSc >= 100 || G.aiSc >= 100) return;
+  
+  if (G.aiTL > 0 && !G.aiTU) {
+      G.aiTU = true;
+      if (G.aiM.id === 'earth') G.aiWolfActive = true;
+      if (G.aiM.id === 'fire') {
+         const fs = [0,1,2,3,4].filter(i => G.slots[i].stk.length > 0);
+         if (fs.length > 0) {
+             const si = fs[Math.floor(Math.random() * fs.length)];
+             const ci = Math.floor(Math.random() * G.aiH.length);
+             const sc = G.slots[si].stk.pop();
+             const hc = G.aiH.splice(ci, 1)[0];
+             G.aiH.push(sc);
+             if (hc.t === 'fd' && hc.el === 'void') {
+                 G.slots[si].stk.forEach(c => discardCard(c));
+                 G.slots[si].stk = [];
+                 reloadSlot(si);
+             } else {
+                 G.slots[si].stk.push(hc);
+             }
          }
       }
-      G.pTU=true; doRender(); doSetMsg('Storm Talon used!','ok');
-    });
-  });
-}
-
-function useTok(ti){
-  if(!G.pTurn){ setMsg('Use tokens on your turn.','err'); return; }
-  const type=G.pToks[ti];
-  if(!isEndlessMode && !G.vsVoid) {
-     if(type==='vertical'||type==='horizontal') PROG.earth.a[2] = Math.min(10, PROG.earth.a[2]+1);
-     if(type==='element'||type==='number') PROG.earth.m[2] = Math.min(10, PROG.earth.m[2]+1);
-     if(type==='run') PROG.earth.l[2] = Math.min(10, PROG.earth.l[2]+1);
-     saveP();
-  }
-  if(type==='element'){ pickSlot('Arcane Lock','Lock this slot for opponent next turn',[0,1,2,3,4],si=>{ G.slots[si].lock=true; G.slots[si].lockFor='ai'; G.pToks.splice(ti,1); cm('slotm'); render(); setMsg('🔒 Slot locked!','ok'); }); } 
-  else if(type==='number'){ pickSlot('Null Sigil','Clear this slot immediately',[0,1,2,3,4],si=>{ G.slots[si].stk.forEach(c=>discardCard(c)); G.slots[si].stk=[]; reloadSlot(si); G.pToks.splice(ti,1); cm('slotm'); render(); setMsg('⚫ Null Sigil!','ok'); }); } 
-  else if(type==='run'){
-    if(!G.disc.length){ setMsg('Discard pile is empty.','err'); return; }
-    document.getElementById('pickt').textContent='Summon Stone'; document.getElementById('picks').textContent='Take any card from the discard pile';
-    const o=document.getElementById('picko'); o.innerHTML='';
-    G.disc.slice(-20).forEach(card=>{ const d=document.createElement('div'); d.className='mopt'; d.innerHTML=`<div class="moptt">${cardLbl(card)}</div>`;
-      d.onclick=()=>{ const ri=G.disc.lastIndexOf(card); if(ri>=0) G.disc.splice(ri,1); G.pH.push({...card}); G.pToks.splice(ti,1); cm('pickm'); render(); setMsg('💎 Summon Stone!','ok'); }; o.appendChild(d); }); om('pickm');
-  } else if(type==='vertical'){
-    const top3=[]; for(let i=0;i<3&&(G.deck.length||G.disc.length);i++) top3.push(drawCard());
-    document.getElementById('pickt').textContent='Crystal Ball'; document.getElementById('picks').textContent='Keep 1 card, return 2 to deck';
-    const o=document.getElementById('picko'); o.innerHTML='';
-    top3.forEach((card,ci)=>{ const d=document.createElement('div'); d.className='mopt'; d.innerHTML=`<div class="moptt">${cardLbl(card)}</div>`;
-      d.onclick=()=>{ G.pH.push({...card}); top3.filter((_,j)=>j!==ci).reverse().forEach(c=>G.deck.unshift(c)); G.pToks.splice(ti,1); cm('pickm'); render(); setMsg('🔮 Crystal Ball!','ok'); }; o.appendChild(d); }); om('pickm');
-  } else if(type==='horizontal'){
-    if(!G.aiH.length){ setMsg('AI has no cards.','err'); return; }
-    const ri=0|Math.random()*G.aiH.length; discardCard(G.aiH.splice(ri,1)[0]); G.aiCB=true; G.pToks.splice(ti,1);
-    render(); setMsg('🌀 Chaos Rune! AI card discarded — they cannot draw replacement until end of their turn.','ok');
-  }
-}
-
-function activateVoidMage(){
-  if(G.pVU||!G.pTurn) return;
-  if(!isEndlessMode && !G.vsVoid) {
-     let allEl = G.pH.concat(...G.slots.map(s=>s.stk)).filter(c=>c.t!=='fd');
-     if(allEl.length>0 && allEl.every(c=>c.el===G.pM.id)) { PROG[G.pM.id].s[0] = Math.min(5, PROG[G.pM.id].s[0]+1); saveP(); }
-  }
-  G.pH.forEach(c=>discardCard(c)); G.aiH.forEach(c=>discardCard(c)); G.pH=[]; G.aiH=[];
-  for(let i=0;i<5;i++){ G.slots[i].stk.forEach(c=>discardCard(c)); G.slots[i].stk=[]; reloadSlot(i); }
-  G.pSc+=25; G.pVU=true; G.pAtt={ts:0,tk:null,ms:0,mk:null};
-  for(let i=0;i<5;i++){ const c=drawCard(); if(c) G.pH.push(c); const c2=drawCard(); if(c2) G.aiH.push(c2); }
-  chkTitanLv(true);
-  if(!chkWin()){ setMsg('⬛ VOID MAGE! Board cleared. +25 Points!','ok'); render(); }
-}
-
-async function aiTurn(){
-  if(G.vsVoid) {
-     G.aiAscStack = 3; 
-     if(G.aiTL >= 1 && !G.aiTU && G.aiH.length>0) {
-        G.aiH[0] = mkUlt();
-        if(G.aiTL >= 2 && G.aiH.length>1) G.aiH[1] = mkFd('void');
-        G.aiTU = true;
-     }
-  }
-
-  for(let p=0;p<5;p++){
-    const mv=bestAiMove(); if(!mv) break;
-    const card=G.aiH.splice(mv.ci,1)[0];
-    if(card.t==='wd'){
-      const t = slotTop(mv.si), tEl = t && t.t !== 'fd' ? cardEl(t) : null, tN = t && t.t !== 'fd' ? cardN(t) : null;
-      if (card.ult) { card.dEl = tEl || ELS[Math.floor(Math.random()*4)]; card.dN = tN || 1 + Math.floor(Math.random()*5); } 
-      else { card.dEl = card.el; card.dN = (tEl !== null && tEl !== card.el && tN !== null) ? tN : 1 + Math.floor(Math.random()*5); }
-    }
-    placeCard(card,mv.si); await sleep(350); render();
-  }
-
-  if(G.aiM.id==='air'&&G.aiTL>=1){
-    const ne=[0,1,2,3,4].filter(i=>G.slots[i].stk.length>0);
-    if(ne.length>=2){ const f=ne[0|Math.random()*ne.length]; const td=[0,1,2,3,4].filter(i=>i!==f); const t2=td[0|Math.random()*td.length];
-      const c=G.slots[f].stk.pop(); G.slots[t2].stk.push(c); if(!G.slots[f].stk.length) reloadSlot(f); }
-  }
-  if(G.aiM.id==='water'&&G.aiTL>=1){
-    const mx=G.aiTL>=2?2:1;
-    for(let i=0;i<mx&&G.aiH.length;i++){ discardCard(G.aiH.splice(0,1)[0]); const c=drawCard(); if(c) G.aiH.push(c); }
-  }
-
-  if(!G.aiVU&&G.aiVQ.el&&G.aiVQ.num&&G.aiVQ.run){
-    G.pH.forEach(c=>discardCard(c)); G.aiH.forEach(c=>discardCard(c)); G.pH=[]; G.aiH=[];
-    for(let i=0;i<5;i++){ G.slots[i].stk.forEach(c=>discardCard(c)); G.slots[i].stk=[]; reloadSlot(i); }
-    G.aiSc+=25; G.aiVU=true; G.aiAtt={ts:0,tk:null,ms:0,mk:null};
-    for(let i=0;i<5;i++){ const c=drawCard(); if(c) G.aiH.push(c); const c2=drawCard(); if(c2) G.pH.push(c2); }
-    chkTitanLv(false); if(chkWin()) return; setMsg('⬛ AI Void Mage! Board cleared. AI +25 pts.','err');
-  }
-
-  if(G.aiToks.length){
-    const t=G.aiToks[0];
-    if(t==='element'){const si=0|Math.random()*5;G.slots[si].lock=true;G.slots[si].lockFor='player';G.aiToks.shift();}
-    else if(t==='number'){const si=0|Math.random()*5;G.slots[si].stk.forEach(c=>discardCard(c));G.slots[si].stk=[];reloadSlot(si);G.aiToks.shift();}
-    else if(t==='horizontal'){ if(G.pH.length){const ri=0|Math.random()*G.pH.length;discardCard(G.pH.splice(ri,1)[0]);G.pCB=true;} G.aiToks.shift(); } 
-    else G.aiToks.shift();
-  }
-
-  await sleep(400);
-  const scored=resolveAll(false);
-  if(chkWin()) return;
-
-  await showCombosSequential(scored,'ai',async()=>{
-    for(let i=0;i<5;i++) if(!G.slots[i].stk.length) reloadSlot(i);
-    while(G.aiH.length<5&&!G.aiCB){ const c=drawCard(); if(!c) break; G.aiH.push(c); } G.aiCB=false;
-    await sleep(300); G.slots.forEach(s=>{if(s.lockFor==='ai')s.lock=false;});
-    G.pTurn=true; G.played=0; G.pTU=false; G.selC=null; G.pWolfActive=false; G.turnProg={fD:0,wD:0,aAdj:false,eW:0};
-    while(G.pH.length<5&&!G.pCB){ const c=drawCard(); if(!c) break; G.pH.push(c); } G.pCB=false;
-    render(); setMsg('Your turn! Play cards, then End Turn to score.');
-  });
-}
-
-function bestAiMove(){
-  let best=null, bs=-999;
-  G.aiH.forEach((card,ci)=>{
-    for(let si=0;si<5;si++){
-      if(!canPlace(card,si)) continue;
-      const sim={...card};
-      if(sim.t==='wd'){
-        const t = slotTop(si), tEl = t && t.t !== 'fd' ? cardEl(t) : null, tN = t && t.t !== 'fd' ? cardN(t) : null;
-        if (sim.ult) { sim.dEl = tEl || ELS[0]; sim.dN = tN || 3; } 
-        else { sim.dEl = sim.el; sim.dN = (tEl !== null && tEl !== sim.el && tN !== null) ? tN : (tN || 3); }
+      if (G.aiM.id === 'water') {
+         if(G.aiH.length > 0) {
+             discardCard(G.aiH.pop());
+             const c = drawCard();
+             if(c) G.aiH.push(c);
+         }
       }
-      const orig=[...G.slots[si].stk]; G.slots[si].stk=[...orig,sim];
-      let sc=detectAll().reduce((s,c)=>s+c.pts,0);
-      if(G.vsVoid) {
-         let pMax = 0;
-         G.pH.forEach((pc) => {
-            for(let psi=0; psi<5; psi++){
-               if(!canPlace(pc, psi)) continue;
-               const porig=[...G.slots[psi].stk]; G.slots[psi].stk=[...porig, pc];
-               let psc=detectAll().reduce((s,c)=>s+c.pts,0);
-               if(psc>pMax) pMax=psc;
-               G.slots[psi].stk=porig;
-            }
-         });
-         sc -= pMax;
+      if (G.aiM.id === 'air') {
+         const fs = [0,1,2,3,4].filter(i => G.slots[i].stk.length > 0);
+         if (fs.length > 0) {
+             const fromSi = fs[Math.floor(Math.random() * fs.length)];
+             const toSi = (fromSi + 1) % 5;
+             const c = G.slots[fromSi].stk.pop();
+             if (c.t === 'fd' && c.el === 'void') {
+                 G.slots[toSi].stk.forEach(x => discardCard(x));
+                 G.slots[toSi].stk = [];
+                 reloadSlot(toSi);
+             } else {
+                 G.slots[toSi].stk.push(c);
+             }
+         }
       }
-      G.slots[si].stk=orig;
-      if(sc>bs){bs=sc;best={ci,si};}
-    }
-  });
-  return best;
-}
-
-function showWin(playerWon){
-  if(playerWon && !isEndlessMode && !G.vsVoid && G.pM) {
-     const id = G.pM.id;
-     PROG[id].a[1] = Math.min(5, PROG[id].a[1]+1);
-     PROG[id].m[1] = Math.min(10, PROG[id].m[1]+1);
-     PROG[id].l[1] = Math.min(20, PROG[id].l[1]+1);
-     saveP();
+      if (G.aiM.id === 'void') {
+         const pSlots = [0,1,2,3,4].filter(i => G.slots[i].stk.length > 0);
+         if (pSlots.length > 0) {
+            const target = pSlots[Math.floor(Math.random() * pSlots.length)];
+            G.slots[target].stk.forEach(c => discardCard(c));
+            G.slots[target].stk = [];
+            reloadSlot(target);
+         }
+      }
   }
-  document.getElementById('wemb').textContent=playerWon?'🏆':'💀';
-  document.getElementById('wtit').textContent=playerWon?'Victory!':'Defeat';
-  document.getElementById('wsub').textContent=playerWon?'The elements bow to your mastery.':'The AI mage prevails... for now.';
-  document.getElementById('wps').textContent=G.pSc;
-  document.getElementById('wais').textContent=G.aiSc;
-  document.getElementById('wai-block').style.display='';
-  setTimeout(()=>showScreen('ws'),1000);
-}
-
-function goEndless(){
-  G.endless=true; G.deck=buildDeck();
-  for(let i=0;i<5;i++) G.pH.push(drawCard()); for(let i=0;i<5;i++) reloadSlot(i);
-  G.turn=1; G.pSc=0; G.selC=null; G.played=0;
-  buildEndlessTable(); showScreen('endls'); eRender(); doSetMsg('Endless Mode! Play cards, then End Turn to score.');
-}
-
-function eRender(){
-  rSlots('e-slrow',true); rHand('e-phand',G.pH);
-  document.getElementById('e-score').textContent=G.pSc; document.getElementById('e-hs').textContent=endlessHS;
-  document.getElementById('e-turn').textContent=G.turn; document.getElementById('e-hmeta').textContent=G.played+'/5 played';
-  document.getElementById('e-bplay').disabled=G.selC===null||G.played>=5;
-  const c=document.getElementById('e-vba'); c.innerHTML=''; const q=G.pVQ;
-  if(!G.pVU&&q.el&&q.num&&q.run){ const b=document.createElement('button'); b.className='vmbtn'; b.textContent='⬛ Void Mage'; b.onclick=eVoidMage; c.appendChild(b); }
-  if(G.pM) {
-     const tb = document.getElementById('e-ptb'), lv = G.pTL;
-     tb.textContent=lv===0?'🔒 Locked':lv===1?'⚡'+G.pM.icon+' Awakened':lv===2?'🌟'+G.pM.icon+' Enhanced':'✨'+G.pM.icon+' Ascended';
-     tb.className='tbadge'+(lv===3?' asc':lv===2?' enh':lv===1?' awk':'');
-  } rTitanBtn();
-  const hb=document.getElementById('e-hs-badge'); hb.innerHTML='';
-  if(endlessHS>0){const s=document.createElement('div');s.className='hs-badge';s.textContent='Best: '+endlessHS;hb.appendChild(s);}
-  updateEndlessTable();
-}
-
-function eTapCard(i){ G.selC=G.selC===i?null:i; eRender(); setMsg2(G.selC!==null?'Tap a Spell Slot to play.':'Card deselected.'); }
-function eTapSlot(si){
-  if(isUndecl(si)&&G.selC===null){openDeclSlotE(si);return;} if(G.selC===null){setMsg2('Select a card first.','err');return;}
-  const card=G.pH[G.selC]; if(!canPlace(card,si)){setMsg2('Cannot play there.','err');return;}
-  if(card.t==='wd'&&(!card.dEl||!card.dN)){ G.pw={ci:G.selC,si,isSlot:false,ssi:null}; openWildModal(card,si); return; }
-  eCommit(G.selC,si);
-}
-
-function eCommit(ci,si){ const card=G.pH.splice(ci,1)[0]; G.selC=null; placeCard(card,si); G.played++; eRender(); setMsg2('Card played. '+(5-G.played)+' remaining.'); }
-function ePlaySelected(){
-  if(G.selC===null){setMsg2('Select a card first.','err');return;}
-  const card=G.pH[G.selC], vs=validSlots(card); if(!vs.length){setMsg2('No valid slots.','err');return;}
-  if(vs.length===1){eTapSlot(vs[0]);return;} pickSlot('Play Card','Choose a Spell Slot',vs,si=>{cm('slotm');eTapSlot(si);});
-}
-function openDeclSlotE(si){ const t=slotTop(si); if(!t||t.t!=='wd') return; G.pw={isSlot:true,ssi:si}; G.wEl=t.ult?null:t.el; G.wN=null; openDeclSlot(si); }
-
-async function eEndTurn(){
-  const scored=resolveAll(true);
-  for(const c of scored){ await comboFlash(c,null); await sleep(200); }
-  processWolfQueue(()=>{
-    for(let i=0;i<5;i++) if(!G.slots[i].stk.length) reloadSlot(i);
-    while(G.pH.length<5){ const c=drawCard(); if(!c) break; G.pH.push(c); }
-    G.turn++; G.played=0; G.selC=null; G.pTU=false; G.pWolfActive=false; G.turnProg={fD:0,wD:0,aAdj:false,eW:0};
-    eRender(); setMsg2('Your turn!');
+  
+  let played = 0;
+  for (let i = 0; i < G.aiH.length; i++) {
+      if (played >= 5) break;
+      const c = G.aiH[i];
+      const vs = validSlots(c);
+      if (vs.length > 0) {
+          const target = vs[Math.floor(Math.random() * vs.length)];
+          const card = G.aiH.splice(i, 1)[0];
+          if (card.t === 'wd') {
+             card.dEl = card.ult ? 'void' : card.el;
+             card.dN = Math.floor(Math.random() * 5) + 1;
+          }
+          placeCard(card, target);
+          played++;
+          i--;
+      }
+  }
+  
+  const scored = resolveAll(false);
+  showCombosSequential(scored, 'ai', () => {
+     for(let i=0;i<5;i++) if(!G.slots[i].stk.length) reloadSlot(i);
+     while(G.aiH.length < 5) { const c = drawCard(); if(!c) break; G.aiH.push(c); }
+     G.slots.forEach(s => { if (s.lockFor === 'ai') s.lock = false; });
+     G.aiCB = false; G.pTurn = true; G.turn++; G.aiTU = false; G.aiWolfActive = false;
+     doRender(); setMsg('Your turn! Play cards, then End Turn to score.');
+     chkWin();
   });
 }
 
-function eVoidMage(){
-  if(G.pVU) return; G.pH.forEach(c=>discardCard(c)); G.pH=[];
-  for(let i=0;i<5;i++){ G.slots[i].stk.forEach(c=>discardCard(c)); G.slots[i].stk=[]; reloadSlot(i); }
-  G.pSc+=25; G.pVU=true; chkTitanLv(true);
-  for(let i=0;i<5;i++){ const c=drawCard(); if(c) G.pH.push(c); }
-  eRender(); setMsg2('⬛ Void Mage! +25 Points!','ok');
+function openRules() {
+   om('rulesm');
 }
 
-function eEndGame(){
-  if(G.pSc>endlessHS) endlessHS=G.pSc;
-  document.getElementById('wemb').textContent='⬛'; document.getElementById('wtit').textContent='Game Over';
-  document.getElementById('wsub').textContent='Endless Mode Complete'; document.getElementById('wps').textContent=G.pSc;
-  document.getElementById('wais').textContent='Best: '+endlessHS; document.getElementById('wai-block').querySelector('.wsl').textContent='HIGH SCORE';
-  setTimeout(()=>showScreen('ws'),200);
+function activateVoidMage() {
+   doSetMsg('Void Mage unlocked but requires specific mechanics...','ok');
 }
 
-function buildEndlessTable(){
-  const tbl=document.getElementById('e-combo-table'); tbl.innerHTML='<tr><th>Combo</th><th>Type</th><th class="pts-col">Pts</th><th class="cnt">×</th></tr>';
-  COMBO_DEFS.forEach(def=>{ const tr=document.createElement('tr'); tr.id='erow_'+getComboKey(def);
-    tr.innerHTML=`<td>${def.label}</td><td class="type-col">${def.method}</td><td class="pts-col">${def.pts}</td><td class="cnt" id="ecnt_${getComboKey(def)}">0</td>`; tbl.appendChild(tr); });
+function goEndless() {
+   G.endless = true;
+   G.pSc = 0; G.turn = 1; G.eComboCount = {};
+   endlessHS = parseInt(localStorage.getItem('mc_hs')) || 0;
+   document.getElementById('e-hs').textContent = endlessHS;
+   G.deck = buildDeck();
+   for(let i=0;i<5;i++) { G.pH.push(drawCard()); reloadSlot(i); }
+   G.pTurn = true;
+   showScreen('endls');
+   eRender();
+   setMsg2('Play cards to score. Survive as long as you can!');
 }
 
-function updateEndlessTable(){
-  COMBO_DEFS.forEach(def=>{ const key=getComboKey(def), cnt=G.eComboCount[key]||0;
-    const el=document.getElementById('ecnt_'+key); if(el) el.textContent=cnt>0?cnt:'—';
-    const row=document.getElementById('erow_'+key); if(row) row.className=cnt>0?'achieved':''; });
-}
-function setMsg2(m,t){ const e=document.getElementById('e-msg'); e.textContent=m; e.className='gmsg'+(t?' '+t:''); }
-
-function pickSlot(title,sub,idxs,cb){
-  document.getElementById('slmt').textContent=title; document.getElementById('slms').textContent=sub;
-  const o=document.getElementById('slmo'); o.innerHTML='';
-  idxs.forEach(si=>{ const s=G.slots[si], t=slotTop(si), d=document.createElement('div'); d.className='mopt';
-    d.innerHTML=`<div class="moptt">Slot ${si+1}</div><div class="moptd">${t?cardLbl(t):'Empty'} — Stack:${s.stk.length}</div>`; d.onclick=()=>cb(si); o.appendChild(d); }); om('slotm');
-}
-function pickHand(sub,cb){
-  document.getElementById('hmt').textContent='Your Hand'; document.getElementById('hms').textContent=sub;
-  const o=document.getElementById('hmo'); o.innerHTML='';
-  G.pH.forEach((card,i)=>{ const d=document.createElement('div'); d.className='mopt'; d.innerHTML=`<div class="moptt">${cardLbl(card)}</div>`; d.onclick=()=>cb(i); o.appendChild(d); }); om('handm');
-}
-function om(id){ document.getElementById(id).classList.add('active'); }
-function cm(id){ document.getElementById(id).classList.remove('active'); }
-function setMsg(m,t){ const e=document.getElementById('gmsg'); e.textContent=m; e.className='gmsg'+(t?' '+t:''); }
-function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-
-function openRules(){
-  document.getElementById('rcon').innerHTML=
-    '<b style="color:var(--goldl)">Game Mode</b><br><b>VS AI:</b> First to 100 points wins.<br><br>'
-    +'<b style="color:var(--goldl)">Placement Rules</b><br><b>Number Switch:</b> Match top card\'s number.<br><b>Element Switch:</b> Match top card\'s element.<br><b>Field Card:</b> Play anywhere.<br><b>Void Field:</b> Clears slot, reloads from deck.<br><b>Element Wild:</b> Match element OR number.<br><b>Primal Spirit:</b> Plays anywhere.<br><br>'
-    +'<b style="color:var(--goldl)">Scoring (End Turn)</b><br>Multiple combinations of different types can be scored in the same turn.<br>'
-    +'El Chain 3/4/5: 3/4/5 pts | Num Chain 3/4/5: 4/5/6 pts | Run 3/4/5: 3/5/7 pts<br>'
-    +'El Row 3/4/5: 4/7/10 pts | Num Row 3/4/5: 5/8/12 pts | Num Run 3/4/5: 6/9/13 pts<br><br>'
-    +'<b style="color:var(--goldl)">Attunement</b><br>Score same combo Type or Method 3 turns in a row → earn Item Token.<br>'
-    +'🔒 Arcane Lock | ⚫ Null Sigil | 💎 Summon Stone | 🔮 Crystal Ball | 🌀 Chaos Rune<br><br>'
-    +'<b style="color:var(--goldl)">Titans (⚡ button)</b><br>Awaken at 15 pts, enhance at 25 pts, ascend at 50 pts.<br>'
-    +'✨ Ascension (Passive): If a scored combo includes a card of your Titan\'s element, +1 pt. Stacks up to +3, resets if not met.<br>'
-    +'🐉 Dragon: swap up to 2 Fire slot card(s) with hand cards.<br>🐋 Leviathan: discard & draw card(s).<br>🦅 Eagle: move top card between slots.<br>'
-    +'🐺 Wolf: After scoring, take 1 earth card from any cleared slot (or discard pile if enhanced).<br><br>'
-    +'<b style="color:var(--goldl)">Void Mage</b><br>Score El Chain/Row(5) + Num Chain/Row(5) + Run/Num Run(5). Clears board, resets hands, +25 pts.<br><br>'
-    +'<b style="color:var(--goldl)">Endless Mode</b><br>Solo play. Score as high as you can. Hit End Game when done.';
-  om('rulesm');
+function eRender() {
+   document.getElementById('e-score').textContent = G.pSc;
+   document.getElementById('e-turn').textContent = G.turn;
+   rSlots('e-slrow', true); rHand('e-phand', G.pH); rTitanBtn();
+   
+   let tb = document.getElementById('e-ptb');
+   tb.textContent = G.pTL === 0 ? '🔒 Locked' : G.pTL === 1 ? '⚡ Awakened' : G.pTL === 2 ? '🌟 Enhanced' : '✨ Ascended';
+   tb.className = 'tbadge' + (G.pTL===3?' asc':G.pTL===2?' enh':G.pTL===1?' awk':'');
+   
+   document.getElementById('e-bplay').disabled = G.selC === null || G.played >= 5;
+   
+   const tbody = document.getElementById('e-combo-table');
+   tbody.innerHTML = '<tr><th>Combo</th><th>Count</th></tr>';
+   for (const [k, v] of Object.entries(G.eComboCount)) {
+      tbody.innerHTML += `<tr><td>${k}</td><td class="cnt">${v}</td></tr>`;
+   }
 }
 
-initG();
+function eTapCard(i) {
+   G.selC = G.selC === i ? null : i;
+   eRender();
+}
+
+function eTapSlot(si) {
+   if (isUndecl(si) && G.selC === null) { openDeclSlot(si); return; }
+   if (G.selC === null) return;
+   const card = G.pH[G.selC];
+   if (!canPlace(card, si)) { setMsg2('Cannot play there.', 'err'); return; }
+   if (card.t === 'wd' && (!card.dEl || !card.dN)) { G.pw = {ci: G.selC, si, isSlot: false, ssi: null}; openWildModal(card, si); return; }
+   eCommit(G.selC, si);
+}
+
+function eCommit(ci, si) {
+   const card = G.pH.splice(ci, 1)[0];
+   G.selC = null; placeCard(card, si); G.played++;
+   if (G.pM) {
+       if (card.el==='fire' && G.pM.id==='fire') PROG.fire.s[2] = Math.min(100, PROG.fire.s[2]+1);
+       if (card.el==='water' && G.pM.id==='water') PROG.water.s[2] = Math.min(100, PROG.water.s[2]+1);
+       if (card.el==='air' && G.pM.id==='air') PROG.air.s[2] = Math.min(100, PROG.air.s[2]+1);
+       if (card.el==='earth' && G.pM.id==='earth') PROG.earth.s[2] = Math.min(100, PROG.earth.s[2]+1);
+       saveP();
+   }
+   eRender();
+}
+
+function ePlaySelected() {
+   if (G.selC === null) return;
+   const card = G.pH[G.selC];
+   const vs = validSlots(card);
+   if (!vs.length) return;
+   if (vs.length === 1) { eTapSlot(vs[0]); return; }
+   pickSlot('Play Card', 'Choose a slot', vs, si => { cm('slotm'); eTapSlot(si); });
+}
+
+function eEndTurn() {
+   const scored = resolveAll(true);
+   showCombosSequential(scored, 'player', () => {
+      processWolfQueue(() => {
+          for (let i=0;i<5;i++) if (!G.slots[i].stk.length) reloadSlot(i);
+          while (G.pH.length < 5) { const c = drawCard(); if (!c) break; G.pH.push(c); }
+          G.turn++; G.played = 0; G.pTU = false; G.selC = null; G.pWolfActive = false;
+          
+          if (G.pSc > endlessHS) { endlessHS = G.pSc; localStorage.setItem('mc_hs', endlessHS); document.getElementById('e-hs').textContent = endlessHS; }
+          eRender();
+      });
+   });
+}
+
+function eEndGame() {
+   document.getElementById('wtit').textContent = 'Game Over';
+   document.getElementById('wsub').textContent = 'Endless Mode Finished';
+   document.getElementById('wps').textContent = G.pSc;
+   document.getElementById('wai-block').style.display = 'none';
+   showScreen('ws');
+}
+
+function showWin(playerWon) {
+   document.getElementById('wps').textContent = G.pSc;
+   document.getElementById('wais').textContent = G.aiSc;
+   document.getElementById('wai-block').style.display = 'block';
+   
+   if (G.vsVoid && playerWon) {
+       PROG.voidWinHard = true;
+       saveP();
+       showScreen('ty-screen');
+       return;
+   }
+
+   document.getElementById('wtit').textContent = playerWon ? 'Victory!' : 'Defeat';
+   document.getElementById('wsub').textContent = playerWon ? 'You have proven your mastery.' : 'The elements overwhelm you.';
+   showScreen('ws');
+}
 </script>
 </body>
 </html>
